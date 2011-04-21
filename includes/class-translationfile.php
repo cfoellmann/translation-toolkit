@@ -35,28 +35,34 @@ class CspStringsAreAscii {
 	function _strpos($haystack, $needle, $offset = null) { return strpos($haystack, $needle, $offset); }
 	function _substr($string, $offset, $length = null) { return (is_null($length) ? substr($string, $offset) : substr($string, $offset, $length)); }
 	function _str_split($string, $chunkSize) { return str_split($string, $chunkSize); }
+	function _substr_count($haystack, $needle) { return substr_count($haystack, $needle); }
+	function _seems_utf8($string) { return seems_utf8($string); }
+	function _utf8_encode($string) { return utf8_encode($string); }
 }
 
 class CspStringsAreMultibyte {
 	function _strlen($string) { return mb_strlen($string, 'ascii'); }
 	function _strpos($haystack, $needle, $offset = null) { return mb_strpos($haystack, $needle, $offset, 'ascii'); }
-	function _substr($string, $offset, $length = null) { return mb_substr($string, $offset, $length, 'ascii'); }
+	function _substr($string, $offset, $length = null) { return (is_null($length) ? mb_substr($string, $offset, 1073741824, 'ascii') : mb_substr($string, $offset, $length, 'ascii')); }
 	function _str_split($string, $chunkSize) { 
 		//do not! break unicode / uft8 character in the middle of encoding, just at char border
-		$length = mb_strlen($string); 
+		$length = $this->_strlen($string); 
 		$out = array(); 
 		for ($i=0;$i<$length;$i+=$chunkSize) { 
-			$out[] = mb_substr($string, $i, $chunkSize); 
+			$out[] = $this->_substr($string, $i, $chunkSize); 
 		}
 		return $out; 
 	}
+	function _substr_count($haystack, $needle) { return mb_substr_count($haystack, $needle, 'ascii'); }
+	function _seems_utf8($string) { return mb_check_encoding($string, 'UTF-8'); }
+	function _utf8_encode($string) { return mb_convert_encoding($string, 'UTF-8'); }
 }
 
 class CspTranslationFile {
 	
 	function CspTranslationFile($type = 'unknown') {
 		//now lets check whether overloaded functions been used and provide the correct str_* functions as usual
-		if(( ini_get( 'mbstring.func_overload' ) & 2 ) && is_callable( 'mb_substr' )) {
+		if(( ini_get( 'mbstring.func_overload' ) & 0x02) === 0x02 && extension_loaded('mbstring') && is_callable( 'mb_substr' )) {
 			$this->strings = new CspStringsAreMultibyte();
 		}
 		else{
@@ -120,7 +126,7 @@ class CspTranslationFile {
 		if (!is_string($head)) return;
 		$hdr = explode("\n", $head);
 		foreach($hdr as $e) {
-			if (strpos($e, ':') === false) continue;
+			if ($this->strings->_strpos($e, ':') === false) continue;
 			list($key, $val) = explode(':', $e, 2);
 			$key = trim($key);$val = str_replace("\\","/", trim($val));
 			if (in_array($key, $this->header_vars)) {
@@ -172,8 +178,8 @@ class CspTranslationFile {
 	}
 		
 	function trim_quotes($s) {
-		if ( substr($s, 0, 1) == '"') $s = substr($s, 1);
-		if ( substr($s, -1, 1) == '"') $s = substr($s, 0, -1);
+		if ( $this->strings->_substr($s, 0, 1) == '"') $s = $this->strings->_substr($s, 1);
+		if ( $this->strings->_substr($s, -1, 1) == '"') $s = $this->strings->_substr($s, 0, -1);
 		return $s;
 	}
 		
@@ -217,8 +223,8 @@ class CspTranslationFile {
 
 		$po = $quote.implode("${slash}n$quote$newline$quote", explode($newline, $string)).$quote;
 		// add empty string on first line for readbility
-		if (false !== strpos($string, $newline) &&
-				(substr_count($string, $newline) > 1 || !($newline === substr($string, -strlen($newline))))) {
+		if (false !== $this->strings->_strpos($string, $newline) &&
+				($this->strings->_substr_count($string, $newline) > 1 || !($newline === $this->strings->_substr($string, -$this->strings->_strlen($newline))))) {
 			$po = "$quote$quote$newline$po";
 		}
 		// remove empty strings
@@ -240,7 +246,7 @@ class CspTranslationFile {
 	function create_pofile($pofile, $base_file, $proj_id, $timestamp, $translator, $pluralforms, $language, $country) {
 		$rel = $this->_build_rel_path($base_file);
 		preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $pofile, $hits);
-		$po_lang = substr($hits[1],0,2);
+		$po_lang = $this->strings->_substr($hits[1],0,2);
 		$country = strtoupper($country);
 		$this->_set_header_from_string(
 			"Project-Id-Version: $proj_id\nPO-Revision-Date: $timestamp\nLast-Translator: $translator\nX-Poedit-Language: $language\nX-Poedit-Country: $country\nX-Poedit-Basepath: $rel\nPlural-Forms: \nX-Textdomain-Support: yes",
@@ -258,7 +264,7 @@ class CspTranslationFile {
 			
 			while (!feof($handle)) {
 				$line = trim(fgets($handle));
-				if (!seems_utf8($line)) $line = utf8_encode($line);
+				if (!$this->strings->_seems_utf8($line)) $line = $this->strings->_utf8_encode($line);
 
 				if (empty($line)) {
 
@@ -310,9 +316,9 @@ class CspTranslationFile {
 			//BUGFIX: language not possible if it's a template file
 			$po_lang = 'en';
 			if (preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $pofile, $hits)) {
-				$po_lang = substr($hits[1],0,2);
+				$po_lang = $this->strings->_substr($hits[1],0,2);
 			}else{
-				$po_lang = substr($_POST['language'],0,2);
+				$po_lang = $this->strings->_substr($_POST['language'],0,2);
 			}
 			$this->_set_header_from_string($this->map['']['T'], $po_lang);
 			$this->_set_header_from_string('Plural-Forms: ', $po_lang); //for safetly the plural forms!
@@ -419,7 +425,7 @@ class CspTranslationFile {
 					$endian = 'V';
 				else
 					return false;
-									
+								
 				// parse header
 				$header = unpack( "{$endian}Hrevision/{$endian}Hcount/{$endian}HposOriginals/{$endian}HposTranslations/{$endian}HsizeHash/{$endian}HposHash", $this->strings->_substr( $header, 4 ) );
 				if ( !is_array( $header ) )
@@ -451,7 +457,7 @@ class CspTranslationFile {
 
 				// find position of first string in file
 				$HposStrings = 0x7FFFFFFF;
-
+				
 				for ( $i = 0; $i < $Hcount; $i++ )
 				{
 
@@ -494,7 +500,7 @@ class CspTranslationFile {
 				}
 
 				preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $mofile, $hits);
-				$po_lang = substr($hits[1],0,2);
+				$po_lang = $this->strings->_substr($hits[1],0,2);
 				$this->_set_header_from_string((isset($this->map['']) ? $this->map['']['T'] : ''), $po_lang);
 				$this->_set_header_from_string('Plural-Forms: ',$po_lang); //for safetly the plural forms!
 				if ($base_file) {
@@ -509,7 +515,7 @@ class CspTranslationFile {
 	
 	function _is_valid_entry(&$entry, &$textdomain) {
 		return (
-			(strlen(str_replace("\0", "", $entry['T'])) > 0)
+			($this->strings->_strlen(str_replace("\0", "", $entry['T'])) > 0)
 			&&
 			in_array($textdomain, $entry['LTD'])
 		);
@@ -540,7 +546,7 @@ class CspTranslationFile {
 		fwrite($handle, $header);
 		foreach($this->map as $key => $value) {
 			if ($this->_is_valid_entry($value, $textdomain)) {
-				$l=strlen($key);
+				$l=$this->strings->_strlen($key);
 				$org_table .= pack('VV', $l, ftell($handle)); 
 				$res = pack('A'.$l.'x',$key);
 				fwrite($handle, $res);
@@ -548,7 +554,7 @@ class CspTranslationFile {
 		}
 		foreach($this->map as $key => $value) {
 			if ($this->_is_valid_entry($value, $textdomain)) {
-				$l=strlen($value['T']);
+				$l=$this->strings->_strlen($value['T']);
 				$trans_table .= pack('VV', $l, ftell($handle)); 
 				$res = pack('A'.$l.'x',$value['T']);
 				fwrite($handle, $res);
@@ -771,7 +777,7 @@ class CspTranslationFile {
 	}
 	
 	function echo_as_json($path, $file, $sys_locales) {
-		$loc = substr($file,strlen($file)-8,-3);
+		$loc = $this->strings->_substr($file,strlen($file)-8,-3);
 		header('Content-Type: application/json');
 ?>
 {
@@ -779,8 +785,8 @@ class CspTranslationFile {
 		foreach($this->header as $key => $value) {
 			echo "<tr><td class=\\\"po-hdr-key\\\">".$key."</td><td class=\\\"po-hdr-val\\\">".htmlspecialchars($value)."</td></tr>";
 		}?>",
-	destlang: "<?php echo ($sys_locales[$loc]['google-api'] === true ? substr($loc, 0, 2) : ''); ?>",
-	last_saved : "<?php $mo = substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($mo)); } else { _e('unknown',CSP_PO_TEXTDOMAIN); } ?>",
+	destlang: "<?php echo ( isset($sys_locales[$loc]) && $sys_locales[$loc]['google-api'] === true ? substr($loc, 0, 2) : ''); ?>",
+	last_saved : "<?php $mo = $this->strings->_substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($mo)); } else { _e('unknown',CSP_PO_TEXTDOMAIN); } ?>",
 	plurals_num : <?php echo $this->nplurals; ?>,
 	plurals_func : "<?php echo $this->plural_func; ?>",
 	path : "<?php echo $path; ?>",
@@ -805,7 +811,7 @@ class CspTranslationFile {
 			$c++;
 			if (!strlen($key)) { continue; }
 			
-			if (strpos($key, "\04") > 0) {
+			if ($this->strings->_strpos($key, "\04") > 0) {
 				list($ctx, $key) = explode("\04", $key);
 				echo "{ \"ctx\" : \"".$this->_convert_for_js($ctx)."\",";
 			}else {
@@ -823,7 +829,7 @@ class CspTranslationFile {
 				echo " \"key\" : [\"".implode("\",\"",$parts)."\"],"; 
 			} else{ echo " \"key\" : \"".$this->_convert_for_js($key)."\","; }
 			
-			if (strpos($entry['T'], "\0") !== false) {
+			if ($this->strings->_strpos($entry['T'], "\0") !== false) {
 				$parts = explode("\0", $entry['T']);
 				for($i=0; $i<count($parts); $i++) {
 					$parts[$i] = $this->_convert_for_js($parts[$i]);

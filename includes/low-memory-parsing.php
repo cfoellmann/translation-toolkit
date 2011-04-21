@@ -10,6 +10,6 @@ if (($idx === false) || ($idx > 0))
 require_once(dirname(__FILE__).'/class.parser.php');
 $parser = new csp_l10n_parser($_POST['path'], $_POST['textdomain'], true, false);
 $r = $parser->parseFile($_POST['file'], $_POST['type']);
-echo serialize($r);
+echo base64_encode(serialize($r));
 exit();
 ?>

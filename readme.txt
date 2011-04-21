@@ -2,8 +2,8 @@
 Contributors: codestyling
 Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
-Tested up to: 3.1
-Stable tag: 1.99.10
+Tested up to: 3.1.1
+Stable tag: 1.99.11
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
@@ -58,6 +58,12 @@ Furthermore it will completely support any new features we have at multi site in
 1. Translate your resources using 'Manage' menu at new 'Localization' sub menu
 
 == Changelog ==
+
+= Version 1.99.11 =
+* Bugfix: IDNA support requires now PHP 5.2.1 or higher, not longer possible at lower PHP versions to support IDN
+* Bugfix: avoid PHP serialization warnings at low memory mode scanning
+* Bugfix: avoid warnings for not registered locale abbreviations
+* Bugfix: if used mbstring.func_overload at php.ini with at least mode 2 containing, the plugin didn't work as expected.
 
 = Version 1.99.10 =
 * Feature: detection of plugins with code created textdomains, but with warning
