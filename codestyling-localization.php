@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
-Version: 1.99.12
+Version: 1.99.13
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -590,12 +590,12 @@ function csp_po_get_plugin_mu_capabilities($plug, $values){
 
 	$const_list = array();
 	$content = file_get_contents($file);
-	if (preg_match("/[^_^!]load_(|plugin_)textdomain\s*\(\s*(\'|\"|)([\w\d\-_]+|[A-Z\d\-_]+)(\'|\"|)\s*(,|\))\s*([^;]+)\)/", $content, $hits)) {
+	if (preg_match("/[^_^!]load_(|plugin_|muplugin_)textdomain\s*\(\s*(\'|\"|)([\w\d\-_]+|[A-Z\d\-_]+)(\'|\"|)\s*(,|\))\s*([^;]+)\)/", $content, $hits)) {
 		$data['textdomain'] = array('identifier' => $hits[3], 'is_const' => empty($hits[2]) );
 		$data['gettext_ready'] = true;
 		$data['php-path-string'] = $hits[6];
 	}
-	else if(preg_match("/[^_^!]load_(|plugin_)textdomain\s*\(/", $content, $hits)) {
+	else if(preg_match("/[^_^!]load_(|plugin_|muplugin_)textdomain\s*\(/", $content, $hits)) {
 		//ATTENTION: it is gettext ready but we don't realy know the textdomain name! Assume it's equal to plugin's name.
 		//TODO: let's think about it in future to find a better solution.
 		$data['textdomain'] = array('identifier' => substr(basename($plug),0,-4), 'is_const' => false );
