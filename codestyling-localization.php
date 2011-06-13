@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
-Version: 1.99.13
+Version: 1.99.14
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -1975,7 +1975,7 @@ function csp_po_main_page() {
 					echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.'/'.$data['base_file'].'xx_XX.pot\');">'. str_replace(str_replace("\\","/",WP_PLUGIN_DIR), '', $dir)."</a><br/>";
 				} 
 			?>
-		<?php } elseif($data['name'] == 'bbPress' && $data['is_US_Version']) { ?>	
+		<?php } elseif($data['name'] == 'bbPress' && isset($data['is_US_Version']) && $data['is_US_Version']) { ?>	
 			<div style="color:#f00;"><?php _e("The original bbPress component doesn't contain a language directory.",CSP_PO_TEXTDOMAIN); ?></div>
 			<br/>
 			<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo $data['base_path']."my-languages"; ?>');"><?php _e('try to create the bbPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
