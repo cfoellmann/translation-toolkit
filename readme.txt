@@ -2,8 +2,8 @@
 Contributors: codestyling
 Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
-Tested up to: 3.1.3
-Stable tag: 1.99.14
+Tested up to: 3.2
+Stable tag: 1.99.15
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
@@ -58,6 +58,9 @@ Furthermore it will completely support any new features we have at multi site in
 1. Translate your resources using 'Manage' menu at new 'Localization' sub menu
 
 == Changelog ==
+
+= Version 1.99.15 =
+* bugfix: detection of theme textdomains eighter loaded by variable or defined as constant by variable
 
 = Version 1.99.14 =
 * bugfix: bbPress plugin translation show index wrong messages (because of stand alone instead of packaged with BuddyPress)

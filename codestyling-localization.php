@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
-Version: 1.99.14
+Version: 1.99.15
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -686,12 +686,18 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	foreach($files as $themefile) {
 		$main = file_get_contents($themefile);
 		if (
-			preg_match("/[^_^!]load_(child_theme_|theme_|)textdomain\s*\(\s*(\'|\"|)(^\$[\w\d\-_]+|^\$[A-Z\d\-_]+)(\'|\"|)\s*(,|\))/", $main, $hits)
+			preg_match("/[^_^!]load_(child_theme_|theme_|)textdomain\s*\(\s*(\'|\"|)([\w\d\-_]+|[A-Z\d\-_]+)(\'|\"|)\s*(,|\))/", $main, $hits)
 			||
 			preg_match("/[^_^!]load_(child_theme_|theme_|)textdomain\s*\(\s*/", $main, $hits)			
 		) {
 			if (isset($hits[1]) && $hits[1] != 'child_theme_' && $hits[1] != 'theme_') 	$data['dev-hints'] = __("<strong>Loading Issue: </strong>Author is using <em>load_textdomain</em> instead of <em>load_theme_textdomain</em> or <em>load_child_theme_textdomain</em> function. This may break behavior of WordPress, because some filters and actions won't be executed anymore. Please contact the Author about that.",CSP_PO_TEXTDOMAIN);
 		
+			//fallback for variable names used to load textdomain, assumes theme name
+			if(isset($hits[3]) && strpos($hits[3], '$') !== false) {
+				unset($hits[3]);
+				if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
+				$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to load the textdomain. It will be assumed to be equal to theme name now.",CSP_PO_TEXTDOMAIN);
+			}			
 			//make it short
 			$data['gettext_ready'] = true;
 			if ($data['gettext_ready']) {
@@ -784,6 +790,14 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 				}
 			}
 		}
+		
+		//fallback for constants defined by variables! assume the theme name instead
+		if(strpos($data['textdomain']['identifier'], '$') !== false) {
+			$data['textdomain']['identifier'] = $values['Template'];
+			if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
+			$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to define the textdomain constant. It will be assumed to be equal to theme name now.",CSP_PO_TEXTDOMAIN);
+		}			
+
 	}		
 	//check now known issues for themes
 	if(isset($data['textdomain']['identifier']) && $data['textdomain']['identifier'] == 'woothemes') {
