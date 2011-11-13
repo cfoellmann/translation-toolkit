@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
-Version: 1.99.15
+Version: 1.99.16
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -447,6 +447,13 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 			}
 		}
 		$data['filename'] = $data['textdomain']['identifier'];
+		//check if const contains brackets, mostly by functional defined const
+		if(preg_match("/(\(|\))/", $data['textdomain']['identifier'])) {
+			$data['filename'] = str_replace('.php', '', basename($plug));
+			$data['textdomain']['is_const'] = false;
+			$data['textdomain']['identifier'] = str_replace('.php', '', basename($plug));
+			//var_dump(str_replace('.php', '', basename($plug)));
+		}
 	}		
 	
 	if (!$data['gettext_ready']) {
@@ -2233,7 +2240,7 @@ function csp_add_language(elem, type, name, row, path, subpath, existing, type, 
 			onSuccess: function(transport) {
 				$('csp-dialog-caption').update("<?php _e('Add New Language',CSP_PO_TEXTDOMAIN); ?>");
 				$("csp-dialog-body").update(transport.responseText).setStyle({'padding' : '10px'});
-				tb_show.defer(null,"#TB_inline?height=530&width=500&inlineId=csp-dialog-container&modal=true",false);
+				tb_show(null,"#TB_inline?height=530&width=500&inlineId=csp-dialog-container&modal=true",false);
 			}
 		}
 	); 	
@@ -3054,19 +3061,19 @@ function csp_edit_catalog(elem) {
 				trans += "<div style=\"margin-top:10px;\"><strong><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong></div>";
 			}
 			if (csp_num_plurals == 1) {
-				trans += "<textarea id=\"csp-dialog-msgstr-"+pl+"\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val.escapeHTML()+"</textarea>";
+				trans += "<textarea id=\"csp-dialog-msgstr-"+pl+"\" class=\"csp-area-multi\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val.escapeHTML()+"</textarea>";
 			}
 			else{
-				trans += "<textarea id=\"csp-dialog-msgstr-"+pl+"\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val[pl].escapeHTML()+"</textarea>";
+				trans += "<textarea id=\"csp-dialog-msgstr-"+pl+"\" class=\"csp-area-multi\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val[pl].escapeHTML()+"</textarea>";
 			}
 		}
 	
 		$("csp-dialog-body").update(	
 			"<small style=\"display:block;text-align:right;\"><b><?php _e('Access Keys:',CSP_PO_TEXTDOMAIN); ?></b> <em>ALT</em> + <em>Shift</em> + [<b>p</b>]revious | [<b>s</b>]ave | [<b>n</b>]next</small>"+
 			"<div><strong><?php _e('Singular:',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
-			"<textarea id=\"csp-dialog-msgid\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key[0].escapeHTML()+"</textarea>"+
+			"<textarea id=\"csp-dialog-msgid\" class=\"csp-area-multi\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key[0].escapeHTML()+"</textarea>"+
 			"<div style=\"margin-top:10px;\"><strong><?php _e('Plural:',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
-			"<textarea id=\"csp-dialog-msgid-plural\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key[1].escapeHTML()+"</textarea>"+
+			"<textarea id=\"csp-dialog-msgid-plural\" class=\"csp-area-multi\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key[1].escapeHTML()+"</textarea>"+
 			"<div style=\"font-weight:bold;padding-top: 5px;border-bottom: dotted 1px #aaa;\"><?php _e("Plural Index Calculation:",CSP_PO_TEXTDOMAIN);?>&nbsp;&nbsp;&nbsp;<span style=\"color:#D54E21;\">"+csp_func_plurals+"</span></div>"+
 			trans+
 			"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
@@ -3079,13 +3086,13 @@ function csp_edit_catalog(elem) {
 		$("csp-dialog-body").update(	
 			"<small style=\"display:block;text-align:right;\"><b><?php _e('Access Keys:',CSP_PO_TEXTDOMAIN); ?></b> <em>ALT</em> + <em>Shift</em> + [p]revious | [s]ave | [n]next</small>"+
 			"<div><strong><?php _e('Original:',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
-			"<textarea id=\"csp-dialog-msgid\" cols=\"50\" rows=\"7\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key.escapeHTML()+"</textarea>"
+			"<textarea id=\"csp-dialog-msgid\" class=\"csp-area-single\" cols=\"50\" rows=\"7\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key.escapeHTML()+"</textarea>"
 			+ (csp_destlang.empty() ? 
 			"<div style=\"margin-top:10px;\"><strong><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></strong></div>"
 			:
 			 "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></strong><a class=\"alignright clickable google\" onclick=\"csp_translate_google(this, 'csp-dialog-msgid', 'csp-dialog-msgstr');\"><img style=\"display:none;\" align=\"left\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with Google API',CSP_PO_TEXTDOMAIN); ?></a><br class=\"clear\" /></div>"
 			 ) +
-			"<textarea id=\"csp-dialog-msgstr\" cols=\"50\" rows=\"7\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val.escapeHTML()+"</textarea>"+
+			"<textarea id=\"csp-dialog-msgstr\" class=\"csp-area-single\" cols=\"50\" rows=\"7\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val.escapeHTML()+"</textarea>"+
 			"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
 			"<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx) > 0 ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'prev');\" value=\"  <?php echo _e('« Save & Previous',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"p\"/>&nbsp;&nbsp;&nbsp;&nbsp;"+
 			"<input class=\"button\" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'close');\" value=\"  <?php echo _e('Save',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"s\"/>"+
@@ -3324,6 +3331,9 @@ tr.mo-file:hover td { border-bottom: 1px dashed #666 !important; }
 <?php endif; ?>
 .po-hdr-key { font-family: monospace; font-size: 11px; font-weight:bold; }
 .po-hdr-val { font-family: monospace; font-size: 11px; padding-left: 10px; }
+
+.csp-area-single { height: 110px; }
+.csp-area-multi { height: 24px; }
 
 <?php
 }
