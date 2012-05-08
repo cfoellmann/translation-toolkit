@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
-Version: 1.99.16
+Version: 1.99.17
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -654,11 +654,20 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	$data = array();
 	$data['dev-hints'] = null;
 	$data['deny_scanning'] = false;
-	
+		
 	//let's first check the whether we have a child or base theme
-	$data['base_path'] = str_replace("\\","/", WP_CONTENT_DIR.str_replace('wp-content', '', dirname($values['Template Files'][0])).'/');
-	if (file_exists($values['Template Files'][0])){
-		$data['base_path'] = dirname(str_replace("\\","/",$values['Template Files'][0])).'/';
+	if(is_object($values) && get_class($values) == 'WP_Theme') {
+		//WORDPRESS Version 3.4 changes theme handling!
+		$firstfile = array_shift(array_values($values['Template Files']));
+		$data['base_path'] = str_replace("\\","/", WP_CONTENT_DIR.str_replace('wp-content', '', dirname($firstfile)).'/');		
+		if (file_exists($firstfile)){
+			$data['base_path'] = dirname(str_replace("\\","/",$firstfile)).'/';
+		}
+	}else{
+		$data['base_path'] = str_replace("\\","/", WP_CONTENT_DIR.str_replace('wp-content', '', dirname($values['Template Files'][0])).'/');
+		if (file_exists($values['Template Files'][0])){
+			$data['base_path'] = dirname(str_replace("\\","/",$values['Template Files'][0])).'/';
+		}
 	}
 		
 	$folder_filesys = end(explode('/',rtrim($data['base_path'], '/')));
@@ -786,6 +795,7 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	}
 	$data['base_file'] = (empty($data['special_path']) ? '' : $data['special_path']."/");
 
+	$constant_failed = false;
 	if ($data['gettext_ready']) {	
 		if ($data['textdomain']['is_const']) {
 			foreach($const_list as $e) {
@@ -799,7 +809,14 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 		}
 		
 		//fallback for constants defined by variables! assume the theme name instead
-		if(strpos($data['textdomain']['identifier'], '$') !== false) {
+		if(
+			(strpos($data['textdomain']['identifier'], '$') !== false) 
+			||
+			(strpos($data['textdomain']['identifier'], '"') !== false)
+			||
+			(strpos($data['textdomain']['identifier'], '\'') !== false)
+		){
+			$constant_failed = true;
 			$data['textdomain']['identifier'] = $values['Template'];
 			if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
 			$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to define the textdomain constant. It will be assumed to be equal to theme name now.",CSP_PO_TEXTDOMAIN);
@@ -810,6 +827,11 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	if(isset($data['textdomain']['identifier']) && $data['textdomain']['identifier'] == 'woothemes') {
 		if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
 		$data['dev-hints'] .= __("<strong>WooThemes Issue: </strong>The Author is known for not supporting a translatable backend. Please expect only translations for frontend or contact the Author for support!",CSP_PO_TEXTDOMAIN);
+	}
+	if(isset($data['textdomain']['identifier']) && $data['textdomain']['identifier'] == 'ares' && $constant_failed) {
+		if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
+		$data['dev-hints'] .= __("<strong>Ares Theme Issue: </strong>This theme uses a textdomain defined by string concatination code. The textdomain will be patched to 'AresLanguage', please contact the theme author to change this into a fix constant value! ",CSP_PO_TEXTDOMAIN);
+		$data['textdomain']['identifier'] = 'AresLanguage';
 	}
 	
 	
@@ -1016,9 +1038,11 @@ if (function_exists('add_action')) {
 	add_action('wp_ajax_csp_po_destroy', 'csp_po_ajax_handle_destroy');
 	add_action('wp_ajax_csp_po_scan_source_file', 'csp_po_ajax_handle_scan_source_file');	
 	add_action('wp_ajax_csp_po_change_low_memory_mode', 'csp_po_ajax_csp_po_change_low_memory_mode');
+	add_action('wp_ajax_csp_po_change_translate_api', 'csp_po_ajax_change_translate_api');
 	add_action('wp_ajax_csp_po_change_permission', 'csp_po_ajax_handle_change_permission');
 	add_action('wp_ajax_csp_po_launch_editor', 'csp_po_ajax_handle_launch_editor');
 	add_action('wp_ajax_csp_po_translate_by_google', 'csp_po_ajax_handle_translate_by_google');
+	add_action('wp_ajax_csp_po_translate_by_microsoft', 'csp_po_ajax_handle_translate_by_microsoft');
 	add_action('wp_ajax_csp_po_save_catalog_entry', 'csp_po_ajax_handle_save_catalog_entry');
 	add_action('wp_ajax_csp_po_generate_mo_file', 'csp_po_ajax_handle_generate_mo_file');
 	add_action('wp_ajax_csp_po_create_language_path', 'csp_po_ajax_handle_create_language_path');
@@ -1503,6 +1527,16 @@ function csp_po_ajax_csp_po_change_low_memory_mode() {
 	exit();
 }
 
+function csp_po_ajax_change_translate_api() {
+	csp_po_check_security();
+	$api_type = 'none';
+	if (in_array($_POST['api_type'], array('google','microsoft'))) {
+		$api_type = $_POST['api_type'];
+	}
+	update_option('codestyling-localization.translate-api', $api_type);
+	exit();
+}
+
 function csp_po_ajax_handle_scan_source_file() {
 	csp_po_check_security();
 
@@ -1605,7 +1639,7 @@ function csp_po_ajax_handle_launch_editor() {
 		$f->read_pofile($_POST['basepath'].$_POST['file'], $csp_l10n_plurals, $_POST['file']);
 	}
 	if ($f->supports_textdomain_extension()){
-		$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales);
+		$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales, csp_get_translate_api_type());
 	}else {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
@@ -1617,12 +1651,15 @@ function csp_po_ajax_handle_launch_editor() {
 function csp_po_ajax_handle_translate_by_google() {
 	csp_po_check_security();
 	// reference documentation: http://code.google.com/intl/de-DE/apis/ajaxlanguage/documentation/reference.html
-	// example 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=hello%20world&langpair=en%7Cit'
+	// example API v1 - 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=hello%20world&langpair=en%7Cit'
+	// example API v2 - [ GET https://www.googleapis.com/language/translate/v2?key=INSERT-YOUR-KEY&source=en&target=de&q=Hello%20world ]
 	$msgid = $_POST['msgid'];
 	$search = array('\\\\\\\"', '\\\\\"','\\\\n', '\\\\r', '\\\\t', '\\\\$','\\0', "\\'", '\\\\');
 	$replace = array('\"', '"', "\n", "\r", "\\t", "\\$", "\0", "'", "\\");
 	$msgid = str_replace( $search, $replace, $msgid );
-	$res = csp_fetch_remote_content("http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&format=html&q=".urlencode($msgid)."&langpair=en%7C".$_POST['destlang']);
+	add_filter('https_ssl_verify', '__return_false');
+	//OLD: $res = csp_fetch_remote_content("http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&format=html&q=".urlencode($msgid)."&langpair=en%7C".$_POST['destlang']);
+	$res = csp_fetch_remote_content("https://www.googleapis.com/language/translate/v2?key=".(defined('GOOGLE_TRANSLATE_KEY') ? GOOGLE_TRANSLATE_KEY : '')."&source=en&target=".$_POST['destlang']."&q=".urlencode($msgid));
 	if ($res) {
 		header('Content-Type: application/json');
 		echo $res;
@@ -1631,8 +1668,67 @@ function csp_po_ajax_handle_translate_by_google() {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
 		load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
-		_e("Sorry, Google Translation is not available.", CSP_PO_TEXTDOMAIN);		
+		_e("Sorry, Google Translation is not available.", CSP_PO_TEXTDOMAIN);	
 	}
+	exit();
+}
+
+function csp_po_ajax_handle_translate_by_microsoft() {
+	csp_po_check_security();
+	$msgid = $_POST['msgid'];
+	$search = array('\\\\\\\"', '\\\\\"','\\\\n', '\\\\r', '\\\\t', '\\\\$','\\0', "\\'", '\\\\');
+	$replace = array('\"', '"', "\n", "\r", "\\t", "\\$", "\0", "'", "\\");
+	$msgid = str_replace( $search, $replace, $msgid );	
+	
+	require_once('includes/translation-api-microsoft.php');
+	header('Content-Type: text/plain');
+	try {
+		//Client ID of the application.
+		$clientID     = defined('MICROSOFT_TRANSLATE_CLIENT_ID') ? MICROSOFT_TRANSLATE_CLIENT_ID : '';
+		//Client Secret key of the application.
+		$clientSecret = defined('MICROSOFT_TRANSLATE_CLIENT_SECRET') ? MICROSOFT_TRANSLATE_CLIENT_SECRET : '';
+		//OAuth Url.
+		$authUrl      = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/";
+		//Application Scope Url
+		$scopeUrl     = "http://api.microsofttranslator.com";
+		//Application grant type
+		$grantType    = "client_credentials";
+
+		//Create the AccessTokenAuthentication object.
+		$authObj      = new AccessTokenAuthentication();
+		//Get the Access token.
+		$accessToken  = $authObj->getTokens($grantType, $scopeUrl, $clientID, $clientSecret, $authUrl);
+		//Create the authorization Header string.
+		$authHeader = "Authorization: Bearer ". $accessToken;
+
+		//Set the params.//
+		$fromLanguage = "en";
+		$toLanguage   = $_POST['destlang'];
+		$inputStr     = $msgid;
+		$contentType  = 'text/plain';
+		$category     = 'general';
+		
+		$params = "text=".urlencode($inputStr)."&to=".$toLanguage."&from=".$fromLanguage;
+		$translateUrl = "http://api.microsofttranslator.com/v2/Http.svc/Translate?$params";
+		
+		//Create the Translator Object.
+		$translatorObj = new HTTPTranslator();
+		
+		//Get the curlResponse.
+		$curlResponse = $translatorObj->curlRequest($translateUrl, $authHeader);
+		
+		//Interprets a string of XML into an object.
+		$xmlObj = simplexml_load_string($curlResponse);
+		foreach((array)$xmlObj[0] as $val){
+			$translatedStr = $val;
+		}
+		echo $translatedStr;
+	} catch(Exception $e) {
+		header('Status: 404 Not Found');
+		header('HTTP/1.1 404 Not Found');
+		echo $e->getMessage();
+	}	
+
 	exit();
 }
 
@@ -1807,6 +1903,9 @@ function csp_load_po_edit_admin_page(){
 	
 	define('CSL_WPEC_PATCH', $wpec);
 	
+	//prevent script injections of badly coded NomNom theme 
+	wp_deregister_script('color_options_minified.js');
+	wp_deregister_script('color-picker-js-files-minified.js');
 }
 
 function csp_po_admin_head() {
@@ -1825,11 +1924,31 @@ function csp_po_admin_menu() {
 	add_action('load-'.$hook, 'csp_load_po_edit_admin_page'); //only load the scripts and stylesheets by hook, if this admin page will be shown
 }
 
+function csp_get_translate_api_type() {
+	$api_type = get_option('codestyling-localization.translate-api', 'none');
+	switch($api_type) {
+		case 'google':
+			if(!defined('GOOGLE_TRANSLATE_KEY')) $api_type = 'none';
+			break;
+		case 'microsoft':
+			if(!defined('MICROSOFT_TRANSLATE_CLIENT_ID') || !defined('MICROSOFT_TRANSLATE_CLIENT_SECRET') || !function_exists('curl_version')) $api_type = 'none';
+			break;
+		default:
+			$api_type = 'none';
+			break;
+	}
+	return $api_type;
+}
+
 function csp_po_main_page() {
 	csp_po_check_security();
 	$mo_list_counter = 0;
 	global $csp_l10n_sys_locales, $wp_version;
 	$csp_wp_main_page = (version_compare($wp_version, '2.7 ', '>=') ? "tools" : "edit");
+	
+	$google_api = defined('GOOGLE_TRANSLATE_KEY');
+	$microsoft_api = defined('MICROSOFT_TRANSLATE_CLIENT_ID') && defined('MICROSOFT_TRANSLATE_CLIENT_SECRET') && function_exists('curl_version');
+	$api_type = csp_get_translate_api_type();
 ?>
 <div id="csp-wrap-main" class="wrap">
 <div class="icon32" id="icon-tools"><br/></div>
@@ -1838,6 +1957,45 @@ function csp_po_main_page() {
 	<input id= "enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>> <label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label> <img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading-small.gif"?>" /><br />
 	<small><?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?></small>
 </p>
+<p class="translation-apis">
+	<label class="alignleft"><strong><?php _e('Translation Service-APIs:',CSP_PO_TEXTDOMAIN); ?></strong></label> 
+	<img class="alignleft" alt="" title="API: not used" src="<?php echo CSP_PO_BASE_URL."/images/off.png"; ?>" /><input id="translate-api-none" class="translate-api-none alignleft" name="translate-api" value="none" type="radio" autocomplete="off" <?php checked('none', $api_type); ?>/> <label class="alignleft" for="translate-api-none"><?php _e('None',CSP_PO_TEXTDOMAIN); ?></label>
+	<img class="alignleft" alt="" title="API: Google Translate" src="<?php echo CSP_PO_BASE_URL."/images/google.png"; ?>" /><input id="translate-api-google" class="translate-api-google alignleft" name="translate-api" value="google" type="radio" autocomplete="off" <?php checked('google', $api_type); ?> <?php disabled(false, $google_api); ?>/> <label class="alignleft" for="translate-api-google"><?php _e('Google',CSP_PO_TEXTDOMAIN); ?></label>
+	<img class="alignleft" alt="" title="API: Microsoft Translate" src="<?php echo CSP_PO_BASE_URL."/images/bing.gif"; ?>" /><input id="translate-api-microsoft" class="translate-api-microsoft alignleft" name="translate-api" value="microsoft" type="radio" autocomplete="off" <?php checked('microsoft', $api_type); ?> <?php disabled(false, $microsoft_api); ?>/> <label class="alignleft" for="translate-api-microsoft"><?php _e('Microsoft',CSP_PO_TEXTDOMAIN); ?></label>
+	<a class="alignright" id="explain-apis" href="#"><?php _e('How to use translation API services...',CSP_PO_TEXTDOMAIN); ?></a><img class="alignright" alt="" title="API: How to use" src="<?php echo CSP_PO_BASE_URL."/images/question.png"; ?>" />
+</p>
+<div class="translation-apis-info">
+	<h5>Google Translate API | <small><a target="_blank" href="https://developers.google.com/translate/v2/faq">FAQ</a></small></h5>
+	<p>
+		<small>
+		<strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong>
+		<?php echo sprintf(__('This API is not longer a free service, Google has relaunched the API in version 2 as a pay per use service. Please read the explantions at %s first.', CSP_PO_TEXTDOMAIN), '<a target="_blank" href="https://developers.google.com/translate/v2/terms">Terms of Service</a>'); ?>
+		<?php _e('Using this API within <em>Codestyling Localization</em> requires an API Key to be created at your Google account first. Once you have such a key, you can activate this API by defining a new constant at your <b>wp-config.php</b> file:', CSP_PO_TEXTDOMAIN); ?>
+		</br/>
+		<textarea class="google" readonly="readonly">define('GOOGLE_TRANSLATE_KEY', 'enter your key here');</textarea>
+		</small>
+	</p>
+	<h5>Microsoft Translate API | <small><a target="_blank" href="http://social.msdn.microsoft.com/Forums/en-US/microsofttranslator/thread/c71aeddd-cc90-4228-93cc-51fb969fde09">FAQ</a></small></h5>
+	<p>
+		<small>
+		<?php  echo sprintf(__('Microsoft provides the translation services with a free option of 2 million characters per month. But this also requires a subscription at %s either for free or for extended payed service volumes.', CSP_PO_TEXTDOMAIN), '<a target="_blank" href="http://go.microsoft.com/?linkid=9782667">Azure Marketplace</a>'); ?>
+		<?php _e('Using this API within <em>Codestyling Localization</em> requires <em>client_id</em> and <em>client_secret</em> to be created at your Azure subscription first. Once you have this values, you can activate this API by defining new constants at your <b>wp-config.php</b> file:', CSP_PO_TEXTDOMAIN); ?>
+		</br/>
+		<textarea class="microsoft" readonly="readonly">
+define('MICROSOFT_TRANSLATE_CLIENT_ID', 'enter your client id here');
+define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
+		</textarea>
+		<br/>
+		<strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong> <?php _e('This API additionally requires PHP curl functions and will not be available without. Current curl version:', CSP_PO_TEXTDOMAIN); ?>
+		&nbsp;<b><i><?php if (function_exists('curl_version')) { $ver = curl_version(); echo $ver['version']; } else _e('not installed',CSP_PO_TEXTDOMAIN); ?></i></b>
+		</small>
+	</p>
+	<div style="border-top: 1px dashed #cfcfcf;">
+		<small>
+		<strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong> <?php _e('Keep in mind, that any WordPress administrator can use the service for translation purpose and may raise your costs in case of paid option used.', CSP_PO_TEXTDOMAIN); ?>
+		</small>
+	</div>
+</div>
 <?php if (CSL_WPEC_PATCH) : ?>
 <p>
 	<small><strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong>&nbsp;<?php _e("You have a running version of WP e-Commerce and it has been programmed to deactivate the javascript library prototype.js at each WordPress backend page! I did a work arround that, in case of issues read my article: <a href=\"http://www.code-styling.de/english/wp-e-commerce-breaks-intentionally-other-plugins-or-themes\">WP e-Commerce breaks intentionally other Plugins or Themes</a>", CSP_PO_TEXTDOMAIN); ?></small>
@@ -2078,6 +2236,22 @@ function csp_po_main_page() {
 			<?php _e('The Textdomain <i><b>default</b></i> always stands for the WordPress main language file, this could be either intentionally or accidentally!',CSP_PO_TEXTDOMAIN); ?><br/>
 			</small>
 		</p>
+		<p id="textdomain-error" class="hidden"><small><?php 
+			_e('<strong>Error</strong>: The actual loaded translation content does not match the textdomain:',CSP_PO_TEXTDOMAIN); 
+			echo '&nbsp;<span></span><br/>';
+			_e('Expect, that any text you translate will not occure as long as the textdomain is mismatching!',CSP_PO_TEXTDOMAIN); 
+			echo '<br/>';
+			_e('This is a coding issue at the source files you try to translate, please contact the original Author and explain this mismatch.',CSP_PO_TEXTDOMAIN); 
+		?></small></p>
+		<p id="textdomain-warning" class="hidden"><small><?php 
+			_e('<strong>Warning</strong>: The actual loaded translation content contains mixed textdomains and is not pure translateable within one textdomain.',CSP_PO_TEXTDOMAIN); 
+			echo '<br/>';
+			_e('It seems, that there is code contained extracted out of other plugins, themes or widgets and used by copy & paste inside some source files.',CSP_PO_TEXTDOMAIN); 
+			echo '<br/>';
+			_e('The affected unknown textdomains are:',CSP_PO_TEXTDOMAIN); 
+			echo '&nbsp;<span></span>';
+			
+		?></small></p>
 		<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:',CSP_PO_TEXTDOMAIN); ?></b><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
 		<div class="alignleft">&nbsp;&nbsp;<input id="csp-write-mo-file" class="button button-secondary" style="display:none" type="submit" value="<?php _e('generate mo-file', CSP_PO_TEXTDOMAIN); ?>" onclick="csp_generate_mofile(this);" /></div>
 		<div class="alignleft" style="margin-left:10px;font-size:11px;padding-top:3px;"><?php _e('last written:',CSP_PO_TEXTDOMAIN);?>&nbsp;&nbsp;<span id="catalog-last-saved" ><?php _e('unknown',CSP_PO_TEXTDOMAIN); ?></span></div>
@@ -2486,6 +2660,7 @@ var csp_search_timer = null;
 var csp_search_interval = Prototype.Browser.IE ? 0.3 : 0.1;
 
 var csp_destlang = 'de';
+var csp_api_type = 'none';
 var csp_path = '';
 var csp_file = '';
 var csp_num_plurals = 2;
@@ -2500,10 +2675,31 @@ function csp_init_editor(actual_domain, actual_type) {
 	//list all contained text domains
 	opt_list = '';
 	csp_actual_type = actual_type;
+	tderror = true;
+	tdmixed = new Array();
 	for (i=0; i<csp_textdomains.size(); i++) {
+		tderror = tderror && (csp_textdomains[i] != actual_domain);
+		if (csp_textdomains[i] != 'default' && csp_textdomains[i] != actual_domain) tdmixed.push(csp_textdomains[i]);
 		opt_list += '<option value="'+csp_textdomains[i]+'"'+(csp_textdomains[i] == actual_domain ? ' selected="selected"' : '')+'>'+(csp_textdomains[i].empty() ? 'default' : csp_textdomains[i])+'</option>';
 	}
 	initial_domain = $('csp-mo-textdomain-val').update(opt_list).value;
+	if(tderror) {
+		$('textdomain-error').removeClassName('hidden');
+		$$("#textdomain-error span").first().update(actual_domain);
+	}
+	else {
+		$('textdomain-error').addClassName('hidden');
+	}
+	if (csp_actual_type != 'wordpress') {
+		if (tdmixed.length) {
+			$$("#textdomain-warning span").first().update(tdmixed.join(', '));
+			$('textdomain-warning').removeClassName('hidden');
+		}else {
+			$('textdomain-warning').addClassName('hidden');
+		}
+	}else{
+		$('textdomain-warning').addClassName('hidden');
+	}
 	
 	//setup all indizee register
 	for (i=0; i<csp_pofile.size(); i++) {
@@ -2624,6 +2820,8 @@ function csp_launch_editor(elem, file, path, textdomain) {
 				$('catalog-last-saved').update(transport.responseJSON.last_saved);
 				$$('#csp-json-header a')[0].update(transport.responseJSON.file);
 				csp_destlang = transport.responseJSON.destlang;
+				csp_api_type = transport.responseJSON.api_type;
+				if (csp_api_type == 'none') csp_destlang = '';
 				csp_path = transport.responseJSON.path;
 				csp_file = transport.responseJSON.file;
 				csp_num_plurals = transport.responseJSON.plurals_num;
@@ -2871,7 +3069,8 @@ function csp_search_regexp(elem) {
 function csp_translate_google(elem, source, dest) {
 	$(elem).blur();
 	$(elem).down().show();
-	//resulting {"responseData": {"translatedText":"Kann nicht öffnen zu schreiben!"}, "responseDetails": null, "responseStatus": 200}
+	//resulting V1 API: {"responseData": {"translatedText":"Kann nicht öffnen zu schreiben!"}, "responseDetails": null, "responseStatus": 200}
+	//resulting V2 API: { "data": { "translations" : [ { "translatedText": "Hallo Welt" } ] } }
 	//TODO: can't handle google errors by own error dialog, because Thickbox is not multi instance ready (modal over modal) !!!
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{
@@ -2882,10 +3081,36 @@ function csp_translate_google(elem, source, dest) {
 			},
 			onSuccess: function(transport) {
 				if (transport.responseJSON.responseStatus == 200 && !transport.responseJSON.responseData.translatedText.empty()) {
-					$(dest).value = transport.responseJSON.responseData.translatedText;
+					//V1: $(dest).value = transport.responseJSON.responseData.translatedText;
+					//V2:
+					$(dest).value = transport.responseJSON.data.translations[0].translatedText;
 				}else{
-					alert(transport.responseJSON.responseDetails);
+					//V1: alert(transport.responseJSON.responseDetails);
+					//V2:
+					alert(transport.responseJSON.error.errors[0].reason);
 				}
+				$(elem).down().hide();
+			},
+			onFailure: function(transport) {
+				$(elem).down().hide();
+				alert(transport.responseJSON.error.errors[0].reason); 
+			}
+		}
+	);
+}
+
+function csp_translate_microsoft(elem, source, dest) {
+	$(elem).blur();
+	$(elem).down().show();
+	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		{
+			parameters: {
+				action: 'csp_po_translate_by_microsoft',
+				msgid: $(source).value,
+				destlang: csp_destlang
+			},
+			onSuccess: function(transport) {
+				$(dest).value = transport.responseText;
 				$(elem).down().hide();
 			},
 			onFailure: function(transport) {
@@ -2894,6 +3119,11 @@ function csp_translate_google(elem, source, dest) {
 			}
 		}
 	);
+}
+
+function csp_translate_none(elem, source, dest) {
+	$(elem).blur();
+	$(elem).down().show();
 }
 
 function csp_save_translation(elem, isplural, additional_action){
@@ -3047,10 +3277,10 @@ function csp_edit_catalog(elem) {
 			if (!csp_destlang.empty()) {
 				switch(pl){
 					case 0:
-						trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong><a class=\"alignright clickable google\" onclick=\"csp_translate_google(this, 'csp-dialog-msgid', 'csp-dialog-msgstr-0');\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with Google API',CSP_PO_TEXTDOMAIN); ?></a><br class=\"clear\" /></div>";
+						trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid', 'csp-dialog-msgstr-0');\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by',CSP_PO_TEXTDOMAIN); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>";
 					break;
 					case 1:
-						trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong><a class=\"alignright clickable google\" onclick=\"csp_translate_google(this, 'csp-dialog-msgid-plural', 'csp-dialog-msgstr-1');\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with Google API',CSP_PO_TEXTDOMAIN); ?></a><br class=\"clear\" /></div>";
+						trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid-plural', 'csp-dialog-msgstr-1');\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by',CSP_PO_TEXTDOMAIN); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>";
 					break;
 					default:
 						trans += "<div style=\"margin-top:10px;height:20px;\"><strong><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong></div>";
@@ -3090,7 +3320,7 @@ function csp_edit_catalog(elem) {
 			+ (csp_destlang.empty() ? 
 			"<div style=\"margin-top:10px;\"><strong><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></strong></div>"
 			:
-			 "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></strong><a class=\"alignright clickable google\" onclick=\"csp_translate_google(this, 'csp-dialog-msgid', 'csp-dialog-msgstr');\"><img style=\"display:none;\" align=\"left\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with Google API',CSP_PO_TEXTDOMAIN); ?></a><br class=\"clear\" /></div>"
+			 "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid', 'csp-dialog-msgstr');\"><img style=\"display:none;\" align=\"left\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by',CSP_PO_TEXTDOMAIN); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>"
 			 ) +
 			"<textarea id=\"csp-dialog-msgstr\" class=\"csp-area-single\" cols=\"50\" rows=\"7\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val.escapeHTML()+"</textarea>"+
 			"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
@@ -3100,7 +3330,7 @@ function csp_edit_catalog(elem) {
 			"</p><input id=\"csp-dialog-msg-idx\" type=\"hidden\" value=\""+msg_idx+"\" />"
 		).setStyle({'padding' : '10px'});
 	}
-	tb_show(null,"#TB_inline?height="+(csp_num_plurals > 2 && Object.isArray(csp_pofile[msg_idx].key) ? '520' : '385')+"&width=600&inlineId=csp-dialog-container&modal=true",false);
+	tb_show(null,"#TB_inline?height="+(csp_num_plurals > 2 && Object.isArray(csp_pofile[msg_idx].key) ? '520' : '385')+"&width=680&inlineId=csp-dialog-container&modal=true",false);
 	$$('#csp-dialog-body textarea').each(function(e) {
 		e.observe('keydown', csp_suppress_enter);
 		e.observe('keypress', csp_suppress_enter);
@@ -3220,6 +3450,18 @@ jQuery(document).ready(function() {
 			});		
 		csp_chuck_size = (jQuery(e.target).is(':checked') ? 1 : 20);
 	});
+	jQuery('#explain-apis').click(function(event) {
+		event.preventDefault();
+		jQuery('.translation-apis-info').slideToggle();
+	});
+	jQuery('.translation-apis input').click(function(event) {
+		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', {  
+				parameters: {
+					action: 'csp_po_change_translate_api',
+					api_type: jQuery(this).val()
+				}
+		});	
+	});
 });
 
 /* TODO: implement context sensitive help 
@@ -3298,7 +3540,7 @@ tr.mo-file:hover td { border-bottom: 1px dashed #666 !important; }
 #csp-dialog-header { background-color:#222 !important; margin:0; padding:0px 2px; color:#D7D7D7; height:20px; font-size:13px; }
 #csp-dialog-header img { width: 16px; height:16px; padding-top: 2px;}
 #csp-dialog-caption { padding: 1px 0 0 5px; }
-#TB_window a.google:hover { color: #D54E21 !important; }
+#TB_window a.service-api:hover { color: #D54E21 !important; }
 
 /* catalog editor styles */
 #catalog-body a { cursor: pointer; }
@@ -3335,6 +3577,21 @@ tr.mo-file:hover td { border-bottom: 1px dashed #666 !important; }
 .csp-area-single { height: 110px; }
 .csp-area-multi { height: 24px; }
 
+#textdomain-error { background-color: #ffebe8; padding: 5px; border: solid 1px #666; }
+#textdomain-warning { background-color: #cfe1ef; padding: 5px; border: solid 1px #666; }
+#textdomain-error span, #textdomain-warning span { font-weight: bold; font-size: 11px; }
+
+p.translation-apis label { margin-right: 25px; }
+p.translation-apis a { text-decoration: none; }
+p.translation-apis img { margin-right: 5px; }
+p.translation-apis input { margin-right: 5px; }
+p.translation-apis { overflow: hidden; border-top: solid 1px #cfcfcf; border-bottom: 1px solid #cfcfcf; padding: 5px 0; }
+div.translation-apis-info { border-bottom: 1px solid #cfcfcf; padding: 5px 0; display: none; }
+div.translation-apis-info h5 { margin-top: 0px; margin-bottom: 0.7em; font-weight: bold; font-size: 11px; }
+div.translation-apis-info p { margin-left: 20px; }
+div.translation-apis-info textarea { font-family: courier,monotype;width:99%;background-color:#dfdfdf; }
+div.translation-apis-info textarea.google { height:24px; }
+div.translation-apis-info textarea.microsoft { height:58px; }
 <?php
 }
 

@@ -776,7 +776,7 @@ class CspTranslationFile {
 		return $str;
 	}
 	
-	function echo_as_json($path, $file, $sys_locales) {
+	function echo_as_json($path, $file, $sys_locales, $api_type) {
 		$loc = $this->strings->_substr($file,strlen($file)-8,-3);
 		header('Content-Type: application/json');
 ?>
@@ -786,6 +786,7 @@ class CspTranslationFile {
 			echo "<tr><td class=\\\"po-hdr-key\\\">".$key."</td><td class=\\\"po-hdr-val\\\">".htmlspecialchars($value)."</td></tr>";
 		}?>",
 	destlang: "<?php echo ( isset($sys_locales[$loc]) && $sys_locales[$loc]['google-api'] === true ? substr($loc, 0, 2) : ''); ?>",
+	api_type: "<?php echo $api_type; ?>",
 	last_saved : "<?php $mo = $this->strings->_substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($mo)); } else { _e('unknown',CSP_PO_TEXTDOMAIN); } ?>",
 	plurals_num : <?php echo $this->nplurals; ?>,
 	plurals_func : "<?php echo $this->plural_func; ?>",
