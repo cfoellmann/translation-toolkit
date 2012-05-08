@@ -1,9 +1,9 @@
 === Codestyling Localization ===
 Contributors: codestyling
-Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, compatibility, mo, po, po-mo, polyglot
+Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, microsoft-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
-Tested up to: 3.3-beta3-19254
-Stable tag: 1.99.16
+Tested up to: 3.4-beta4-22725
+Stable tag: 1.99.17
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
@@ -18,6 +18,7 @@ This plugin supports **WordPress MU** and allows explicit **WPMU Plugin** transl
 1. WordPress version 2.5 and later
 1. PHP Interpreter version 4.4.2 or later
 1. PHP Tokenizer Module (normally standard, required since version 1.90)
+1. PHP Curl Library (if Microsoft translation API services should be used)
 
 Please visit [the official website](http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en "Codestyling Localization") for further details and the latest information on this plugin.
 
@@ -27,7 +28,7 @@ Please visit [the official website](http://www.code-styling.de/english/developme
 1. inplace adjusting of *.mo/*.po file permissions to be able to tranlate it
 1. component specific (re)scan of source file to build the updated catalog entries
 1. wrapping multiple plugins using same textdomain into one translation unit (like plugin and it's widget(s))
-1. extended editing of full gettext catalog assisted by using Google translate API
+1. extended editing of full gettext catalog assisted by using Google or Microsoft translate API
 1. full catalog search (exact match) with instant result set view for source or target language
 1. correct handling of language dependend plural forms by providing appropriated edit dialog
 1. first support of WMPU plugins started at version 1.60
@@ -59,19 +60,28 @@ Furthermore it will completely support any new features we have at multi site in
 
 == Changelog ==
 
+= Version 1.99.17 =
+* Bugfix: old Google Translate API v1 removed (obsolete and not longer supported)
+* Bugfix: WordPress 3.4 changes Theme handling, scan process adapted
+* Bugfix: additional warnings and errors for textdomain issues and textdomain detection
+* Bugfix: avoid that NomNom Theme damages the plugins pages by unwanted script injection
+* Feature: Implementation of Google Translate API v2, requires API Key (paid service)
+* Feature: Implementation of Microsoft Translate API, requires Access Tokens and Curl (free service for 2M characters / month)
+* Languages: updated german translation
+
 = Version 1.99.16 =
-* bugfix: failed preg_match repaired
-* bugfix: compatible with latest WP 3.3 pre-release because of modified ThickBox script.
+* Bugfix: failed preg_match repaired
+* Bugfix: compatible with latest WP 3.3 pre-release because of modified ThickBox script.
 
 = Version 1.99.15 =
-* bugfix: detection of theme textdomains eighter loaded by variable or defined as constant by variable
+* Bugfix: detection of theme textdomains eighter loaded by variable or defined as constant by variable
 
 = Version 1.99.14 =
-* bugfix: bbPress plugin translation show index wrong messages (because of stand alone instead of packaged with BuddyPress)
-* bugfix: bbPress uses own _nx_noop translations accidentally mapped to default textdomain
+* Bugfix: bbPress plugin translation show index wrong messages (because of stand alone instead of packaged with BuddyPress)
+* Bugfix: bbPress uses own _nx_noop translations accidentally mapped to default textdomain
 
 = Version 1.99.13 =
-* bugfix: WordPress mu-plugin textdomains partially not detected even if present
+* Bugfix: WordPress mu-plugin textdomains partially not detected even if present
 
 = Version 1.99.12 =
 * Bugfix: blog urls configured with uppercase letters breaking ajax JSON calls because of false positive brower XSS detection
