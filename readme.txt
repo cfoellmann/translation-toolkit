@@ -60,6 +60,14 @@ Furthermore it will completely support any new features we have at multi site in
 
 == Changelog ==
 
+= Version 1.99.18 =
+* Bugfix: compatibility with upcomming WordPress 3.4 and rewritten WordPress Theme Core
+* Bugfix: skips now protected folder during scan process instead of warning message output
+* Bugfix: simple plugins (main folder) but translatable now being supported correctly
+* Feature: supports galego language
+* Feature: supports mongolian language
+* Feature: supports georgian language
+
 = Version 1.99.17 =
 * Bugfix: old Google Translate API v1 removed (obsolete and not longer supported)
 * Bugfix: WordPress 3.4 changes Theme handling, scan process adapted

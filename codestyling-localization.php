@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
-Version: 1.99.17
+Version: 1.99.18
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -234,7 +234,7 @@ if (!function_exists('scandir')) {
 }
 
 function has_subdirs($base='') {
-  if (!is_dir($base)) return $false;
+  if (!is_dir($base) || !is_readable($base)) return $false;
   $array = array_diff(scandir($base), array('.', '..'));
   foreach($array as $value) : 
     if (is_dir($base.$value)) return true; 
@@ -243,7 +243,7 @@ function has_subdirs($base='') {
 }
 
 function lscandir($base='', $reg='', &$data) {
-  if (!is_dir($base)) return $data;
+  if (!is_dir($base) || !is_readable($base)) return $data;
   $array = array_diff(scandir($base), array('.', '..')); 
   foreach($array as $value) : 
 		if (is_file($base.$value) && preg_match($reg, $value) ) : 
@@ -254,7 +254,7 @@ function lscandir($base='', $reg='', &$data) {
 }
 
 function rscandir($base='', $reg='', &$data) {
-  if (!is_dir($base)) return $data;
+  if (!is_dir($base) || !is_readable($base)) return $data;
   $array = array_diff(scandir($base), array('.', '..')); 
   foreach($array as $value) : 
     if (is_dir($base.$value)) : 
@@ -267,7 +267,7 @@ function rscandir($base='', $reg='', &$data) {
 }		
 
 function rscanpath($base='', &$data) {
-  if (!is_dir($base)) return $data;
+  if (!is_dir($base) || !is_readable($base)) return $data;
   $array = array_diff(scandir($base), array('.', '..')); 
   foreach($array as $value) : 
     if (is_dir($base.$value)) : 
@@ -280,7 +280,7 @@ function rscanpath($base='', &$data) {
 
 
 function rscandir_php($base='', &$exclude_dirs, &$data) {
-  if (!is_dir($base)) return $data;
+  if (!is_dir($base) || !is_readable($base)) return $data;
   $array = array_diff(scandir($base), array('.', '..')); 
   foreach($array as $value) : 
     if (is_dir($base.$value)) : 
@@ -495,7 +495,7 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 		foreach($files as $filename) {
 			if ($data['is-simple']) {
 				$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
-				preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);		
+				preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
 				if (empty($hits[2]) === false) {				
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
@@ -505,7 +505,7 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 				}
 				else{
 					//try to re-construct from real file.
-					preg_match("/([\/a-z0-9\-_]+)-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
+					preg_match("/([a-z0-9\-_]+)-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
 					if (empty($hits[2]) === false) {				
 						$data['filename'] = $hits[1];
 						$data['textdomain']['identifier'] = $hits[1];
@@ -556,7 +556,7 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 				if (empty($hits[1]) === false) { $data['special_path'] = $hits[1]; }
 			}
 		}
-		
+
 		//DEBUG:  $data['php-path-string']  will contain real path part like: "false,'codestyling-localization'" | "'wp-content/plugins/' . NGGFOLDER . '/lang'" | "GENGO_LANGUAGES_DIR" | "$moFile"
 		//this may be part of later excessive parsing to find correct lang file path even if no lang files exist as hint or implementation of directory selector, if 0 languages contained
 		//if any lang files may be contained the qualified sub path will be extracted out of
@@ -1008,7 +1008,7 @@ function csp_po_collect_by_type($type){
 		}
 	}
 	if (empty($type) || ($type == 'themes')) {
-		$themes = get_themes();
+		$themes = function_exists('wp_get_themes') ? wp_get_themes() : get_themes();
 		//WARNING: Theme handling is not well coded by WordPress core
 		$err = error_reporting(0);
 		$ct = current_theme_info();
