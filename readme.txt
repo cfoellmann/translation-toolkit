@@ -64,6 +64,10 @@ Furthermore it will completely support any new features we have at multi site in
 * Bugfix: compatibility with upcomming WordPress 3.4 and rewritten WordPress Theme Core
 * Bugfix: skips now protected folder during scan process instead of warning message output
 * Bugfix: simple plugins (main folder) but translatable now being supported correctly
+* Bugfix: google translate response leads to hidden exception and idle dialog.
+* Bugfix: minor changes for RTL language CSS 
+* Feature: per user translation API configuration as second option extends User Profile Settings
+* Feature: provider mode possible to disable the help screen for API configuration
 * Feature: supports galego language
 * Feature: supports mongolian language
 * Feature: supports georgian language
