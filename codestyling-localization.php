@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
-Version: 1.99.18
+Version: 1.99.19
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -1857,9 +1857,11 @@ function csp_po_ajax_handle_create_pot_indicator() {
 	}
 	else{
 		@fwrite($handle, 
-			'MIME-Version: 1.0\n'.
-			'Content-Type: text/plain; charset=UTF-8\n'.
-			'Content-Transfer-Encoding: 8bit'
+			"msgid \"\"\n".
+			"msgstr \"\"\n".
+			"\"MIME-Version: 1.0\"\n".
+			"\"Content-Type: text/plain; charset=UTF-8\"\n".
+			"\"Content-Transfer-Encoding: 8bit\"\n"
 		);
 		@fclose($handle);
 		header('Status: 200 ok');
