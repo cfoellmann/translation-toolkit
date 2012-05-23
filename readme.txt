@@ -60,6 +60,13 @@ Furthermore it will completely support any new features we have at multi site in
 
 == Changelog ==
 
+= Version 1.99.19 = 
+* Bugfix: pot file indicator writes unstructured content and blocked new language creation
+* Feature: supports Uighur language
+* Feature: supports Albanian language
+* Feature: supports Burmese language
+
+
 = Version 1.99.18 =
 * Bugfix: compatibility with upcomming WordPress 3.4 and rewritten WordPress Theme Core
 * Bugfix: skips now protected folder during scan process instead of warning message output
