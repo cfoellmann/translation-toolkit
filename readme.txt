@@ -10,7 +10,7 @@ You can manage and edit all gettext translation files (*.po/*.mo) directly out o
 == Description ==
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor.
-It automatically detects the gettext ready components like **WordPress** itself or any **Plugin** / **Theme** supporting gettext, is able to scan the related source files and assists you using **Google translate API** during translation.
+It automatically detects the gettext ready components like **WordPress** itself or any **Plugin** / **Theme** supporting gettext, is able to scan the related source files and can assists you using **Google Translate API** or **Microsoft Translator API** during translation.
 This plugin supports **WordPress MU** and allows explicit **WPMU Plugin** translation too. It newly introduces ignore-case and regular expression search during translation.
 **BuddyPress** and **bbPress** as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to **PoEdit**.
 
@@ -45,11 +45,23 @@ Please visit [the official website](http://www.code-styling.de/english/developme
 1. support of IDN based installations if PHP version is 5.0 or higher
 
 = Announcement =
-As I stated at one of my articles [Features and Future Development](http://www.code-styling.de/english/wordpress-localization-features-and-future-development) this Version 1.x trunk will be maintained now only.
-This is because of complete rewrite and massive feature implementation of version 2.x series. 
-I will nevertheless support the 1.x trunk, but it would not get more features from now. Please look at the article, it also shows more sneak peak screens of upcomming features. 
-The new version trunk 2.0 is still in progress but has been changed again. So this can last additional time, because harder constraints will be introduced. Planned 2.0 will require PHP 5.x and WP 3.0 as base.
-Furthermore it will completely support any new features we have at multi site installations. So this took again more time as expected.
+Starting with version 3.4 of WordPress I faced a restructured handling of localization within the Core Files, can be read here: [Important Changes for WordPress 3.4](http://wppolyglots.wordpress.com/important-changes-for-wordpress-3-4/)
+Because I had to cope with this, the translation process of WordPress itself has been rewritten. The pugin now supports backward compatibility (for older WordPress versions) and also generates to new one structured *.mo files.
+It depends on your installed version, if it's less than 3.4-alpha, than you will get the old behavior otherwise the new one behavior.
+
+= Support & Development =
+The plugin stays for a long time at major version 1.x now and it was planned to come up with a new major release 2.x several month ago. But because of massive changes at the WordPress core, not having that much time I would need, the new major version will be delayed again.
+I can't estimate currently a timeframe for availability. That's why I continue maintainance of version 1.x as long as I'm working on version 2.x at alpha stage.
+
+= Translation API's & User Interface =
+Introduced with version 1.99.17 of this plugin, the translation API's of Google and Microsoft have been integrated. Both required at least subscriptions and the Google API is a paid service.
+The plugin knows, which API is able to translated what language, so you will find the information next to your language file to be translated at the list.
+I did reshape the User Interface a bit more closer to WordPress Standard UI, so it should be more intuitive to use it from now on.
+
+= Translations =
+The german translation has been created with this plugin itself. Feel free to make your translation related to your native language.
+If you have a ready to publish translation of this plugin not pre-packaged yet, please send me an email. I will extend the package and remark your work at Acknowledgements.
+
 
 == Installation ==
 
@@ -62,6 +74,17 @@ Furthermore it will completely support any new features we have at multi site in
 
 = Version 1.99.19 = 
 * Bugfix: pot file indicator writes unstructured content and blocked new language creation
+* Bugfix: valid specified UTF-8 character breaks JSON response during editor call (LINE SEPARATOR decimal: &#8232;)
+* Bugfix: trailing NUL chars may comming out of a reversed *.mo files and will be skipped now
+* Bugfix: Chinese Traditional and Simplified can be used with translation API now
+* Bugfix: disabled (unavailable) API's may hang the editor call
+* Feature: User Interface has been polished to be closer at WordPress standard backend look and feel.
+* Feature: Translation API availabilities updated, visualization of which API is able to translate what language
+* Feature: special workaround only for WooCoomerce none standard German language file handling (temporary solution)
+* Feature: complete support of WordPress 3.4 changed localization behavior at core files
+* Feature: special handling for improper context based "Center" text, used at UI and as continent/cities
+* Feature: complete translation of WordPress within one *.po (merges now first splitted po files) file but separate saving of *.mo files
+* Feature: qualified support of older and newer versions of WordPress out of the box
 * Feature: supports Uighur language
 * Feature: supports Albanian language
 * Feature: supports Burmese language
@@ -407,6 +430,6 @@ Thanks to [Thomas Urban](http://www.toxa.de "Thomas Urban") for contributing a f
 This plugins is released under the GPL, you can use it free of charge on your personal or commercial blog. 
 
 = Translations =
-The german translation has been created with this plugin itself. Feel free to make you translation related to your native language.
+The german translation has been created with this plugin itself. Feel free to make your translation related to your native language.
 If you have a ready to publish translation of this plugin not pre-packaged yet, please send me an email. I will extend the package and remark your work at Acknowledgements.
 

@@ -119,7 +119,7 @@ class CspTranslationFile {
 		$this->reg_msgstr			= '/^msgstr\s+(".*")/';
 		$this->reg_msgid_plural		= '/^msgid_plural\s+(".*")/';
 		$this->reg_msgstr_plural	= '/^msgstr\[\d+\]\s+(".*")/';
-		$this->reg_multi_line		= '/^(".*")/';
+		$this->reg_multi_line		= "/^(\".*\")/s";
 	}
 	
 	function _set_header_from_string($head, $lang='') {
@@ -165,6 +165,11 @@ class CspTranslationFile {
 		// F ... flags like 'php-format'
 		// R ... reference
 		// LTD ... loaded text domain
+		
+		//Bugfix: illegal line separators contained
+		if ($trans !== false)
+			$trans = preg_replace('/ /', '', $trans); //LINE SEPARATOR decimal: &#8232; UTF-8 (e2, 80, a8)
+		
 		return array(
 			'T' 	=> $trans,
 			'X'		=> ($this->strings->_strpos( $org, "\04" ) !== false),
@@ -257,15 +262,15 @@ class CspTranslationFile {
 	
 	function read_pofile($pofile, $check_plurals=false, $base_file=false) {
 		if (!empty($pofile) && file_exists($pofile) && is_readable($pofile)) {		
-			$handle = fopen($pofile,'r');
+			$handle = fopen($pofile,'rb');
 
 			$msgid = false;
 			$cur_entry = $this->_new_entry('', false); //empty 
 			
 			while (!feof($handle)) {
-				$line = trim(fgets($handle));
+				$line = trim(fgets($handle));  
 				if (!$this->strings->_seems_utf8($line)) $line = $this->strings->_utf8_encode($line);
-
+			
 				if (empty($line)) {
 
 					if ($msgid !== false) {		
@@ -320,7 +325,7 @@ class CspTranslationFile {
 			}else{
 				$po_lang = $this->strings->_substr($_POST['language'],0,2);
 			}
-			$this->_set_header_from_string($this->map['']['T'], $po_lang);
+			$this->_set_header_from_string($this->map[""]['T'], $po_lang);
 			$this->_set_header_from_string('Plural-Forms: ', $po_lang); //for safetly the plural forms!
 			if ($base_file) {
 				$rel = $this->_build_rel_path($base_file);
@@ -332,11 +337,11 @@ class CspTranslationFile {
 	}
 	
 	//extension made to stamp pot files to textdomain entirely
-	function write_pofile($pofile, $last = false, $textdomain = false) {
+	function write_pofile($pofile, $last = false, $textdomain = false, $tds = 'yes') {
 		if (file_exists($pofile) && !is_writable($pofile)) return false;
 		$handle = @fopen($pofile, "wb");
 		if ($handle === false) return false;
-		$this->_set_header_from_string("Plural-Forms: \nX-Textdomain-Support: yes");
+		$this->_set_header_from_string("Plural-Forms: \nX-Textdomain-Support: $tds");
 
 		//write header if last because it has no code ref anyway
 		if ($last === true) {
@@ -495,7 +500,9 @@ class CspTranslationFile {
 					// extract original and translations
 					$original    = $this->strings->_substr( $strings, $originals[$i]['pos'], $originals[$i]['length'] );
 					$translation = $this->strings->_substr( $strings, $translations[$i]['pos'], $translations[$i]['length'] );
-					
+					//Bugfix: 1.9.19 - trailing nul were occuring somehow, removed now.
+					$translation = trim($translation, "\0");
+								
 					$this->map[$original] = $this->_new_entry($original, $translation, false, false, false, false, $default_textdomain);
 				}
 
@@ -530,6 +537,12 @@ class CspTranslationFile {
 	}
 	
 	function write_mofile($mofile, $textdomain) {
+		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
+		if (isset($this->map["continents-cities\04Center"])) {
+			$trans = $this->map["continents-cities\04Center"];
+			unset($this->map["continents-cities\04Center"]);
+			$this->map["Center"] = $trans;
+		}
 		$handle = @fopen($mofile, "wb");
 		if ($handle === false) return false;
 		ksort($this->map, SORT_REGULAR);
@@ -778,14 +791,14 @@ class CspTranslationFile {
 	
 	function echo_as_json($path, $file, $sys_locales, $api_type) {
 		$loc = $this->strings->_substr($file,strlen($file)-8,-3);
-		header('Content-Type: application/json');
+		header('Content-Type: application/json; charset=utf-8');
 ?>
 {
 	header : "<table id=\"po-hdr\" style=\"display:none;\"><?php
 		foreach($this->header as $key => $value) {
 			echo "<tr><td class=\\\"po-hdr-key\\\">".$key."</td><td class=\\\"po-hdr-val\\\">".htmlspecialchars($value)."</td></tr>";
 		}?>",
-	destlang: "<?php echo ( isset($sys_locales[$loc]) && $sys_locales[$loc]['google-api'] === true ? substr($loc, 0, 2) : ''); ?>",
+	destlang: "<?php echo ( isset($sys_locales[$loc]) && !empty($api_type) && $api_type != 'none' ? $sys_locales[$loc][$api_type.'-api'] : ''); ?>",
 	api_type: "<?php echo $api_type; ?>",
 	last_saved : "<?php $mo = $this->strings->_substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($mo)); } else { _e('unknown',CSP_PO_TEXTDOMAIN); } ?>",
 	plurals_num : <?php echo $this->nplurals; ?>,

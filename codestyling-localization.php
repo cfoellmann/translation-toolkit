@@ -1490,7 +1490,9 @@ function csp_po_ajax_handle_create() {
 		simplefilename: '<?php echo $_POST['simplefilename']; ?>',
 		transtemplate: '<?php echo $_POST['transtemplate']; ?>',
 		permissions: '<?php echo date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename); ?>',
-		denyscan: <?php echo $_POST['denyscan']; ?>
+		denyscan: <?php echo $_POST['denyscan']; ?>,
+		google: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['google-api'] ? 'yes' : 'no'; ?>",
+		microsoft: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['microsoft-api'] ? 'yes' : 'no'; ?>"
 }
 <?php		
 	}
@@ -1552,11 +1554,54 @@ function csp_po_ajax_handle_scan_source_file() {
 	if (!file_exists($_POST['pofile'])) {
 		//try implicite convert first and reopen as po second
 		if($pofile->read_mofile(substr($_POST['pofile'],0,-2)."mo", $csp_l10n_plurals, false, $textdomain)) {
-			$pofile->write_pofile($_POST['pofile']);
+			$pofile->write_pofile($_POST['pofile'],false,false, ($_POST['type'] == 'wordpress' ? 'no' : 'yes'));
+		}
+		//check, if we have to reverse all the other *.mo's too
+		if($_POST['type'] == 'wordpress') {
+			$root_po = basename($_POST['pofile']);
+			$root_mo = substr($root_po,0,-2)."mo";
+			$part = str_replace($root_po, '', $_POST['pofile']);
+			if($pofile->read_mofile($part.'continents-cities-'.$root_mo, $csp_l10n_plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
+				$pofile->write_pofile($part.'continents-cities-'.$root_po,false,false,'no');
+			}
+			if($pofile->read_mofile($part.'ms-'.$root_mo, $csp_l10n_plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
+				$pofile->write_pofile($part.'ms-'.$root_po,false,false,'no');
+			}
+			global $wp_version;			
+			if (version_compare($wp_version, '3.4-alpha', ">=")) {
+				if($pofile->read_mofile($part.'admin-'.$root_mo, $csp_l10n_plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
+					$pofile->write_pofile($part.'admin-'.$root_po,false,false,'no');
+				}
+				if($pofile->read_mofile($part.'admin-network-'.$root_mo, $csp_l10n_plurals, $part.'admin-network-'.$root_mo, $_POST['textdomain'])) {
+					$pofile->write_pofile($part.'admin-network-'.$root_po,false,false,'no');
+				}
+			}
 		}
 	}		
+	$pofile = new CspTranslationFile($_POST['type']);
 	if ($pofile->read_pofile($_POST['pofile'])) {
-		if ((int)$_POST['num'] == 0) { $pofile->parsing_init(); }
+		if ((int)$_POST['num'] == 0) { 
+		
+			if (!$pofile->supports_textdomain_extension() && $_POST['type'] == 'wordpress'){
+				//try to merge up first all splitted translations.
+				$root = basename($_POST['pofile']);
+				$part = str_replace($root, '', $_POST['pofile']);
+				//load existing files for backward compatibility if existing
+				$pofile->read_pofile($part.'continents-cities-'.$root, $csp_l10n_plurals, $part.'continents-cities-'.$root);
+				$pofile->read_pofile($part.'ms-'.$root, $csp_l10n_plurals, $part.'ms-'.$root);
+				global $wp_version;			
+				if (version_compare($wp_version, '3.4-alpha', ">=")) {
+					$pofile->read_pofile($part.'admin-'.$root, $csp_l10n_plurals, $part.'admin-'.$root);
+					$pofile->read_pofile($part.'admin-network-'.$root, $csp_l10n_plurals, $part.'admin-network-'.$root);
+				}
+				//again read it to get the right header overwritten last
+				$pofile->read_pofile($_POST['pofile']);
+				//overwrite with full imploded sparse file contents now
+				$pofile->write_pofile($_POST['pofile'],false,false,'no');
+			}		
+		
+			$pofile->parsing_init(); 
+		}
 		
 		$php_files = explode("|", $_POST['php']);
 		$s = (int)$_POST['num'];
@@ -1629,17 +1674,54 @@ function csp_po_ajax_handle_launch_editor() {
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
 	require_once('includes/locale-definitions.php');
 	require_once('includes/class-translationfile.php');
-	$f = new CspTranslationFile();
+	$f = new CspTranslationFile($_POST['type']);
 	if (!file_exists($_POST['basepath'].$_POST['file'])) {
 		//try implicite convert first
 		if($f->read_mofile(substr($_POST['basepath'].$_POST['file'],0,-2)."mo", $csp_l10n_plurals, $_POST['file'], $_POST['textdomain'])) {
-			$f->write_pofile($_POST['basepath'].$_POST['file']);
+			$f->write_pofile($_POST['basepath'].$_POST['file'],false,false,'no');
+		}
+		//check, if we have to reverse all the other *.mo's too
+		if($_POST['type'] == 'wordpress') {
+			$root_po = basename($_POST['file']);
+			$root_mo = substr($root_po,0,-2)."mo";
+			$part = str_replace($root_po, '', $_POST['file']);
+			if($f->read_mofile($_POST['basepath'].$part.'continents-cities-'.$root_mo, $csp_l10n_plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
+				$f->write_pofile($_POST['basepath'].$part.'continents-cities-'.$root_po,false,false,'no');
+			}
+			if($f->read_mofile($_POST['basepath'].$part.'ms-'.$root_mo, $csp_l10n_plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
+				$f->write_pofile($_POST['basepath'].$part.'ms-'.$root_po,false,false,'no');
+			}
+			global $wp_version;			
+			if (version_compare($wp_version, '3.4-alpha', ">=")) {
+				if($f->read_mofile($_POST['basepath'].$part.'admin-'.$root_mo, $csp_l10n_plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
+					$f->write_pofile($_POST['basepath'].$part.'admin-'.$root_po,false,false,'no');
+				}
+				if($f->read_mofile($_POST['basepath'].$part.'admin-network-'.$root_mo, $csp_l10n_plurals, $part.'admin-network-'.$root_mo, $_POST['textdomain'])) {
+					$f->write_pofile($_POST['basepath'].$part.'admin-network-'.$root_po,false,false,'no');
+				}
+			}
 		}
 	}
-	else{
+	$f = new CspTranslationFile($_POST['type']);
+	$f->read_pofile($_POST['basepath'].$_POST['file'], $csp_l10n_plurals, $_POST['file']);
+	if (!$f->supports_textdomain_extension() && $_POST['type'] == 'wordpress'){
+		//try to merge up first all splitted translations.
+		$root = basename($_POST['file']);
+		$part = str_replace($root, '', $_POST['file']);
+		//load existing files for backward compatibility if existing
+		$f->read_pofile($_POST['basepath'].$part.'continents-cities-'.$root, $csp_l10n_plurals, $part.'continents-cities-'.$root);
+		$f->read_pofile($_POST['basepath'].$part.'ms-'.$root, $csp_l10n_plurals, $part.'ms-'.$root);
+		global $wp_version;			
+		if (version_compare($wp_version, '3.4-alpha', ">=")) {
+			$f->read_pofile($_POST['basepath'].$part.'admin-'.$root, $csp_l10n_plurals, $part.'admin-'.$root);
+			$f->read_pofile($_POST['basepath'].$part.'admin-network-'.$root, $csp_l10n_plurals, $part.'admin-network-'.$root);
+		}
+		//again read it to get the right header overwritten last
 		$f->read_pofile($_POST['basepath'].$_POST['file'], $csp_l10n_plurals, $_POST['file']);
+		//overwrite with full imploded sparse file contents now
+		$f->write_pofile($_POST['basepath'].$_POST['file'],false,false,'no');
 	}
-	if ($f->supports_textdomain_extension()){
+	if ($f->supports_textdomain_extension() || $_POST['type'] == 'wordpress'){
 		$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales, csp_get_translate_api_type());
 	}else {
 		header('Status: 404 Not Found');
@@ -2143,7 +2225,6 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 	if (isset($_GET['type']) && $_GET['type'] == 'compat') $_GET['type'] = '';
 	foreach($rows as $data) : 
 ?>
-<!-- <tr<?php if ($data['status'] == __("activated",CSP_PO_TEXTDOMAIN)) echo " class=\"csp-active\""; ?>> -->
 <tr<?php if (preg_match("/^".__("activated",CSP_PO_TEXTDOMAIN)."/", $data['status'])) echo " class=\"csp-active\""; ?>>
 	<td align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/".$data['img_type'].".gif"; ?>" /><div><strong><?php echo $data['type-desc']; ?></strong></div></td>
 	<td>
@@ -2154,19 +2235,15 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 				<td class="csp-info-value"><?php echo $data['textdomain']['identifier']; ?><?php if ($data['textdomain']['is_const']) echo " (".__('defined by constant',CSP_PO_TEXTDOMAIN).")"; ?></td>
 			</tr>
 			<tr>
-				<td colspan="2">&nbsp;</td>
-			</tr>
-			<tr>
 				<td><strong><?php _e('Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
 				<td class="csp-info-value"><?php echo $data['version']; ?></td>
 			</tr>
 			<tr>
 				<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-				<td class="csp-info-value"><?php echo $data['status']; ?></td>
+				<td class="csp-info-value csp-info-status"><?php echo $data['status']; ?></td>
 			</tr>
 			<tr>
-				<td><strong><?php _e('Description',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-				<td class="csp-info-value"><?php echo $data['description'];?></td>
+				<td colspan="2" class="csp-desc-value"><em><?php echo $data['description'];?></em></td>
 			</tr>
 			<?php if (isset($data['dev-hints'])) : ?>
 			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -2207,11 +2284,10 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 				</tr>
 				<tr>
 					<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value"><?php echo $child['status']; ?></td>
+					<td class="csp-info-value csp-info-status"><?php echo $child['status']; ?></td>
 				</tr>
 				<tr>
-					<td><strong><?php _e('Description',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value"><?php echo $child['description'];?></td>
+					<td colspan="2" class="csp-desc-value"><em><?php echo $child['description'];?></em></td>
 				</tr>
 			</table>
 		</div>
@@ -2252,14 +2328,16 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 		<?php	} else { ?>
 		<table width="100%" cellspacing="0" class="mo-list" id="mo-list-<?php echo ++$mo_list_counter; ?>" summary="<?php echo $data['textdomain']['identifier'].'|'.$data['type']; ?>">
 			<tr class="mo-list-head">
-				<td colspan="2" nowrap="nowrap">
+				<td colspan="4" nowrap="nowrap">
 					<img alt="GNU GetText" class="alignleft" src="<?php echo CSP_PO_BASE_URL; ?>/images/gettext.gif" />
-					&nbsp;<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", CSP_PO_TEXTDOMAIN); ?></a>
+					&nbsp;<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile button" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", CSP_PO_TEXTDOMAIN); ?></a>
 				</td>
-				<td nowrap="nowrap" class="csp-ta-right"><?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',count($data['languages']),CSP_PO_TEXTDOMAIN), count($data['languages'])); ?></td>
+				<td colspan="1" nowrap="nowrap" class="csp-ta-right"><?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',count($data['languages']),CSP_PO_TEXTDOMAIN), count($data['languages'])); ?></td>
 			</tr>
 			<tr class="mo-list-desc">
-				<td nowrap="nowrap" align="center"><?php _e('Language',CSP_PO_TEXTDOMAIN);?></td>
+				<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/google.png"; ?>" /></td>
+				<td nowrap="nowrap" width="16px" align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/bing.gif"; ?>" /></td>
+				<td nowrap="nowrap" align="left" class="lang-info-desc"><?php _e('Language',CSP_PO_TEXTDOMAIN);?></td>
 				<td nowrap="nowrap" align="center"><?php _e('Permissions',CSP_PO_TEXTDOMAIN);?></td>
 				<td nowrap="nowrap" align="center"><?php _e('Actions',CSP_PO_TEXTDOMAIN);?></td>
 			</tr>
@@ -2268,8 +2346,13 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 					$country_www = isset($csp_l10n_sys_locales[$lang]) ? $csp_l10n_sys_locales[$lang]['country-www'] : 'unknown';
 					$lang_native = isset($csp_l10n_sys_locales[$lang]) ? $csp_l10n_sys_locales[$lang]['lang-native'] : '<em>locale: </em>'.$lang;
 			?>
+			<?php if ($data['textdomain']['identifier'] == 'woocommerce' && $lang == 'de_DE') : ?>
+			<!-- special case woocommerce german: start -->
+			<?php $copy_base_file = $data['base_file']; $data['base_file'] = 'languages/informal/woocommerce-'; ?>
 			<tr class="mo-file" lang="<?php echo $lang; ?>">
-				<td nowrap="nowrap" width="100%"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native; ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+				<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['google-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
+				<td nowrap="nowrap" width="16px"align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['microsoft-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
+				<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__('(informal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
 				<td nowrap="nowrap" align="center">
 					<div style="width:44px">
 						<?php if (array_key_exists('po', $gtf)) {
@@ -2285,18 +2368,89 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 					</div>
 				</td>
 				<td nowrap="nowrap" style="padding-right: 5px;">
-					<a class="clickable" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>');"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
-					<span> | </span>
+					<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>');"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+					<span>&nbsp;</span>
 					<?php if (!$data['deny_scanning']) : ?>
-					<a class="clickable" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
-					<span> | </span>
+					<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+					<span>&nbsp;</span>
 					<?php else: ?>
 					<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
-					<span> | </span>
+					<span>&nbsp;</span>
 					<?php endif; ?>
-					<a class="clickable" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+					<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
 				</td>
 			</tr>
+			<?php $data['base_file'] = 'languages/formal/woocommerce-'; ?>
+			<tr class="mo-file" lang="<?php echo $lang; ?>">
+				<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['google-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
+				<td nowrap="nowrap" width="16px" align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['microsoft-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
+				<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__('(formal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+				<td nowrap="nowrap" align="center">
+					<div style="width:44px">
+						<?php if (array_key_exists('po', $gtf)) {
+							echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\');' : '')."\">&nbsp;</a>";
+						} else { ?>
+						<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+						<?php } ?>
+						<?php if (array_key_exists('mo', $gtf)) {
+							echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\');' : '')."\">&nbsp;</a>";
+						} else { ?>
+						<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+						<?php } ?>
+					</div>
+				</td>
+				<td nowrap="nowrap" style="padding-right: 5px;">
+					<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>');"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+					<span>&nbsp;</span>
+					<?php if (!$data['deny_scanning']) : ?>
+					<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+					<span>&nbsp;</span>
+					<?php else: ?>
+					<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+					<span>&nbsp;</span>
+					<?php endif; ?>
+					<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+				</td>
+			</tr>
+			<?php $data['base_file'] =  $copy_base_file;?>
+			<tr class="mo-file" lang="<?php echo $lang; ?>">
+				<td colspan="2" class="lang-info-api">&nbsp;</td>
+				<td width="100%" colspan="3" class="lang-info-desc"><small><strong style="color:#f00;"><?php _e('Warning',CSP_PO_TEXTDOMAIN); ?>: </strong><?php _e('German translations are currently supported by a temporary workaround only, because they will be handled completely uncommon beside WordPress standards!',CSP_PO_TEXTDOMAIN); ?></small></td>
+			</tr>
+			<!-- special case woocommerce german: end -->
+			<?php else : ?>
+			<tr class="mo-file" lang="<?php echo $lang; ?>">
+				<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['google-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
+				<td nowrap="nowrap" width="16px" align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['microsoft-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
+				<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native; ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+				<td nowrap="nowrap" align="center">
+					<div style="width:44px">
+						<?php if (array_key_exists('po', $gtf)) {
+							echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\');' : '')."\">&nbsp;</a>";
+						} else { ?>
+						<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+						<?php } ?>
+						<?php if (array_key_exists('mo', $gtf)) {
+							echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\');' : '')."\">&nbsp;</a>";
+						} else { ?>
+						<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+						<?php } ?>
+					</div>
+				</td>
+				<td nowrap="nowrap" style="padding-right: 5px;">
+					<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>');"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+					<span>&nbsp;</span>
+					<?php if (!$data['deny_scanning']) : ?>
+					<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+					<span>&nbsp;</span>
+					<?php else: ?>
+					<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+					<span>&nbsp;</span>
+					<?php endif; ?>
+					<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+				</td>
+			</tr>
+			<?php endif; ?>
 			<?php endforeach; ?>		
 		</table>
 		<?php } ?>
@@ -2535,7 +2689,9 @@ function csp_create_new_pofile(elem, type){
 				elem_after = null;
 								
 				content = "<tr class=\"mo-file\" lang=\""+transport.responseJSON.language+"\">"+
-					"<td nowrap=\"nowrap\" width=\"100%\">"+
+					"<td nowrap=\"nowrap\" width=\"16px\" align=\"center\"><img src=\"<?php echo CSP_PO_BASE_URL."/images/"; ?>"+transport.responseJSON.google+".png\" /></td>"+
+					"<td nowrap=\"nowrap\" width=\"16px\" align=\"center\" class=\"lang-info-api\"><img src=\"<?php echo CSP_PO_BASE_URL."/images/"; ?>"+transport.responseJSON.microsoft+".png\" /></td>"+
+					"<td nowrap=\"nowrap\" width=\"100%\"  class=\"lang-info-desc\">"+
 						"<img title=\"<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: "+transport.responseJSON.language+"\" alt=\"(locale: "+transport.responseJSON.language+")\" src=\""+transport.responseJSON.image+"\" />" +
 						("<?php echo get_locale(); ?>" == transport.responseJSON.language ? "<strong>" : "") + 
 						"&nbsp;" + transport.responseJSON.lang_native +
@@ -2548,15 +2704,15 @@ function csp_create_new_pofile(elem, type){
 						"</div>"+
 					"</td>"+
 					"<td nowrap=\"nowrap\">"+
-						"<a class=\"clickable\" onclick=\"csp_launch_editor(this, '"+transport.responseJSON.subpath+transport.responseJSON.language+".po"+"', '"+transport.responseJSON.path+"','"+transport.responseJSON.textdomain+"');\"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>"+
-						"<span> | </span>"+(transport.responseJSON.denyscan == false ? 
-						"<a class=\"clickable\" onclick=\"csp_rescan_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"','"+transport.responseJSON.type+"','"+transport.responseJSON.simplefilename+"')\"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>"+
-						"<span> | </span>" 
+						"<a class=\"clickable button\" onclick=\"csp_launch_editor(this, '"+transport.responseJSON.subpath+transport.responseJSON.language+".po"+"', '"+transport.responseJSON.path+"','"+transport.responseJSON.textdomain+"');\"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>"+
+						"\n<span>&nbsp;</span>\n"+(transport.responseJSON.denyscan == false ? 
+						"<a class=\"clickable button\" onclick=\"csp_rescan_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"','"+transport.responseJSON.type+"','"+transport.responseJSON.simplefilename+"')\"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>"+
+						"\n<span>&nbsp;</span>\n" 
 						: 
 						"<span style=\"text-decoration: line-through;\"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>"+
-						"<span> | </span>" 
+						"\n<span>&nbsp;</span>\n" 
 						) +
-						"<a class=\"clickable\" onclick=\"csp_remove_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"');\"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>"+
+						"<a class=\"clickable button\" onclick=\"csp_remove_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"');\"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>"+
 					"</td>"+
 					"</tr>";			
 				$$('#'+transport.responseJSON.row+' .mo-file').each(function(tr) {
@@ -2768,7 +2924,7 @@ function csp_init_editor(actual_domain, actual_type) {
 		opt_list += '<option value="'+csp_textdomains[i]+'"'+(csp_textdomains[i] == actual_domain ? ' selected="selected"' : '')+'>'+(csp_textdomains[i].empty() ? 'default' : csp_textdomains[i])+'</option>';
 	}
 	initial_domain = $('csp-mo-textdomain-val').update(opt_list).value;
-	if(tderror) {
+	if(tderror && (csp_actual_type != 'wordpress')) {
 		$('textdomain-error').removeClassName('hidden');
 		$$("#textdomain-error span").first().update(actual_domain);
 	}
@@ -2890,7 +3046,8 @@ function csp_launch_editor(elem, file, path, textdomain) {
 				action: 'csp_po_launch_editor',
 				basepath: path,
 				file: file,
-				textdomain: textdomain
+				textdomain: textdomain,
+				type: a[1]
 			},
 			onSuccess: function(transport) {
 				//switch to editor now
@@ -3614,17 +3771,24 @@ if (isset($_GET['css']) && $_GET['css'] == 'default') {
 .csp-filetype-mo-rw { margin-left: 5px; background: url(images/mo.gif) no-repeat -36px 0; }
 
 /* overview page styles */
-.csp-active { background-color: #E7F7D3; }
+#the-gettext-list tr { background-color: /*#E7F7D3*/#F4F4F4/*#FCFCFC*/; }
+#the-gettext-list tr.csp-active, #the-gettext-list tr.csp-active table tr { background-color: /*#E7F7D3*//*#F4F4F4*/#FCFCFC; }
+#the-gettext-list a.button, #the-gettext-list table a.button { padding: 1px 10px; color: #21759B; border-radius: 0 0 0 0; }
+#the-gettext-list a.button:hover, #the-gettext-list table a.button:hover { color: #d54e21; }
 *:first-child + html tr.csp-active td{ background-color: #E7F7D3; }
 .csp-type-name { 	margin: 0pt 10px 1em 0pt; }
 .csp-type-info {}
 table.csp-type-info td {	padding:0; border-bottom: 0px; }
-table.csp-type-info td.csp-info-value { padding:0 5px; }
+table.csp-type-info td.csp-desc-value { padding-top: 5px; color: #666; }
 table.mo-list td { padding:3px 0 3px 5px;border-bottom: 0px !important; }
 table.mo-list tr.mo-list-head td, table.mo-list tr.mo-list-desc td { border-bottom: 1px solid #aaa !important; }
 .csp-ta-right { text-align: right; }
 tr.mo-file td { border-bottom: 1px solid transparent !important; }
 tr.mo-file:hover td { border-bottom: 1px dashed #666 !important; }
+tr.mo-list-desc {background-color: #eee !important; }
+tr.mo-list-desc td { vertical-align: middle; }
+td.lang-info-api { padding-right: 5px !important; }
+td.lang-info-desc { border-left: dotted 1px #ccc !important; padding-left: 5px !important; }
 
 /* new ajax dialogs */
 #TB_ajaxContent { background-color: #EAF3FA !important; width: auto !important; overflow: hidden !important; }
@@ -3689,6 +3853,13 @@ label.disabled { color: gray; cursor: not-allowed; }
 
 body.rtl p.translation-apis label { margin-right: 5px; }
 body.rtl p.translation-apis img { margin-right: 25px; }
+
+#the-gettext-list table td, #the-gettext-list table th {
+    border-style: none;
+}
+tr.csp-active .csp-info-status { color: #267F00 !important; font-weight: bold; font-style: italic; }
+.csp-info-status { color: #888 !important; font-weight: bold; font-style: italic; }
+
 <?php
 }
 
