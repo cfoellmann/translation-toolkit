@@ -924,12 +924,6 @@ msgstr "CodeStyling Localization"
 msgid "http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en"
 msgstr "http://www.code-styling.de/deutsch/entwicklungen/wordpress-plugin-codestyling-localization"
 
-#. translators: plugin header field 'Description'
-#: codestyling-localization.php:0
-#@ codestyling-localization
-msgid "Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected."
-msgstr "Sie können Ihre WordPress Übersetzungsdateien (*. po / *. mo) nun frei verwalten, bearbeiten und ändern. Sie benötigen keinen zusätzlich installierten Editor dazu. WPMU und WordPress Multi Site wird ebenfalls unterstützt."
-
 #. translators: plugin header field 'Author'
 #: codestyling-localization.php:0
 #@ codestyling-localization
@@ -1214,4 +1208,10 @@ msgstr "(Sie)"
 #@ codestyling-localization
 msgid "German translations are currently supported by a temporary workaround only, because they will be handled completely uncommon beside WordPress standards!"
 msgstr "Deutsche Übersetzungen werden gegenwärtig nur durch eine Zwischenlösung unterstützt, weil sie völlig ungewöhnlich neben WordPress Normen behandelt werden!"
+
+#. translators: plugin header field 'Description'
+#: codestyling-localization.php:0
+#@ codestyling-localization
+msgid "You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation.<b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>."
+msgstr "Sie können alle Gettext Übersetzungsdateien (*.po/*.mo) direkt von Ihrem WordPress Admin Center ohne jede Notwendigkeit eines externen Editors verwalten und bearbeiten. Es erkennt automatisch die Gettext vorbereiteten Komponenten wie <b>WordPress</b> selbst oder jedes <b>Plugin</b> / <b>Theme</b> mit Gettext Unterstützung, ist in der Lage, die zugehörigen Quelldateien zu scannen und unterstützt Sie mithilfe von <b>Google Translate API</b> oder <b>Microsoft Translator API</b> während der Übersetzung. Dieses Plugin unterstützt <b>WordPress MU</b> und ermöglicht explizite <b>WPMU Plugin</b> -Übersetzung. Die Suche funktioniert sowohl mit ignore-case als auch mit regulären Ausdrücken während der Übersetzung.<b>BuddyPress</b> und <b>bbPress</b> als Teil von BuddyPress können auch übersetzt werden. Produzierte Übersetzungsdateien sind 100 % kompatibel zu <b>PoEdit</b>."
 

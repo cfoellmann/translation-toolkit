@@ -70,6 +70,10 @@ If you have a ready to publish translation of this plugin not pre-packaged yet, 
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Translate your resources using 'Manage' menu at new 'Localization' sub menu
 
+= Activation of Translation API's =
+
+You can use 2 translation API's with this plugin. Normally they are disabled at default installation. You will find inside the plugin main page a link that expands the required description how to work with API's.
+
 == Changelog ==
 
 = Version 1.99.19 = 
@@ -78,6 +82,7 @@ If you have a ready to publish translation of this plugin not pre-packaged yet, 
 * Bugfix: trailing NUL chars may comming out of a reversed *.mo files and will be skipped now
 * Bugfix: Chinese Traditional and Simplified can be used with translation API now
 * Bugfix: disabled (unavailable) API's may hang the editor call
+* Bugfix: Plugin/Theme Descriptions which are translatable (plugin loaded) shows up translated if possible.
 * Feature: User Interface has been polished to be closer at WordPress standard backend look and feel.
 * Feature: Translation API availabilities updated, visualization of which API is able to translate what language
 * Feature: special workaround only for WooCoomerce none standard German language file handling (temporary solution)

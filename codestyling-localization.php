@@ -2,7 +2,7 @@
 /*
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
-Description: Now you can freely manage, edit and modify your WordPress language translation files (*.po / *.mo) as usual. You won't need any additional editor have been installed. Also supports WPMU plugins, if WPMU versions has been detected.
+Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation.<b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
 Version: 1.99.19
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
@@ -2243,7 +2243,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 				<td class="csp-info-value csp-info-status"><?php echo $data['status']; ?></td>
 			</tr>
 			<tr>
-				<td colspan="2" class="csp-desc-value"><em><?php echo $data['description'];?></em></td>
+				<td colspan="2" class="csp-desc-value"><small><?php echo __($data['description'], $data['textdomain']['identifier']);?></small></td>
 			</tr>
 			<?php if (isset($data['dev-hints'])) : ?>
 			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -2287,7 +2287,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 					<td class="csp-info-value csp-info-status"><?php echo $child['status']; ?></td>
 				</tr>
 				<tr>
-					<td colspan="2" class="csp-desc-value"><em><?php echo $child['description'];?></em></td>
+					<td colspan="2" class="csp-desc-value"><small><?php echo __($child['description'], $data['textdomain']['identifier']);?></small></td>
 				</tr>
 			</table>
 		</div>
@@ -3779,7 +3779,7 @@ if (isset($_GET['css']) && $_GET['css'] == 'default') {
 .csp-type-name { 	margin: 0pt 10px 1em 0pt; }
 .csp-type-info {}
 table.csp-type-info td {	padding:0; border-bottom: 0px; }
-table.csp-type-info td.csp-desc-value { padding-top: 5px; color: #666; }
+table.csp-type-info td.csp-desc-value { padding-top: 5px; color: #666; border-top: 1px dotted #666 !important; }
 table.mo-list td { padding:3px 0 3px 5px;border-bottom: 0px !important; }
 table.mo-list tr.mo-list-head td, table.mo-list tr.mo-list-desc td { border-bottom: 1px solid #aaa !important; }
 .csp-ta-right { text-align: right; }
