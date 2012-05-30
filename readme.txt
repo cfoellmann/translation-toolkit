@@ -81,6 +81,7 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 * Bugfix: admin ajax url not longer lowercase completely, only "same origin policy" parts lowercased, stops function on installions with uppercased folder names.
 * Bugfix: false positive XSS vulnerablities handled anyway, all reported vulnerability requires always an admin login (admin permission) to be useable and are all false positive.
 * Bugfix: last 4 plugin versions damaged the backward compatibility downto WordPress version 2.5 and has been repaired to support also this old versions of WordPress again
+* Bugfix: small visibility adjustments 
 
 = Version 1.99.19 = 
 * Bugfix: pot file indicator writes unstructured content and blocked new language creation

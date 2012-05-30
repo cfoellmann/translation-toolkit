@@ -2245,7 +2245,8 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 <input type="hidden" value="USD" name="currency_code">
 <input type="hidden" value="0" name="tax">
 <input type="hidden" value="PP-DonationsBF" name="bn">
-<?php $loc = get_locale(); if ($loc == 'de_DE' || $loc == 'de') { $loc = 'de_DE'; } else { $loc = 'en_US'; } ?>
+<?php $valid_loc_for_button = array('en_US', 'de_DE', 'it_IT', 'fr_FR', 'es_ES', 'zh_TW', 'zh_CN', 'he_IL', 'nl_NL'); ?>
+<?php $loc = get_locale(); if(!in_array($loc, $valid_loc_for_button)) { if ($loc == 'de_DE' || $loc == 'de') { $loc = 'de_DE'; } else { $loc = 'en_US'; } } ?>
 <input border="0" type="image" alt="Make payments with PayPal - it's fast, free and secure!" name="submit" src="https://www.paypal.com/<?php echo $loc ?>/i/btn/btn_donate_SM.gif">
 </form>
 <br/>
@@ -2332,7 +2333,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 		</div>
 		<?php } } ?>
 	</td>
-	<td>
+	<td class="component-details">
 		<?php  if ($data['type'] == 'wordpress' && $data['is_US_Version'] ) {?>
 			<div style="color:#f00;"><?php _e("The original US version doesn't contain the language directory.",CSP_PO_TEXTDOMAIN); ?></div>
 			<br/>
@@ -3818,7 +3819,7 @@ if (isset($_GET['css']) && $_GET['css'] == 'default') {
 .csp-type-name { 	margin: 0pt 10px 1em 0pt; }
 .csp-type-info {}
 table.csp-type-info td {	padding:0; border-bottom: 0px; }
-table.csp-type-info td.csp-desc-value { padding-top: 5px; color: #666; border-top: 1px dotted #666 !important; }
+table.csp-type-info td.csp-desc-value { padding-top: 5px; color: #666; border-top: 1px solid #ddd !important; }
 table.mo-list td { padding:3px 0 3px 5px;border-bottom: 0px !important; }
 table.mo-list tr.mo-list-head td, table.mo-list tr.mo-list-desc td { border-bottom: 1px solid #aaa !important; }
 .csp-ta-right { text-align: right; }
@@ -3899,6 +3900,8 @@ body.rtl p.translation-apis img { margin-right: 25px; }
 tr.csp-active .csp-info-status { color: #267F00 !important; font-weight: bold; font-style: italic; }
 .csp-info-status { color: #888 !important; font-weight: bold; font-style: italic; }
 
+td.component-details { border-left: 1px solid #eee; }
+.mo-list-head td { padding-bottom: 10px !important; }
 <?php
 }
 
