@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation.<b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.19
+Version: 1.99.20
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -47,6 +47,20 @@ Domain Path: /languages
 //Attention: the strict logging may prevent WP from proper working because of many not handled issues.
 //error_reporting(E_ALL|E_STRICT);
 
+function csp_split_url($url) {
+  $parsed_url = parse_url($url);
+  $scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
+  $host     = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+  $port     = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+  $user     = isset($parsed_url['user']) ? $parsed_url['user'] : '';
+  $pass     = isset($parsed_url['pass']) ? ':' . $parsed_url['pass']  : '';
+  $pass     = ($user || $pass) ? "$pass@" : '';
+  $path     = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+  $query    = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+  $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
+  return array("$scheme$user$pass$host$port","$path$query$fragment"); 
+}
+
 if (function_exists('add_action')) {
 	if ( !defined('WP_CONTENT_URL') )
 	    define('WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
@@ -77,6 +91,7 @@ if (function_exists('add_action')) {
 		
 	//Bugfix: ensure valid JSON requests at IDN locations!
 	//Attention: Google Chrome and Safari behave in different way (shared WebKit issue or all other are wrong?)!
+	list($domain, $target) = csp_split_url( ( function_exists("admin_url") ? rtrim(admin_url(), '/') : rtrim(get_option('siteurl').'/wp-admin/', '/') ) );
 	if (
 		stripos($_SERVER['HTTP_USER_AGENT'], 'chrome') !== false 
 		|| 
@@ -84,21 +99,13 @@ if (function_exists('add_action')) {
 		||
 		version_compare(phpversion(), '5.2.1', '<') //IDNA class requires PHP 5.2.1 or higher
 	) {
-		if (function_exists("admin_url")) {
-			define('CSP_PO_ADMIN_URL', rtrim(strtolower(admin_url()), '/'));
-		}else{
-			define('CSP_PO_ADMIN_URL', rtrim(strtolower(get_option('siteurl')).'/wp-admin/', '/'));
-		}
+		define('CSP_PO_ADMIN_URL', strtolower($domain).$target);
 	}
 	else{
 		if (!class_exists('idna_convert'))
 			require_once('includes/idna_convert.class.php');
 		$idn = new idna_convert();
-		if (function_exists("admin_url")) {
-			define('CSP_PO_ADMIN_URL', $idn->decode(rtrim( strtolower(admin_url()) , '/'), 'utf8'));
-		}else{
-			define('CSP_PO_ADMIN_URL', $idn->decode(rtrim(strtolower(get_option('siteurl')).'/wp-admin/', '/'),'utf8'));
-		}
+		define('CSP_PO_ADMIN_URL', $idn->decode(strtolower($domain), 'utf8').$target);
 	}
 	
     define('CSP_PO_BASE_PATH', WP_PLUGIN_DIR . CSP_PO_PLUGINPATH);
@@ -107,6 +114,7 @@ if (function_exists('add_action')) {
 	define('CSP_PO_MIN_REQUIRED_PHP_VERSION', '4.4.2');
 		
 	register_activation_hook(__FILE__, 'csp_po_install_plugin');
+
 }
 
 function csp_is_multisite() {
@@ -197,6 +205,26 @@ if (!function_exists('esc_js')) {
 		$args = func_get_args();
 		return call_user_func_array('js_escape', $args);
 	}
+}
+
+if (!function_exists('__checked_selected_helper')) {
+	function __checked_selected_helper( $helper, $current, $echo, $type ) {
+		if ( (string) $helper === (string) $current )
+			$result = " $type='$type'";
+		else
+			$result = '';
+
+		if ( $echo )
+			echo $result;
+
+		return $result;
+	}
+}
+
+if (!function_exists('disabled')) {
+	function disabled( $disabled, $current = true, $echo = true ) {
+		return __checked_selected_helper( $disabled, $current, $echo, 'disabled' );
+	}	
 }
 
 if (!function_exists('file_get_contents')) {
@@ -1108,7 +1136,7 @@ function csp_po_ajax_handle_dlg_new() {
 	<table class="widefat" cellspacing="2px">
 		<tr>
 			<td nowrap="nowrap"><strong><?php _e('Project-Id-Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-			<td><?php echo rawurldecode($_POST['name']); ?><input type="hidden" id="csp-dialog-name" value="<?php echo rawurldecode($_POST['name']); ?>" /></td>
+			<td><?php echo strip_tags(rawurldecode($_POST['name'])); ?><input type="hidden" id="csp-dialog-name" value="<?php echo strip_tags(rawurldecode($_POST['name'])); ?>" /></td>
 		</tr>
 		<tr>
 			<td><strong><?php _e('Creation-Date',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
@@ -1722,6 +1750,7 @@ function csp_po_ajax_handle_launch_editor() {
 		$f->write_pofile($_POST['basepath'].$_POST['file'],false,false,'no');
 	}
 	if ($f->supports_textdomain_extension() || $_POST['type'] == 'wordpress'){
+		if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
 		$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales, csp_get_translate_api_type());
 	}else {
 		header('Status: 404 Not Found');
@@ -1733,6 +1762,7 @@ function csp_po_ajax_handle_launch_editor() {
 
 function csp_po_ajax_handle_translate_by_google() {
 	csp_po_check_security();
+	if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
 	// reference documentation: http://code.google.com/intl/de-DE/apis/ajaxlanguage/documentation/reference.html
 	// example API v1 - 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=hello%20world&langpair=en%7Cit'
 	// example API v2 - [ GET https://www.googleapis.com/language/translate/v2?key=INSERT-YOUR-KEY&source=en&target=de&q=Hello%20world ]
@@ -1758,6 +1788,7 @@ function csp_po_ajax_handle_translate_by_google() {
 
 function csp_po_ajax_handle_translate_by_microsoft() {
 	csp_po_check_security();
+	if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
 	$msgid = $_POST['msgid'];
 	$search = array('\\\\\\\"', '\\\\\"','\\\\n', '\\\\r', '\\\\t', '\\\\$','\\0', "\\'", '\\\\');
 	$replace = array('\"', '"', "\n", "\r", "\\t", "\\$", "\0", "'", "\\");
@@ -1973,13 +2004,15 @@ function csp_po_init_per_user_trans() {
 	//process per user settings
 	if (defined('TRANSLATION_API_PER_USER') && (TRANSLATION_API_PER_USER === true) && current_user_can('manage_options')) {
 		$myself = wp_get_current_user();
-		$g = get_user_meta($myself->ID, 'csp-google-api-key', true);
+		$func = function_exists('get_user_meta') ? 'get_user_meta' : 'get_usermeta';
+		$g = call_user_func($func, $myself->ID, 'csp-google-api-key', true);
 		if (!empty($g) && !defined('GOOGLE_TRANSLATE_KEY'))  define('GOOGLE_TRANSLATE_KEY', $g);
-		$m1 = get_user_meta($myself->ID, 'csp-microsoft-api-client-id', true);
+		$m1 = call_user_func($func, $myself->ID, 'csp-microsoft-api-client-id', true);
 		if (!empty($m1) && !defined('MICROSOFT_TRANSLATE_CLIENT_ID'))  define('MICROSOFT_TRANSLATE_CLIENT_ID', $m1);
-		$m2 = get_user_meta($myself->ID, 'csp-microsoft-api-client-secret', true);
+		$m2 = call_user_func($func, $myself->ID, 'csp-microsoft-api-client-secret', true);
 		if (!empty($m2) && !defined('MICROSOFT_TRANSLATE_CLIENT_SECRET'))  define('MICROSOFT_TRANSLATE_CLIENT_SECRET', $m2);
 	}		
+	if (!defined('TRANSLATION_API_PER_USER_DONE')) define('TRANSLATION_API_PER_USER_DONE', true);
 }
 
 function csp_po_init() {
@@ -2027,43 +2060,49 @@ function csp_po_admin_menu() {
 	//User Profile extension if necessary
 	if (defined('TRANSLATION_API_PER_USER') && (TRANSLATION_API_PER_USER === true) /*&& current_user_can('manage_options')*/) {
 		add_action('show_user_profile', 'csp_extend_user_profile');
-		add_action('profile_update', 'csp_save_user_profile',10,2);
+		add_action('personal_options_update', 'csp_save_user_profile');
 	}	
 }
 function csp_extend_user_profile($profileuser) {
+	if (!is_object($profiluser)) {
+		$profileuser = wp_get_current_user();
+	}
+	$func = function_exists('get_user_meta') ? 'get_user_meta' : 'get_usermeta';
 ?>
 <h3 id="translations"><?php _e('Translation API Keys', CSP_PO_TEXTDOMAIN); ?><br/><small><em>(Codestyling Localization)</em></small></h3>
 <table class="form-table">
 <tr>
 <th><label for="google-api-key"><?php _e('Google Translate API Key', CSP_PO_TEXTDOMAIN); ?></label></th>
-<td><input type="text" class="regular-text" name="csp-google-api-key" id="csp-google-api-key" value="<?php echo get_user_meta($profileuser->ID, 'csp-google-api-key', true); ?>" autocomplete="off" />
+<td><input type="text" class="regular-text" name="csp-google-api-key" id="csp-google-api-key" value="<?php echo call_user_func($func, $profileuser->ID, 'csp-google-api-key', true); ?>" autocomplete="off" />
 </tr>
 <tr>
 <th><label for="microsoft-api-client-id"><?php _e('Microsoft Translator - Client ID', CSP_PO_TEXTDOMAIN); ?></label></th>
-<td><input type="text" class="regular-text" name="csp-microsoft-api-client-id" id="csp-microsoft-api-client-id" value="<?php echo get_user_meta($profileuser->ID, 'csp-microsoft-api-client-id', true); ?>" autocomplete="off" />
+<td><input type="text" class="regular-text" name="csp-microsoft-api-client-id" id="csp-microsoft-api-client-id" value="<?php echo call_user_func($func, $profileuser->ID, 'csp-microsoft-api-client-id', true); ?>" autocomplete="off" />
 </tr>
 <tr>
 <th><label for="microsoft-api-client-secret"><?php _e('Microsoft Translator - Client Secret', CSP_PO_TEXTDOMAIN); ?></label></th>
-<td><input type="text" class="regular-text" name="csp-microsoft-api-client-secret" id="csp-microsoft-api-client-secret" value="<?php echo get_user_meta($profileuser->ID, 'csp-microsoft-api-client-secret', true); ?>" autocomplete="off" />
+<td><input type="text" class="regular-text" name="csp-microsoft-api-client-secret" id="csp-microsoft-api-client-secret" value="<?php echo call_user_func($func, $profileuser->ID, 'csp-microsoft-api-client-secret', true); ?>" autocomplete="off" />
 </tr>
 </table>
 <?php
 }
 
-function csp_save_user_profile($user_id, $old_user_data) {
+function csp_save_user_profile() {
+	$myself = wp_get_current_user();
+	$func = function_exists('update_user_meta') ? 'update_user_meta' : 'update_usermeta';
 	if (isset($_POST['csp-google-api-key'])) {
-		update_user_meta($user_id, 'csp-google-api-key', $_POST['csp-google-api-key']);
+		call_user_func($func, $myself->ID, 'csp-google-api-key', $_POST['csp-google-api-key']);
 	}
 	if (isset($_POST['csp-microsoft-api-client-id'])) {
-		update_user_meta($user_id, 'csp-microsoft-api-client-id', $_POST['csp-microsoft-api-client-id']);
+		call_user_func($func, $myself->ID, 'csp-microsoft-api-client-id', $_POST['csp-microsoft-api-client-id']);
 	}
 	if (isset($_POST['csp-microsoft-api-client-secret'])) {
-		update_user_meta($user_id, 'csp-microsoft-api-client-secret', $_POST['csp-microsoft-api-client-secret']);
+		call_user_func($func, $myself->ID, 'csp-microsoft-api-client-secret', $_POST['csp-microsoft-api-client-secret']);
 	}
 }
 
 function csp_get_translate_api_type() {
-	$api_type = get_option('codestyling-localization.translate-api', 'none');
+	$api_type = (string)get_option('codestyling-localization.translate-api', 'none');
 	switch($api_type) {
 		case 'google':
 			if(!defined('GOOGLE_TRANSLATE_KEY')) $api_type = 'none';
@@ -2243,7 +2282,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 				<td class="csp-info-value csp-info-status"><?php echo $data['status']; ?></td>
 			</tr>
 			<tr>
-				<td colspan="2" class="csp-desc-value"><small><?php echo __($data['description'], $data['textdomain']['identifier']);?></small></td>
+				<td colspan="2" class="csp-desc-value"><small><?php echo call_user_func('__', $data['description'], $data['textdomain']['identifier']);?></small></td>
 			</tr>
 			<?php if (isset($data['dev-hints'])) : ?>
 			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -2287,7 +2326,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 					<td class="csp-info-value csp-info-status"><?php echo $child['status']; ?></td>
 				</tr>
 				<tr>
-					<td colspan="2" class="csp-desc-value"><small><?php echo __($child['description'], $data['textdomain']['identifier']);?></small></td>
+					<td colspan="2" class="csp-desc-value"><small><?php echo call_user_func('__', $child['description'], $data['textdomain']['identifier']);?></small></td>
 				</tr>
 			</table>
 		</div>

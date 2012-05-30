@@ -46,15 +46,15 @@ Please visit [the official website](http://www.code-styling.de/english/developme
 
 = Announcement =
 Starting with version 3.4 of WordPress I faced a restructured handling of localization within the Core Files, can be read here: [Important Changes for WordPress 3.4](http://wppolyglots.wordpress.com/important-changes-for-wordpress-3-4/)
-Because I had to cope with this, the translation process of WordPress itself has been rewritten. The pugin now supports backward compatibility (for older WordPress versions) and also generates to new one structured *.mo files.
-It depends on your installed version, if it's less than 3.4-alpha, than you will get the old behavior otherwise the new one behavior.
+Because I had to cope with this, the translation process of WordPress itself has been rewritten. The pugin now supports backward compatibility (for older WordPress versions) and also generates two new structured *.mo files.
+It depends on your installed version, if it's less than 3.4-alpha, than you will get the old files generated otherwise the new files.
 
 = Support & Development =
 The plugin stays for a long time at major version 1.x now and it was planned to come up with a new major release 2.x several month ago. But because of massive changes at the WordPress core, not having that much time I would need, the new major version will be delayed again.
-I can't estimate currently a timeframe for availability. That's why I continue maintainance of version 1.x as long as I'm working on version 2.x at alpha stage.
+I can't estimate currently a timeframe for availability. That's why I continue maintainance of version 1.x as long as I'm working on version 2.x at alpha stage in parallel.
 
 = Translation API's & User Interface =
-Introduced with version 1.99.17 of this plugin, the translation API's of Google and Microsoft have been integrated. Both required at least subscriptions and the Google API is a paid service.
+Introduced with version 1.99.17 of this plugin, the translation API's of Google and Microsoft have been integrated. Both require at least subscriptions and the Google API is a paid service.
 The plugin knows, which API is able to translated what language, so you will find the information next to your language file to be translated at the list.
 I did reshape the User Interface a bit more closer to WordPress Standard UI, so it should be more intuitive to use it from now on.
 
@@ -76,9 +76,15 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 
 == Changelog ==
 
+= Version 1.99.20 =
+* Bugfix: translated plugin/theme descriptions accidentally states, that Codestyling Localization uses more than one textdomain
+* Bugfix: admin ajax url not longer lowercase completely, only "same origin policy" parts lowercased, stops function on installions with uppercased folder names.
+* Bugfix: false positive XSS vulnerablities handled anyway, all reported vulnerability requires always an admin login (admin permission) to be useable and are all false positive.
+* Bugfix: last 4 plugin versions damaged the backward compatibility downto WordPress version 2.5 and has been repaired to support also this old versions of WordPress again
+
 = Version 1.99.19 = 
 * Bugfix: pot file indicator writes unstructured content and blocked new language creation
-* Bugfix: valid specified UTF-8 character breaks JSON response during editor call (LINE SEPARATOR decimal: &#8232;)
+* Bugfix: valid specified UTF-8 character breaks JSON response during editor call (LINE SEPARATOR / decimal: 8232)
 * Bugfix: trailing NUL chars may comming out of a reversed *.mo files and will be skipped now
 * Bugfix: Chinese Traditional and Simplified can be used with translation API now
 * Bugfix: disabled (unavailable) API's may hang the editor call
