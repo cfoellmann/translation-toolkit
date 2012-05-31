@@ -1151,14 +1151,14 @@ function csp_po_ajax_handle_dlg_new() {
 			<td>
 				<div style="width:332px;height:300px; overflow:scroll;border:solid 1px #54585B;overflow-x:hidden;">
 					<?php $existing = explode('|', ltrim($_POST['existing'],'|')); if(strlen($existing[0]) == 0) $existing=array(); ?>
-					<input type="hidden" id="csp-dialog-row" value="<?php echo $_POST['row']; ?>" />
+					<input type="hidden" id="csp-dialog-row" value="<?php echo strip_tags($_POST['row']); ?>" />
 					<input type="hidden" id="csp-dialog-numlangs" value="<?php echo count($existing)+1; ?>" />
 					<input type="hidden" id="csp-dialog-language" value="" />
-					<input type="hidden" id="csp-dialog-path" value="<?php echo $_POST['path']; ?>" />
-					<input type="hidden" id="csp-dialog-subpath" value="<?php echo $_POST['subpath']; ?>" />
-					<input type="hidden" id="csp-dialog-simplefilename" value="<?php echo $_POST['simplefilename']; ?>" />			
-					<input type="hidden" id="csp-dialog-transtemplate" value="<?php echo $_POST['transtemplate']; ?>" />					
-					<input type="hidden" id="csp-dialog-textdomain" value="<?php echo $_POST['textdomain']; ?>" />					
+					<input type="hidden" id="csp-dialog-path" value="<?php echo strip_tags($_POST['path']); ?>" />
+					<input type="hidden" id="csp-dialog-subpath" value="<?php echo strip_tags($_POST['subpath']); ?>" />
+					<input type="hidden" id="csp-dialog-simplefilename" value="<?php echo strip_tags($_POST['simplefilename']); ?>" />			
+					<input type="hidden" id="csp-dialog-transtemplate" value="<?php echo strip_tags($_POST['transtemplate']); ?>" />					
+					<input type="hidden" id="csp-dialog-textdomain" value="<?php echo strip_tags($_POST['textdomain']); ?>" />					
 					<input type="hidden" id="csp-dialog-denyscan" value="<?php echo ($_POST['denyscan'] ? "true" : "false"); ?>" />					
 					<table style="font-family:monospace;">
 					<?php
@@ -1182,7 +1182,7 @@ function csp_po_ajax_handle_dlg_new() {
 			</td>
 		</tr>
 	</table>
-	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" disabled="disabled" value="<?php _e('create po-file',CSP_PO_TEXTDOMAIN); ?>" onclick="return csp_create_new_pofile(this,<?php echo "'".$_POST['type']."'"; ?>);"/></div>
+	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" disabled="disabled" value="<?php _e('create po-file',CSP_PO_TEXTDOMAIN); ?>" onclick="return csp_create_new_pofile(this,<?php echo "'".strip_tags($_POST['type'])."'"; ?>);"/></div>
 <?php
 exit();
 }
@@ -1193,8 +1193,8 @@ function csp_po_ajax_handle_dlg_delete() {
 	require_once('includes/locale-definitions.php');
 	$lang = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
 ?>
-	<p style="text-align:center;"><?php echo sprintf(__('You are about to delete <strong>%s</strong> from "<strong>%s</strong>" permanently.<br/>Are you sure you wish to delete these files?', CSP_PO_TEXTDOMAIN), $lang, rawurldecode($_POST['name'])); ?></p>
-	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" value="<?php _e('delete files',CSP_PO_TEXTDOMAIN); ?>" onclick="csp_destroy_files(this,'<?php echo str_replace("'", "\\'", rawurldecode($_POST['name']))."','".$_POST['row']."','".$_POST['path']."','".$_POST['subpath']."','".$_POST['language']."','".$_POST['numlangs'];?>');" /></div>
+	<p style="text-align:center;"><?php echo sprintf(__('You are about to delete <strong>%s</strong> from "<strong>%s</strong>" permanently.<br/>Are you sure you wish to delete these files?', CSP_PO_TEXTDOMAIN), $lang, strip_tags(rawurldecode($_POST['name']))); ?></p>
+	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" value="<?php _e('delete files',CSP_PO_TEXTDOMAIN); ?>" onclick="csp_destroy_files(this,'<?php echo str_replace("'", "\\'", strip_tags(rawurldecode($_POST['name'])))."','".strip_tags($_POST['row'])."','".strip_tags($_POST['path'])."','".strip_tags($_POST['subpath'])."','".strip_tags($_POST['language'])."','".strip_tags($_POST['numlangs']);?>');" /></div>
 <?php
 	exit();
 }
@@ -1240,47 +1240,47 @@ function csp_po_ajax_handle_dlg_rescan() {
 		}	
 	}
 	elseif ($_POST['type'] == 'plugins_mu') {
-		$files[] = $_POST['simplefilename'];
+		$files[] = strip_tags($_POST['simplefilename']);
 	}
 	elseif ($_POST['textdomain'] == 'buddypress') {
 		$files = array();
-		$excludes = array($_POST['path'].'bp-forums/bbpress');
-		rscandir_php($_POST['path'], $excludes, $files);
+		$excludes = array(strip_tags($_POST['path']).'bp-forums/bbpress');
+		rscandir_php(strip_tags($_POST['path']), $excludes, $files);
 	}
 	else{
 		$files = array();
 		$excludes = array();
-		if (isset($_POST['simplefilename']) && !empty($_POST['simplefilename'])) { $files[] = $_POST['simplefilename']; }
-		else { rscandir_php($_POST['path'], $excludes, $files); }
+		if (isset($_POST['simplefilename']) && !empty($_POST['simplefilename'])) { $files[] = strip_tags($_POST['simplefilename']); }
+		else { rscandir_php(strip_tags($_POST['path']), $excludes, $files); }
 	}
 	$country_www = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['country-www'] : 'unknown';
 	$lang_native = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
-	$filename = $_POST['path'].$_POST['subpath'].$_POST['language'].".po";
+	$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).".po";
 ?>	
 	<input id="csp-dialog-source-file-json" type="hidden" value="{ <?php 
-		echo "row: '".$_POST['row']."',";
-		echo "language: '".$_POST['language']."',";
-		echo "textdomain: '".$_POST['textdomain']."',";
+		echo "row: '".strip_tags($_POST['row'])."',";
+		echo "language: '".strip_tags($_POST['language'])."',";
+		echo "textdomain: '".strip_tags($_POST['textdomain'])."',";
 		echo "next : 0,";
-		echo "path : '".$_POST['path']."',";
-		echo "pofile : '".$_POST['path'].$_POST['subpath'].$_POST['language'].".po',";
-		echo "type : '".$_POST['type']."',";
+		echo "path : '".strip_tags($_POST['path'])."',";
+		echo "pofile : '".strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).".po',";
+		echo "type : '".strip_tags($_POST['type'])."',";
 		echo "files : ['".implode("','",$files)."']"
 	?>}" />
 	<table class="widefat" cellspacing="2px">
 		<tr>
 			<td nowrap="nowrap"><strong><?php _e('Project-Id-Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-			<td colspan="2"><?php echo rawurldecode($_POST['name']); ?><input type="hidden" name="name" value="<?php echo rawurldecode($_POST['name']); ?>" /></td>
+			<td colspan="2"><?php echo strip_tags(rawurldecode($_POST['name'])); ?><input type="hidden" name="name" value="<?php echo strip_tags(rawurldecode($_POST['name'])); ?>" /></td>
 		</tr>
 		<tr>
 			<td nowrap="nowrap"><strong><?php _e('Language Target',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-			<td><img alt="" title="locale: <?php echo $_POST['language']; ?>" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif\""; ?>" /></td>			
+			<td><img alt="" title="locale: <?php echo strip_tags($_POST['language']); ?>" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif\""; ?>" /></td>			
 			<td><?php echo $lang_native; ?></td>
 		</tr>	
 		<tr>
 			<td nowrap="nowrap"><strong><?php _e('Affected Total Files',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
 			<td nowrap="nowrap" align="right"><?php echo count($files); ?></td>
-			<td><em><?php echo "/".str_replace(str_replace("\\",'/',ABSPATH), '', $_POST['path']); ?></em></td>
+			<td><em><?php echo "/".str_replace(str_replace("\\",'/',ABSPATH), '', strip_tags($_POST['path'])); ?></em></td>
 		</tr>
 		<tr>
 			<td nowrap="nowrap" valign="top"><strong><?php _e('Scanning Progress',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
@@ -1307,8 +1307,8 @@ function csp_po_ajax_handle_dlg_show_source() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
 	list($file, $match_line) = explode(':', $_POST['file']);
-	$l = filesize($_POST['path'].$file);
-	$handle = fopen($_POST['path'].$file,'rb');
+	$l = filesize(strip_tags($_POST['path']).$file);
+	$handle = fopen(strip_tags($_POST['path']).$file,'rb');
 	$content = str_replace(array("\r","\\$"),array('','$'), fread($handle, $l));
 	fclose($handle);
 
@@ -1480,17 +1480,17 @@ function csp_po_ajax_handle_create() {
 	require_once('includes/locale-definitions.php');
 	require_once('includes/class-translationfile.php');
 	$pofile = new CspTranslationFile();
-	$filename = $_POST['path'].$_POST['subpath'].$_POST['language'].'.po';
+	$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
 	
-	$ok = $pofile->read_pofile($_POST['transtemplate']);
+	$ok = $pofile->read_pofile(strip_tags($_POST['transtemplate']));
 	if ($ok) 
-		$ok = $pofile->write_pofile($filename, false, $_POST['textdomain']);
+		$ok = $pofile->write_pofile($filename, false, strip_tags($_POST['textdomain']));
 	if (!$ok)
 		$ok = $pofile->create_pofile(
 		$filename, 
-		$_POST['subpath'],
-		$_POST['name'], 
-		$_POST['timestamp'], 
+		strip_tags($_POST['subpath']),
+		strip_tags($_POST['name']), 
+		strip_tags($_POST['timestamp']), 
 		$_POST['translator'], 
 		$csp_l10n_plurals[substr($_POST['language'],0,2)], 
 		$csp_l10n_sys_locales[$_POST['language']]['lang'], 
@@ -1506,19 +1506,19 @@ function csp_po_ajax_handle_create() {
 		header('Content-Type: application/json');
 ?>
 {
-		name: '<?php echo rawurldecode($_POST['name']); ?>',
-		row : '<?php echo $_POST['row']; ?>',
-		head: '<?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',$_POST['numlangs'],CSP_PO_TEXTDOMAIN), $_POST['numlangs']); ?>',
-		path: '<?php echo $_POST['path']; ?>',
-		subpath: '<?php echo $_POST['subpath']; ?>',
-		language: '<?php echo $_POST['language']; ?>',
-		lang_native: '<?php echo $csp_l10n_sys_locales[$_POST['language']]['lang-native']; ?>',
-		image: '<?php echo CSP_PO_BASE_URL."/images/flags/".$csp_l10n_sys_locales[$_POST['language']]['country-www'].".gif";?>',
-		type: '<?php echo $_POST['type']; ?>',
-		simplefilename: '<?php echo $_POST['simplefilename']; ?>',
-		transtemplate: '<?php echo $_POST['transtemplate']; ?>',
+		name: '<?php echo strip_tags(rawurldecode($_POST['name'])); ?>',
+		row : '<?php echo strip_tags($_POST['row']); ?>',
+		head: '<?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',(int)$_POST['numlangs'],CSP_PO_TEXTDOMAIN), $_POST['numlangs']); ?>',
+		path: '<?php echo strip_tags($_POST['path']); ?>',
+		subpath: '<?php echo strip_tags($_POST['subpath']); ?>',
+		language: '<?php echo strip_tags($_POST['language']); ?>',
+		lang_native: '<?php echo $csp_l10n_sys_locales[strip_tags($_POST['language'])]['lang-native']; ?>',
+		image: '<?php echo CSP_PO_BASE_URL."/images/flags/".$csp_l10n_sys_locales[strip_tags($_POST['language'])]['country-www'].".gif";?>',
+		type: '<?php echo strip_tags($_POST['type']); ?>',
+		simplefilename: '<?php echo strip_tags($_POST['simplefilename']); ?>',
+		transtemplate: '<?php echo strip_tags($_POST['transtemplate']); ?>',
 		permissions: '<?php echo date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename); ?>',
-		denyscan: <?php echo $_POST['denyscan']; ?>,
+		denyscan: <?php echo strip_tags($_POST['denyscan']); ?>,
 		google: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['google-api'] ? 'yes' : 'no'; ?>",
 		microsoft: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['microsoft-api'] ? 'yes' : 'no'; ?>"
 }
@@ -1530,8 +1530,8 @@ function csp_po_ajax_handle_create() {
 function csp_po_ajax_handle_destroy() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
-	$pofile = $_POST['path'].$_POST['subpath'].$_POST['language'].'.po';
-	$mofile = $_POST['path'].$_POST['subpath'].$_POST['language'].'.mo';
+	$pofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
+	$mofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.mo';
 	$error = false;
 	if (file_exists($pofile)) if (!@unlink($pofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $pofile);
 	if (file_exists($mofile)) if (!@unlink($mofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
@@ -1541,13 +1541,13 @@ function csp_po_ajax_handle_destroy() {
 		echo $error;
 		exit();
 	}
-	$num = $_POST['numlangs'] - 1;
+	$num = (int)$_POST['numlangs'] - 1;
 	header('Content-Type: application/json');
 ?>
 {
-	row : '<?php echo $_POST['row']; ?>',
+	row : '<?php echo strip_tags($_POST['row']); ?>',
 	head: '<?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',$num,CSP_PO_TEXTDOMAIN), $num); ?>',
-	language: '<?php echo $_POST['language']; ?>'
+	language: '<?php echo strip_tags($_POST['language']); ?>'
 }
 <?php	
 	exit();
@@ -1672,7 +1672,7 @@ function csp_po_ajax_handle_scan_source_file() {
 function csp_po_ajax_handle_change_permission() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
-	$filename = $_POST['file'];
+	$filename = strip_tags($_POST['file']);
 	$error = false;
 	if (file_exists($filename)) {
 		@chmod($filename, 0644);
@@ -1817,7 +1817,7 @@ function csp_po_ajax_handle_translate_by_microsoft() {
 
 		//Set the params.//
 		$fromLanguage = "en";
-		$toLanguage   = $_POST['destlang'];
+		$toLanguage   = strip_tags($_POST['destlang']);
 		$inputStr     = $msgid;
 		$contentType  = 'text/plain';
 		$category     = 'general';
@@ -1942,7 +1942,7 @@ function csp_po_ajax_handle_generate_mo_file(){
 function csp_po_ajax_handle_create_language_path() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
-	$path = $_POST['path'];
+	$path = strip_tags($_POST['path']);
 	if (!mkdir($path)) {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
@@ -1961,7 +1961,7 @@ function csp_po_ajax_handle_create_pot_indicator() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
 	
-	$handle = @fopen($_POST['potfile'], "w");
+	$handle = @fopen(strip_tags($_POST['potfile']), "w");
 	
 	if ($handle === false) {
 		header('Status: 404 Not Found');
