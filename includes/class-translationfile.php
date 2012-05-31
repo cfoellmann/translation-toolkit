@@ -341,7 +341,10 @@ class CspTranslationFile {
 		if (file_exists($pofile) && !is_writable($pofile)) return false;
 		$handle = @fopen($pofile, "wb");
 		if ($handle === false) return false;
-		$this->_set_header_from_string("Plural-Forms: \nX-Textdomain-Support: $tds");
+		//set the plurals and multi textdomain support
+		//update the revision date
+		$stamp = date("Y-m-d H:i:sO");
+		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds");
 
 		//write header if last because it has no code ref anyway
 		if ($last === true) {
@@ -752,7 +755,7 @@ class CspTranslationFile {
 		}
 	}
 	
-	function parsing_finalize($textdomain) {
+	function parsing_finalize($textdomain, $prjidver) {
 		//if there is only one textdomain included and this is '' (empty string) replace all with the given textdomain
 		$ltd = array();
 		foreach($this->map as $key => $entry) {
@@ -773,6 +776,7 @@ class CspTranslationFile {
 			}
 		}
 		$this->repair_illegal_single_multi_utilization();
+		$this->_set_header_from_string("Project-Id-Version: $prjidver");
 	}
 	
 	function _convert_for_js($str) {

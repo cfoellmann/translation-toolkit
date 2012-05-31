@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: CodeStyling Localization v1.99.20\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-25 03:13+0100\n"
-"PO-Revision-Date: 2012-05-28 08:00+0100\n"
+"PO-Revision-Date: 2012-05-31 16:19:04+0000\n"
 "Last-Translator: Heiko Rabe <info@code-styling.de>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,27 +19,27 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Textdomain-Support: yes"
 
-#: codestyling-localization.php:2563
-#: codestyling-localization.php:2617
-#: codestyling-localization.php:3143
+#: codestyling-localization.php:2618
+#: codestyling-localization.php:2672
+#: codestyling-localization.php:3204
 #@ codestyling-localization
 msgid "&laquo; Previous"
 msgstr "&laquo; zurück"
 
-#: codestyling-localization.php:2400
-#: codestyling-localization.php:2405
-#: codestyling-localization.php:2432
-#: codestyling-localization.php:2437
-#: codestyling-localization.php:2470
-#: codestyling-localization.php:2475
-#: codestyling-localization.php:2742
+#: codestyling-localization.php:2454
+#: codestyling-localization.php:2459
+#: codestyling-localization.php:2486
+#: codestyling-localization.php:2491
+#: codestyling-localization.php:2524
+#: codestyling-localization.php:2529
+#: codestyling-localization.php:2800
 #@ codestyling-localization
 msgid "-n.a.-"
 msgstr "-n.a.-"
 
-#: codestyling-localization.php:1511
-#: codestyling-localization.php:1549
-#: codestyling-localization.php:2374
+#: codestyling-localization.php:1509
+#: codestyling-localization.php:1547
+#: codestyling-localization.php:2428
 #, php-format
 #@ codestyling-localization
 msgid "<strong>%d</strong> Language"
@@ -47,185 +47,185 @@ msgid_plural "<strong>%d</strong> Languages"
 msgstr[0] "<strong>%d</strong> Sprache"
 msgstr[1] "<strong>%d</strong> Sprachen"
 
-#: codestyling-localization.php:3064
+#: codestyling-localization.php:3124
 #@ codestyling-localization
 msgid "Access Error"
 msgstr "Zugriffsfehler"
 
-#: codestyling-localization.php:2381
-#: codestyling-localization.php:2607
+#: codestyling-localization.php:2435
+#: codestyling-localization.php:2662
 #@ codestyling-localization
 msgid "Actions"
 msgstr "Aktionen"
 
-#: codestyling-localization.php:2372
-#: codestyling-localization.php:2693
+#: codestyling-localization.php:2426
+#: codestyling-localization.php:2751
 #@ codestyling-localization
 msgid "Add New Language"
 msgstr "Neue Sprache hinzufügen"
 
-#: codestyling-localization.php:1281
+#: codestyling-localization.php:1279
 #@ codestyling-localization
 msgid "Affected Total Files"
 msgstr "Betroffene Dateien"
 
-#: codestyling-localization.php:2212
+#: codestyling-localization.php:2265
 #@ codestyling-localization
 msgid "All Translations"
 msgstr "Alle Übersetzungen"
 
-#: codestyling-localization.php:2347
+#: codestyling-localization.php:2401
 #@ codestyling-localization
 msgid "Available Directories:"
 msgstr "verfügbare Verzeichnisse:"
 
-#: codestyling-localization.php:2789
+#: codestyling-localization.php:2847
 #@ codestyling-localization
 msgid "Confirm Delete Language"
 msgstr "Bestätigung der Löschung der Sprache"
 
-#: codestyling-localization.php:3203
+#: codestyling-localization.php:3264
 #@ codestyling-localization
 msgid "Copy"
 msgstr "Kopieren"
 
-#: codestyling-localization.php:1142
+#: codestyling-localization.php:1139
 #@ codestyling-localization
 msgid "Creation-Date"
 msgstr "Erstellungsdatum"
 
-#: codestyling-localization.php:2419
-#: codestyling-localization.php:2451
-#: codestyling-localization.php:2489
-#: codestyling-localization.php:2754
+#: codestyling-localization.php:2473
+#: codestyling-localization.php:2505
+#: codestyling-localization.php:2543
+#: codestyling-localization.php:2812
 #@ codestyling-localization
 msgid "Delete"
 msgstr "Löschen"
 
-#: codestyling-localization.php:2257
+#: codestyling-localization.php:2311
 #@ codestyling-localization
 msgid "Description"
 msgstr "Beschreibung"
 
-#: codestyling-localization.php:2410
-#: codestyling-localization.php:2442
-#: codestyling-localization.php:2480
-#: codestyling-localization.php:2746
-#: codestyling-localization.php:3202
+#: codestyling-localization.php:2464
+#: codestyling-localization.php:2496
+#: codestyling-localization.php:2534
+#: codestyling-localization.php:2804
+#: codestyling-localization.php:3263
 #@ codestyling-localization
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: codestyling-localization.php:2632
-#: codestyling-localization.php:3561
+#: codestyling-localization.php:2687
+#: codestyling-localization.php:3622
 #@ codestyling-localization
 msgid "Edit Catalog Entry"
 msgstr "Katalogeintrag bearbeiten"
 
-#: codestyling-localization.php:3338
+#: codestyling-localization.php:3399
 #@ codestyling-localization
 msgid "Examples: <small>Please refer to official Perl regular expression descriptions</small>"
 msgstr "Beispiele: <small>Bitte lies auch die offizielle Beschreibung für Perl reguläre Ausdrücke.</small>"
 
-#: codestyling-localization.php:2547
+#: codestyling-localization.php:2602
 #@ codestyling-localization
 msgid "Expression Result"
 msgstr "Treffer Ausdruckssuche"
 
-#: codestyling-localization.php:3336
+#: codestyling-localization.php:3397
 #@ codestyling-localization
 msgid "Expression:"
 msgstr "Ausdruck:"
 
-#: codestyling-localization.php:3334
+#: codestyling-localization.php:3395
 #@ codestyling-localization
 msgid "Extended Expression Search"
 msgstr "Erweiterte Suche per Ausdruck"
 
-#: codestyling-localization.php:2506
-#: codestyling-localization.php:2921
-#: codestyling-localization.php:3655
+#: codestyling-localization.php:2560
+#: codestyling-localization.php:2981
+#: codestyling-localization.php:3716
 #@ codestyling-localization
 msgid "File:"
 msgstr "Datei:"
 
-#: codestyling-localization.php:3169
+#: codestyling-localization.php:3230
 #@ codestyling-localization
 msgid "Files:"
 msgstr "Dateien:"
 
-#: codestyling-localization.php:2576
+#: codestyling-localization.php:2631
 #@ codestyling-localization
 msgid "Infos"
 msgstr "Infos"
 
-#: codestyling-localization.php:2379
+#: codestyling-localization.php:2433
 #@ codestyling-localization
 msgid "Language"
 msgstr "Sprache"
 
-#: codestyling-localization.php:1276
+#: codestyling-localization.php:1274
 #@ codestyling-localization
 msgid "Language Target"
 msgstr "Zielsprache"
 
-#: codestyling-localization.php:2258
+#: codestyling-localization.php:2312
 #@ codestyling-localization
 msgid "Languages"
 msgstr "Sprachen"
 
-#: codestyling-localization.php:1146
+#: codestyling-localization.php:1143
 #@ codestyling-localization
 msgid "Last-Translator"
 msgstr "Letzter Übersetzer"
 
-#: codestyling-localization.php:2394
-#: codestyling-localization.php:2426
-#: codestyling-localization.php:2464
-#: codestyling-localization.php:2734
+#: codestyling-localization.php:2448
+#: codestyling-localization.php:2480
+#: codestyling-localization.php:2518
+#: codestyling-localization.php:2792
 #@ codestyling-localization
 msgid "Locale"
 msgstr "Gebietsschema"
 
-#: codestyling-localization.php:2057
+#: codestyling-localization.php:2110
 #@ codestyling-localization
 msgid "Localization"
 msgstr "Lokalisierung"
 
-#: codestyling-localization.php:2132
+#: codestyling-localization.php:2185
 #@ codestyling-localization
 msgid "Manage Language Files"
 msgstr "Sprachdateien verwalten"
 
-#: codestyling-localization.php:2568
-#: codestyling-localization.php:2622
-#: codestyling-localization.php:3150
+#: codestyling-localization.php:2623
+#: codestyling-localization.php:2677
+#: codestyling-localization.php:3211
 #@ codestyling-localization
 msgid "Next &raquo;"
 msgstr "vorwärts &raquo;"
 
-#: codestyling-localization.php:2580
-#: codestyling-localization.php:3606
+#: codestyling-localization.php:2635
+#: codestyling-localization.php:3667
 #@ codestyling-localization
 msgid "Original:"
 msgstr "Original:"
 
-#: codestyling-localization.php:2551
+#: codestyling-localization.php:2606
 #@ codestyling-localization
 msgid "Page Size"
 msgstr "Seitengröße"
 
-#: codestyling-localization.php:2380
+#: codestyling-localization.php:2434
 #@ codestyling-localization
 msgid "Permissions"
 msgstr "Berechtigungen"
 
-#: codestyling-localization.php:1294
+#: codestyling-localization.php:1292
 #@ codestyling-localization
 msgid "Please standby, files presently being scanned ..."
 msgstr "Bitte warten, Dateien werden durchsucht ..."
 
-#: codestyling-localization.php:2611
+#: codestyling-localization.php:2666
 #@ codestyling-localization
 msgid "Please wait, file content presently being loaded ..."
 msgstr "Bitte warten, die Sprachdatei wird geladen ..."
@@ -235,110 +235,110 @@ msgstr "Bitte warten, die Sprachdatei wird geladen ..."
 msgid "Plugin"
 msgstr "Plugin"
 
-#: codestyling-localization.php:2223
+#: codestyling-localization.php:2276
 #@ codestyling-localization
 msgid "Plugins"
 msgstr "Plugins"
 
-#: codestyling-localization.php:3595
+#: codestyling-localization.php:3656
 #@ codestyling-localization
 msgid "Plural Index Calculation:"
 msgstr "Plural Index Berechnung:"
 
-#: codestyling-localization.php:3187
-#: codestyling-localization.php:3190
-#: codestyling-localization.php:3568
-#: codestyling-localization.php:3571
-#: codestyling-localization.php:3574
-#: codestyling-localization.php:3579
+#: codestyling-localization.php:3248
+#: codestyling-localization.php:3251
+#: codestyling-localization.php:3629
+#: codestyling-localization.php:3632
+#: codestyling-localization.php:3635
+#: codestyling-localization.php:3640
 #@ codestyling-localization
 msgid "Plural Index Result ="
 msgstr "Plural Index Ergebnis ="
 
-#: codestyling-localization.php:3183
-#: codestyling-localization.php:3593
+#: codestyling-localization.php:3244
+#: codestyling-localization.php:3654
 #@ codestyling-localization
 msgid "Plural:"
 msgstr "Plural:"
 
-#: codestyling-localization.php:1138
-#: codestyling-localization.php:1272
+#: codestyling-localization.php:1135
+#: codestyling-localization.php:1270
 #@ codestyling-localization
 msgid "Project-Id-Version"
 msgstr "Project-Id-Version"
 
-#: codestyling-localization.php:2413
-#: codestyling-localization.php:2416
-#: codestyling-localization.php:2445
-#: codestyling-localization.php:2448
-#: codestyling-localization.php:2483
-#: codestyling-localization.php:2486
-#: codestyling-localization.php:2748
-#: codestyling-localization.php:2751
+#: codestyling-localization.php:2467
+#: codestyling-localization.php:2470
+#: codestyling-localization.php:2499
+#: codestyling-localization.php:2502
+#: codestyling-localization.php:2537
+#: codestyling-localization.php:2540
+#: codestyling-localization.php:2806
+#: codestyling-localization.php:2809
 #@ codestyling-localization
 msgid "Rescan"
 msgstr "Einlesen"
 
-#: codestyling-localization.php:2858
+#: codestyling-localization.php:2917
 #@ codestyling-localization
 msgid "Rescanning PHP Source Files"
 msgstr "Einlesen der PHP Quelldateien"
 
-#: codestyling-localization.php:3599
-#: codestyling-localization.php:3616
+#: codestyling-localization.php:3660
+#: codestyling-localization.php:3677
 #@ codestyling-localization
 msgid "Save"
 msgstr "Speichern"
 
-#: codestyling-localization.php:3600
-#: codestyling-localization.php:3617
+#: codestyling-localization.php:3661
+#: codestyling-localization.php:3678
 #@ codestyling-localization
 msgid "Save & Next »"
 msgstr "Speichern & nächsten Eintrag »"
 
-#: codestyling-localization.php:1286
+#: codestyling-localization.php:1284
 #@ codestyling-localization
 msgid "Scanning Progress"
 msgstr "Analyse Fortschritt"
 
-#: codestyling-localization.php:3343
+#: codestyling-localization.php:3404
 #@ codestyling-localization
 msgid "Search"
 msgstr "Suche"
 
-#: codestyling-localization.php:2546
+#: codestyling-localization.php:2601
 #@ codestyling-localization
 msgid "Search Result"
 msgstr "Suchergebnis"
 
-#: codestyling-localization.php:1684
+#: codestyling-localization.php:1682
 #@ codestyling-localization
 msgid "Server Restrictions: Changing file rights is not permitted."
 msgstr "Server-Beschränkungen: Ändern der Datei Rechte ist nicht zulässig."
 
-#: codestyling-localization.php:3183
-#: codestyling-localization.php:3591
+#: codestyling-localization.php:3244
+#: codestyling-localization.php:3652
 #@ codestyling-localization
 msgid "Singular:"
 msgstr "Singular:"
 
-#: codestyling-localization.php:1784
+#: codestyling-localization.php:1782
 #@ codestyling-localization
 msgid "Sorry, Google Translation is not available."
 msgstr "Sorry, Google-Übersetzung ist nicht verfügbar."
 
-#: codestyling-localization.php:2281
-#: codestyling-localization.php:2325
+#: codestyling-localization.php:2335
+#: codestyling-localization.php:2379
 #@ codestyling-localization
 msgid "State"
 msgstr "Status"
 
-#: codestyling-localization.php:2273
+#: codestyling-localization.php:2327
 #@ codestyling-localization
 msgid "Textdomain"
 msgstr "Textdomain"
 
-#: codestyling-localization.php:2337
+#: codestyling-localization.php:2391
 #@ codestyling-localization
 msgid "The original US version doesn't contain the language directory."
 msgstr "Die originale US-Version enthält kein Sprachdatei-Verzeichnis."
@@ -348,46 +348,46 @@ msgstr "Die originale US-Version enthält kein Sprachdatei-Verzeichnis."
 msgid "Theme"
 msgstr "Theme"
 
-#: codestyling-localization.php:2226
+#: codestyling-localization.php:2279
 #@ codestyling-localization
 msgid "Themes"
 msgstr "Themes"
 
-#: codestyling-localization.php:2504
+#: codestyling-localization.php:2558
 #@ codestyling-localization
 msgid "Translate Language File"
 msgstr "Sprachdatei übersetzen"
 
-#: codestyling-localization.php:2595
-#: codestyling-localization.php:3609
-#: codestyling-localization.php:3611
+#: codestyling-localization.php:2650
+#: codestyling-localization.php:3670
+#: codestyling-localization.php:3672
 #@ codestyling-localization
 msgid "Translation:"
 msgstr "Übersetzung:"
 
-#: codestyling-localization.php:2256
+#: codestyling-localization.php:2310
 #@ codestyling-localization
 msgid "Type"
 msgstr "Typ"
 
-#: codestyling-localization.php:2277
-#: codestyling-localization.php:2321
+#: codestyling-localization.php:2331
+#: codestyling-localization.php:2375
 #@ codestyling-localization
 msgid "Version"
 msgstr "Version"
 
 #: codestyling-localization.php:370
-#: codestyling-localization.php:2215
+#: codestyling-localization.php:2268
 #@ codestyling-localization
 msgid "WordPress"
 msgstr "WordPress"
 
-#: codestyling-localization.php:2057
+#: codestyling-localization.php:2110
 #@ codestyling-localization
 msgid "WordPress Localization"
 msgstr "WordPress Lokalisierung"
 
-#: codestyling-localization.php:1196
+#: codestyling-localization.php:1193
 #, php-format
 #@ codestyling-localization
 msgid "You are about to delete <strong>%s</strong> from \"<strong>%s</strong>\" permanently.<br/>Are you sure you wish to delete these files?"
@@ -398,41 +398,41 @@ msgstr "Sie sind dabei die Sprache <strong>%s</strong> von \"<strong>%s</strong>
 msgid "You do not have permission to manage translation files."
 msgstr "Sie haben keine Berechtigungen, Sprachdateien zu verwalten."
 
-#: codestyling-localization.php:1969
+#: codestyling-localization.php:1967
 #@ codestyling-localization
 msgid "You do not have the permission to choose the translation file directory<br/>Please upload at least one language file (*.mo|*.po) or an empty template file (*.pot) at the appropriated folder using FTP."
 msgstr "Sie haben nicht die Erlaubnis, ein Verzeichnis zu bestimmen.<br/> Bitte laden Sie zumindest eine Sprachdatei (*. mo | *. po) oder eine leere Template-Datei (*. pot) in den geeigneten Ordner mittels FTP hoch."
 
-#: codestyling-localization.php:1503
+#: codestyling-localization.php:1501
 #, php-format
 #@ codestyling-localization
 msgid "You do not have the permission to create the file '%s'."
 msgstr "Sie verfügen nicht über die Berechtigung zum Erstellen der Datei '%s'."
 
-#: codestyling-localization.php:1536
-#: codestyling-localization.php:1537
+#: codestyling-localization.php:1534
+#: codestyling-localization.php:1535
 #, php-format
 #@ codestyling-localization
 msgid "You do not have the permission to delete the file '%s'."
 msgstr "Sie verfügen nicht über die Berechtigung zum Löschen der Datei '%s'."
 
-#: codestyling-localization.php:1687
+#: codestyling-localization.php:1685
 #, php-format
 #@ codestyling-localization
 msgid "You do not have the permission to modify the file rights for a not existing file '%s'."
 msgstr "Sie verfügen nicht über die Berechtigung zum Ändern der Datei Rechte für eine nicht existierende Datei '%s'."
 
-#: codestyling-localization.php:1667
-#: codestyling-localization.php:1874
-#: codestyling-localization.php:1889
+#: codestyling-localization.php:1665
+#: codestyling-localization.php:1872
+#: codestyling-localization.php:1887
 #, php-format
 #@ codestyling-localization
 msgid "You do not have the permission to read the file '%s'."
 msgstr "Sie verfügen nicht über die Berechtigung zum Lesen der Datei '%s'."
 
-#: codestyling-localization.php:1661
-#: codestyling-localization.php:1861
-#: codestyling-localization.php:1929
+#: codestyling-localization.php:1659
+#: codestyling-localization.php:1859
+#: codestyling-localization.php:1927
 #, php-format
 #@ codestyling-localization
 msgid "You do not have the permission to write to the file '%s'."
@@ -444,7 +444,7 @@ msgstr "Sie verfügen nicht über die Berechtigung zum Schreiben der Datei '%s'.
 #: codestyling-localization.php:713
 #: codestyling-localization.php:885
 #: codestyling-localization.php:926
-#: codestyling-localization.php:2267
+#: codestyling-localization.php:2321
 #@ codestyling-localization
 msgid "activated"
 msgstr "aktiviert"
@@ -454,17 +454,17 @@ msgstr "aktiviert"
 msgid "actual"
 msgstr "aktuell"
 
-#: codestyling-localization.php:2318
+#: codestyling-localization.php:2372
 #@ codestyling-localization
 msgid "by"
 msgstr "&copy;"
 
-#: codestyling-localization.php:2633
+#: codestyling-localization.php:2688
 #@ codestyling-localization
 msgid "close"
 msgstr "Schliessen"
 
-#: codestyling-localization.php:1185
+#: codestyling-localization.php:1182
 #@ codestyling-localization
 msgid "create po-file"
 msgstr "erstelle po Datei"
@@ -477,24 +477,24 @@ msgstr "erstelle po Datei"
 msgid "deactivated"
 msgstr "deaktiviert"
 
-#: codestyling-localization.php:2274
+#: codestyling-localization.php:2328
 #@ codestyling-localization
 msgid "defined by constant"
 msgstr "durch Konstante definiert"
 
-#: codestyling-localization.php:1197
+#: codestyling-localization.php:1194
 #@ codestyling-localization
 msgid "delete files"
 msgstr "Dateien löschen"
 
-#: codestyling-localization.php:2884
-#: codestyling-localization.php:2909
-#: codestyling-localization.php:2926
+#: codestyling-localization.php:2943
+#: codestyling-localization.php:2969
+#: codestyling-localization.php:2986
 #@ codestyling-localization
 msgid "finished"
 msgstr "fertig"
 
-#: codestyling-localization.php:2534
+#: codestyling-localization.php:2589
 #@ codestyling-localization
 msgid "generate mo-file"
 msgstr "erstelle mo-Datei"
@@ -508,23 +508,23 @@ msgstr "erstelle mo-Datei"
 #: codestyling-localization.php:778
 #: codestyling-localization.php:906
 #: codestyling-localization.php:950
-#: codestyling-localization.php:1520
-#: codestyling-localization.php:1656
-#: codestyling-localization.php:1695
-#: codestyling-localization.php:1936
-#: includes/class-translationfile.php:803
+#: codestyling-localization.php:1518
+#: codestyling-localization.php:1654
+#: codestyling-localization.php:1693
+#: codestyling-localization.php:1934
+#: includes/class-translationfile.php:807
 #@ codestyling-localization
 msgid "m/d/Y H:i:s"
 msgstr "d.m.Y H:i:s"
 
-#: codestyling-localization.php:2584
-#: codestyling-localization.php:2599
+#: codestyling-localization.php:2639
+#: codestyling-localization.php:2654
 #@ codestyling-localization
 msgid "non case-sensitive"
 msgstr "nicht sensitiv"
 
-#: codestyling-localization.php:2342
-#: codestyling-localization.php:2363
+#: codestyling-localization.php:2396
+#: codestyling-localization.php:2417
 #@ codestyling-localization
 msgid "or create the missing directory using FTP Access as:"
 msgstr "oder erstelle der fehlenden Ordner mit einem FTP Programm:"
@@ -534,30 +534,30 @@ msgstr "oder erstelle der fehlenden Ordner mit einem FTP Programm:"
 msgid "required"
 msgstr "erforderlich"
 
-#: codestyling-localization.php:1294
+#: codestyling-localization.php:1292
 #@ codestyling-localization
 msgid "scan now"
 msgstr "analysieren"
 
-#: codestyling-localization.php:2615
+#: codestyling-localization.php:2670
 #@ codestyling-localization
 msgid "scroll to top"
 msgstr "nach oben springen"
 
-#: codestyling-localization.php:2339
+#: codestyling-localization.php:2393
 #@ codestyling-localization
 msgid "try to create the WordPress language directory"
 msgstr "versuche, den Sprachdatei-Ordner anzulegen"
 
-#: codestyling-localization.php:2506
-#: codestyling-localization.php:2535
-#: includes/class-translationfile.php:803
+#: codestyling-localization.php:2560
+#: codestyling-localization.php:2590
+#: includes/class-translationfile.php:807
 #@ codestyling-localization
 msgid "unknown"
 msgstr "unbekannt"
 
-#: codestyling-localization.php:3598
-#: codestyling-localization.php:3615
+#: codestyling-localization.php:3659
+#: codestyling-localization.php:3676
 #@ codestyling-localization
 msgid "« Save & Previous"
 msgstr "« Speichern & vorherigen Eintrag"
@@ -567,74 +567,74 @@ msgstr "« Speichern & vorherigen Eintrag"
 msgid "μ Plugin"
 msgstr "μ Plugin"
 
-#: codestyling-localization.php:2219
+#: codestyling-localization.php:2272
 #@ codestyling-localization
 msgid "μ Plugins"
 msgstr "μ Plugins"
 
-#: codestyling-localization.php:2535
+#: codestyling-localization.php:2590
 #@ codestyling-localization
 msgid "last written:"
 msgstr "Zuletzt geschrieben:"
 
-#: codestyling-localization.php:2539
+#: codestyling-localization.php:2594
 #@ codestyling-localization
 msgid "Total"
 msgstr "Insgesamt"
 
-#: codestyling-localization.php:2540
+#: codestyling-localization.php:2595
 #@ codestyling-localization
 msgid "Plural"
 msgstr "Plural"
 
-#: codestyling-localization.php:2541
-#: codestyling-localization.php:3179
+#: codestyling-localization.php:2596
+#: codestyling-localization.php:3240
 #@ codestyling-localization
 msgid "Context"
 msgstr "Kontext"
 
-#: codestyling-localization.php:2542
+#: codestyling-localization.php:2597
 #@ codestyling-localization
 msgid "Not translated"
 msgstr "Nicht übersetzt"
 
-#: codestyling-localization.php:2543
+#: codestyling-localization.php:2598
 #@ codestyling-localization
 msgid "Comments"
 msgstr "Kommentare"
 
-#: codestyling-localization.php:2544
-#: codestyling-localization.php:3161
+#: codestyling-localization.php:2599
+#: codestyling-localization.php:3222
 #@ codestyling-localization
 msgid "Code Hint"
 msgstr "Code Hinweise"
 
-#: codestyling-localization.php:3160
+#: codestyling-localization.php:3221
 #@ codestyling-localization
 msgid "Comment"
 msgstr "Kommentar"
 
-#: codestyling-localization.php:2511
+#: codestyling-localization.php:2565
 #@ codestyling-localization
 msgid "<b>Hint:</b> The extended feature for textdomain separation shows at dropdown box <i>Textdomain</i> the pre-selected primary textdomain."
 msgstr "<b>Hinweis:</b> Die erweiterte Funktion für Textdomain-Trennung zeigt im Auswahlfeld <i>Textdomain</i> die primäre Textdomain der Komponente an."
 
-#: codestyling-localization.php:2512
+#: codestyling-localization.php:2566
 #@ codestyling-localization
 msgid "All other additional contained textdomains occur at the source but will not be used, if not explicitely supported by this component!"
 msgstr "Alle anderen zusätzlichen Textdomains treten im Quelltext auf, werden aber nicht benutzt, wenn die Komponente sie nicht explizit unterstützt!"
 
-#: codestyling-localization.php:2513
+#: codestyling-localization.php:2567
 #@ codestyling-localization
 msgid "Please contact the author, if some of the non primary textdomain based phrases will not show up translated at the required position!"
 msgstr "Bitte wenden Sie sich an den Autor, wenn einige der Begriffe nicht übersetzt erscheinen, weil sie nicht in der primären Textdomain sind!"
 
-#: codestyling-localization.php:2514
+#: codestyling-localization.php:2568
 #@ codestyling-localization
 msgid "The Textdomain <i><b>default</b></i> always stands for the WordPress main language file, this could be either intentionally or accidentally!"
 msgstr "Die Textdomain <b><i>default</i></b> immer steht für die WordPress-Sprachdatei, dies könnte entweder absichtlich oder unabsichtlich sein!"
 
-#: codestyling-localization.php:2533
+#: codestyling-localization.php:2588
 #@ codestyling-localization
 msgid "Textdomain:"
 msgstr "Textdomain:"
@@ -839,17 +839,17 @@ msgstr "BuddyPress"
 msgid "bbPress"
 msgstr "bbPress"
 
-#: codestyling-localization.php:2358
+#: codestyling-localization.php:2412
 #@ codestyling-localization
 msgid "The original bbPress component doesn't contain a language directory."
 msgstr "Die originale bbPress Komponente enthält kein Sprachdatei-Verzeichnis."
 
-#: codestyling-localization.php:2360
+#: codestyling-localization.php:2414
 #@ codestyling-localization
 msgid "try to create the bbPress language directory"
 msgstr "versuche das bbPress Sparchdatei-Verzeichnis erstellen"
 
-#: codestyling-localization.php:1949
+#: codestyling-localization.php:1947
 #@ codestyling-localization
 msgid "You do not have the permission to create a new Language File Path.<br/>Please create the appropriated path using your FTP access."
 msgstr "Sie haben nicht die Berechtigung, einen neuen Sprachedatei-Pfad zu erstellen. <br/> Bitte legen Sie den enstprechenden Pfad mit Ihrem FTP-Zugang an."
@@ -865,8 +865,8 @@ msgstr "<strong>Ladeverhalten: </strong>Der Autor benutzt <em>load_textdomain</e
 msgid "<strong>Naming Issue: </strong>Author uses unsupported language file naming convention! Instead of example <em>de_DE.po</em> the non theme standard version <em>%s</em> has been used. If you translate this Theme, only renamed language files will be working!"
 msgstr "<strong>Benennungsproblem: </strong>Der Autor nutzt nicht unterstützte Sprachdatei-Namenkonvention! Anstatt beispielsweise <em>de_DE.po</em> im Thema zu verwenden, wird die nicht standardisierte Form <em>%s</em> verwendet. Wenn Sie dieses Thema übersetzen, werden nur manuell umbenannte Sprachdateien funktionieren!"
 
-#: codestyling-localization.php:2229
-#: codestyling-localization.php:2290
+#: codestyling-localization.php:2282
+#: codestyling-localization.php:2344
 #@ codestyling-localization
 msgid "Compatibility"
 msgstr "Kompatibilität"
@@ -881,33 +881,33 @@ msgstr "<strong>Ladeverhalten: </strong>Der Autor benutzt <em>load_textdomain</e
 msgid "<strong>WooThemes Issue: </strong>The Author is known for not supporting a translatable backend. Please expect only translations for frontend or contact the Author for support!"
 msgstr "<strong>WooThemes Problem:</strong> Der Autor ist bekannt für nicht durchgeführte Übersetzung der Administrationsoberfläche seines Themes. Bitte erwarten Sie nur Übersetzungen für Frontend Ansichten oder kontaktieren Sie den Autor für weitere Unterstützung!"
 
-#: codestyling-localization.php:2236
+#: codestyling-localization.php:2289
 #@ codestyling-localization
 msgid "You like it?"
 msgstr "Gefällt es Ihnen?"
 
-#: codestyling-localization.php:2304
+#: codestyling-localization.php:2358
 #@ codestyling-localization
 msgid "Memory Warning"
 msgstr "Speicherwarnung"
 
-#: codestyling-localization.php:2305
+#: codestyling-localization.php:2359
 #@ codestyling-localization
 msgid "Since WordPress 3.x version it may require at least <strong>58MB</strong> PHP memory_limit! The reason is still unclear but it doesn't freeze anymore. Instead a error message will be shown and the scanning process aborts while reaching your limits."
 msgstr "Seit WordPress Version 3.x werden mindestens <strong>58MB</strong> PHP memory_limit benötigt! Der Grund ist noch unklar, aber der Einlesevorgang friert nicht mehr ein. Stattdessen wird eine Fehlermeldung angezeigt und der Scan-Vorgang beim Überschreiten des Limits abgebrochen."
 
-#: codestyling-localization.php:2311
+#: codestyling-localization.php:2365
 #@ codestyling-localization
 msgid "Language Folder"
 msgstr "Sprachdatei-Ordner"
 
-#: codestyling-localization.php:2312
+#: codestyling-localization.php:2366
 #@ codestyling-localization
 msgid "The translation file folder is ambiguous, please select by clicking the appropriated language file folder or ask the Author about!"
 msgstr "Der Sprachdateiordner ist nicht eindeutig, wählen Sie bitte durch Anklicken den geeigneten Dateiordner oder fragen Sie den Autor dieser Komponente!"
 
-#: codestyling-localization.php:3590
-#: codestyling-localization.php:3605
+#: codestyling-localization.php:3651
+#: codestyling-localization.php:3666
 #@ codestyling-localization
 msgid "Access Keys:"
 msgstr "Schnellzugriff:"
@@ -946,44 +946,44 @@ msgstr "<strong>komplett verschlüsselter PHP Code:</strong> Dieses Plugin beste
 msgid "<strong>Textdomain definition: </strong>This plugin provides a textdomain definition at plugin header fields but seems not to load any translation file. If it doesn't show your translation, please contact the plugin Author."
 msgstr "<strong>Textdomain Definition:</strong> Dieses Plugin hat eine Plugin-Textdomain Definition in den Header-Felder, scheint aber keine Übersetzung zu laden. Wenn es nicht Ihre Übersetzung anzeigt, kontaktieren Sie bitte den Plugin-Autor."
 
-#: codestyling-localization.php:2232
-#: codestyling-localization.php:2297
+#: codestyling-localization.php:2285
+#: codestyling-localization.php:2351
 #@ codestyling-localization
 msgid "Security Risk"
 msgstr "Sicherheitsrisiko"
 
-#: codestyling-localization.php:2545
+#: codestyling-localization.php:2600
 #@ codestyling-localization
 msgid "Trailing Space"
 msgstr "Ende-Leerzeichen"
 
-#: codestyling-localization.php:1758
+#: codestyling-localization.php:1756
 #@ codestyling-localization
 msgid "Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature."
 msgstr "Deine Übersetzungdatei unterstützt nicht Erweiterung <em>mehrfache Textdomains in einer Übersetzungsdatei</em>.<br/>Bitte lesen Sie die Quelldateien auf der Übersichtsseite der Komponente neu ein, um die Erweiterung zu nutzen."
 
-#: codestyling-localization.php:2134
+#: codestyling-localization.php:2187
 #@ codestyling-localization
 msgid "enable low memory mode"
 msgstr "Low-Memory-Modus einschalten"
 
-#: codestyling-localization.php:2135
+#: codestyling-localization.php:2188
 #@ codestyling-localization
 msgid "If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases."
 msgstr "Wenn Ihre Installation unter niedrigen Speicherbedingungen ausgeführt wird, werden Sie möglicherweise mit einen Speicher Limit Fehler konfrontiert werden, während Sie eine Komponente einlesen oder übersetzen wollen. Wenn Sie an Ihr Limit anschlagen, können Sie diesen speziellen Modus aktivieren. Es wird versucht, die Aktionen auf einen anderen Wege auszuführen. Dies wird aber zu viel langsameren Reaktionszeiten führen und gibt dennoch keine Garantie, dass es Ihre Speicherprobleme in allen Fällen löst."
 
-#: codestyling-localization.php:2504
+#: codestyling-localization.php:2558
 #@ codestyling-localization
 msgid "back to overview page &raquo;"
 msgstr "Zurück zur Übersicht »"
 
-#: codestyling-localization.php:2914
+#: codestyling-localization.php:2974
 #, php-format
 #@ codestyling-localization
 msgid "You are trying to rescan files which expands above your PHP Memory Limit at %s MB during the analysis.<br/>Please enable the <em>low memory mode</em> for scanning this component."
 msgstr "Sie versuchen Dateien einzulesen, die Ihr PHP Memory Limit bei %s MB während der Analyse übersteigen.<br/>Bitte aktivieren Sie den <em>Low-Memory-Modus</em>."
 
-#: codestyling-localization.php:3098
+#: codestyling-localization.php:3159
 #, php-format
 #@ codestyling-localization
 msgid "You are trying to open a translation catalog which expands above your PHP Memory Limit at %s MB during read.<br/>Please enable the <em>low memory mode</em> for opening this components catalog."
@@ -995,21 +995,21 @@ msgstr "Sie versuchen einen Übersetzungkatalog zu öffnen, der Ihr PHP Memory L
 msgid "<strong>Textdomain definition: </strong>There are problems to find the used textdomain. It has been taken from existing translation files. If it doesn't work with your install, please contact the Author of this plugin."
 msgstr "<strong>Textdomain Definition:</strong> Es gibt Probleme mit der Suche nach der verwendeten Textdomain. Sie wurde aus vorhanden Sprachdateinamen rekonstruiert. Wenn es nicht mit der Übersetzung funktioniert, kontaktieren Sie bitte den Autor des Plugins."
 
-#: codestyling-localization.php:1922
+#: codestyling-localization.php:1920
 #@ codestyling-localization
 msgid "You are trying to create an empty mo-file without any translations. This is not possible, please translate at least one entry."
 msgstr "Sie versuchen, eine leere mo-Datei ohne Übersetzungen erstellen. Dies ist nicht möglich, bitte übersetzen Sie mindestens einen Eintrag."
 
-#: codestyling-localization.php:2155
-#: codestyling-localization.php:2161
-#: codestyling-localization.php:2179
-#: codestyling-localization.php:2187
-#: codestyling-localization.php:2207
+#: codestyling-localization.php:2208
+#: codestyling-localization.php:2214
+#: codestyling-localization.php:2232
+#: codestyling-localization.php:2240
+#: codestyling-localization.php:2260
 #@ codestyling-localization
 msgid "Attention:"
 msgstr "Achtung:"
 
-#: codestyling-localization.php:2207
+#: codestyling-localization.php:2260
 #@ codestyling-localization
 msgid "You have a running version of WP e-Commerce and it has been programmed to deactivate the javascript library prototype.js at each WordPress backend page! I did a work arround that, in case of issues read my article: <a href=\"http://www.code-styling.de/english/wp-e-commerce-breaks-intentionally-other-plugins-or-themes\">WP e-Commerce breaks intentionally other Plugins or Themes</a>"
 msgstr "Sie haben eine lauffähige Version von WP e-Commerce und es wurde so programmiert, dass die JavaScript-Bibliothek prototype.js in jeder WordPress Backend-Seite deaktiviert wird! Ich habe eine Umgehung dieses Problems eingebaut, im Falle von Fragen lesen Sie meinen Artikel: <a href=\"http://www.code-styling.de/deutsch/wp-e-commerce-bricht-absichtlich-andere-plugins-und-themes\">WP e-Commerce bricht absichtlich andere Plugins und Themes</a>"
@@ -1029,176 +1029,176 @@ msgstr "<strong>Textdomain Benennungsproblem:</strong> Der Autor verwendet eine 
 msgid "<strong>Ares Theme Issue: </strong>This theme uses a textdomain defined by string concatination code. The textdomain will be patched to 'AresLanguage', please contact the theme author to change this into a fix constant value! "
 msgstr "<strong>Ares Theme Problem: </strong>Dieses Theme definiert seine Textdomain durch Stringverkettung im Code. Die Textdomain wurde auf 'AresLanguage' angepasst, bitte benachrichtige den Theme Author, damit er das in eine feste Konstante ändern kann! "
 
-#: codestyling-localization.php:2139
+#: codestyling-localization.php:2192
 #@ codestyling-localization
 msgid "None"
 msgstr "Keine"
 
-#: codestyling-localization.php:2140
+#: codestyling-localization.php:2193
 #@ codestyling-localization
 msgid "Google"
 msgstr "Google"
 
-#: codestyling-localization.php:2141
+#: codestyling-localization.php:2194
 #@ codestyling-localization
 msgid "Microsoft"
 msgstr "Microsoft"
 
-#: codestyling-localization.php:2147
+#: codestyling-localization.php:2200
 #@ codestyling-localization
 msgid "How to use translation API services..."
 msgstr "Wie benutzt man die Übersetzungs-APIs..."
 
-#: codestyling-localization.php:2162
+#: codestyling-localization.php:2215
 #, php-format
 #@ codestyling-localization
 msgid "This API is not longer a free service, Google has relaunched the API in version 2 as a pay per use service. Please read the explantions at %s first."
 msgstr "Dieser Service ist nicht länger kostenfrei, seit Google die neue Version 2 seiner API veröffentlicht hat. Bitte lesen Sie sich zuerst die entsprechende Erklärung unter %s durch."
 
-#: codestyling-localization.php:2163
+#: codestyling-localization.php:2216
 #@ codestyling-localization
 msgid "Using this API within <em>Codestyling Localization</em> requires an API Key to be created at your Google account first. Once you have such a key, you can activate this API by defining a new constant at your <b>wp-config.php</b> file:"
 msgstr "Die Benutzung dieser API innerhalb von <em>Codestyling Localization</em> erfordert, daß Sie zuerst einen API Schlüssel in Ihrem Google Account erzeugen. Wenn Sie diesen haben, können Sie diese API freischalten, indem Sie in der <b>wp-config.php</b> folgendes einfügen:"
 
-#: codestyling-localization.php:2171
+#: codestyling-localization.php:2224
 #, php-format
 #@ codestyling-localization
 msgid "Microsoft provides the translation services with a free option of 2 million characters per month. But this also requires a subscription at %s either for free or for extended payed service volumes."
 msgstr "Microsoft stellt einen Übersetzungdienst bereit, der 2 Millionen Zeichen pro Monat kostenfrei übersetzen lässt. Aber dafür ist trotzdem eine Subscription auf %s notwendig egal ob kostenfrei oder als bezahlter Volumendienst."
 
-#: codestyling-localization.php:2172
+#: codestyling-localization.php:2225
 #@ codestyling-localization
 msgid "Using this API within <em>Codestyling Localization</em> requires <em>client_id</em> and <em>client_secret</em> to be created at your Azure subscription first. Once you have this values, you can activate this API by defining new constants at your <b>wp-config.php</b> file:"
 msgstr "Die Benutzung dieser API innerhalb von <em>Codestyling Localization</em> erfordert, daß Sie zuerst eine <em>client_id</em> und ein <em>client_secret</em> in Ihrer Azure Subscription generieren. Wenn Sie diese Daten haben, können Sie diese API freischalten, wenn Sie in Ihrer <b>wp-config.php</b> folgende Einträge hinzufügen:"
 
-#: codestyling-localization.php:2179
+#: codestyling-localization.php:2232
 #@ codestyling-localization
 msgid "This API additionally requires PHP curl functions and will not be available without. Current curl version:"
 msgstr "Dieser Dienst erfordert zusätzlich, das in PHP die curl Funktionen installiert sind und wird sonst nicht verfügbar sein. Aktuelle Curl Version:"
 
-#: codestyling-localization.php:2180
+#: codestyling-localization.php:2233
 #@ codestyling-localization
 msgid "not installed"
 msgstr "nicht installiert"
 
-#: codestyling-localization.php:2155
+#: codestyling-localization.php:2208
 #@ codestyling-localization
 msgid "Keep in mind, that any WordPress administrator can use the service for translation purpose and may raise your costs in case of paid option used."
 msgstr "Bitte denken Sie darüber nach, daß jeder WordPress Administrator die Übersetzungsdienste benutzen und somit die Kosten in die Höhe treiben kann, sofern der Dienst kostenpflichtig ist."
 
-#: codestyling-localization.php:2518
+#: codestyling-localization.php:2572
 #@ codestyling-localization
 msgid "<strong>Error</strong>: The actual loaded translation content does not match the textdomain:"
 msgstr "<strong>Fehler</strong>: Die aktuell geladenen Texte gehören nicht zur Texdomain:"
 
-#: codestyling-localization.php:2520
+#: codestyling-localization.php:2574
 #@ codestyling-localization
 msgid "Expect, that any text you translate will not occure as long as the textdomain is mismatching!"
 msgstr "Erwarten Sie, dass jeder Text, der nun übersetzt wird, nicht erscheinen wird, solange die Textdomains nicht übereinstimmen."
 
-#: codestyling-localization.php:2522
+#: codestyling-localization.php:2576
 #@ codestyling-localization
 msgid "This is a coding issue at the source files you try to translate, please contact the original Author and explain this mismatch."
 msgstr "Dies ist ein Problem in der Programmierung der Quelldateien, die Sie zu übersetzen versuchen. Kontaktieren Sie den Autor und erklären Sie das Problem."
 
-#: codestyling-localization.php:2525
+#: codestyling-localization.php:2579
 #@ codestyling-localization
 msgid "<strong>Warning</strong>: The actual loaded translation content contains mixed textdomains and is not pure translateable within one textdomain."
 msgstr "<strong>Warnung</strong>: Die aktuell verfügbaren Text kommen aus verschiedenen Textdomains und können nicht einheitlich in einer Textdomain übersetzt werden."
 
-#: codestyling-localization.php:2529
+#: codestyling-localization.php:2583
 #@ codestyling-localization
 msgid "The affected unknown textdomains are:"
 msgstr "Die betroffenen, unbekannten Textdomains sind:"
 
-#: codestyling-localization.php:3568
-#: codestyling-localization.php:3571
-#: codestyling-localization.php:3611
+#: codestyling-localization.php:3629
+#: codestyling-localization.php:3632
+#: codestyling-localization.php:3672
 #@ codestyling-localization
 msgid "translate with API Service by"
 msgstr "übersetzen mit API-Service von"
 
-#: codestyling-localization.php:2138
+#: codestyling-localization.php:2191
 #@ codestyling-localization
 msgid "Translation Service-APIs:"
 msgstr "Übersetzungs-Service-APIs:"
 
-#: codestyling-localization.php:2527
+#: codestyling-localization.php:2581
 #@ codestyling-localization
 msgid "It seems, that there is code contained extracted out of other plugins, themes or widgets and used by copy & paste inside some source files."
 msgstr "Es scheint so, daß in den Quelldateien Code enthalten ist, der per Copy & Paste aus anderen Plugins, Themes oder Widgets stammt."
 
-#: codestyling-localization.php:2072
+#: codestyling-localization.php:2125
 #@ codestyling-localization
 msgid "Translation API Keys"
 msgstr "Übersetzung API Schlüssel"
 
-#: codestyling-localization.php:2075
+#: codestyling-localization.php:2128
 #@ codestyling-localization
 msgid "Google Translate API Key"
 msgstr "Google Translate API-Schlüssel"
 
-#: codestyling-localization.php:2079
+#: codestyling-localization.php:2132
 #@ codestyling-localization
 msgid "Microsoft Translator - Client ID"
 msgstr "Microsoft Translator - Client-ID"
 
-#: codestyling-localization.php:2083
+#: codestyling-localization.php:2136
 #@ codestyling-localization
 msgid "Microsoft Translator - Client Secret"
 msgstr "Microsoft Translator - Client Secret"
 
-#: codestyling-localization.php:2152
+#: codestyling-localization.php:2205
 #@ codestyling-localization
 msgid "a) Global Unique Keys - single user configuration"
 msgstr "a) Global eindeutige Schlüssel - Einzelnutzer-Konfiguration"
 
-#: codestyling-localization.php:2184
+#: codestyling-localization.php:2237
 #@ codestyling-localization
 msgid "b) User Dedicated Keys - multiple user configurations"
 msgstr "b) dedizierte Benutzerschlüssel - Mehrbenutzerkonfigurationen"
 
-#: codestyling-localization.php:2187
+#: codestyling-localization.php:2240
 #@ codestyling-localization
 msgid "This will extends all <em>User Profile</em> pages with a new section to enter all required translation key data. Keep im mind, that this data are stored at the database and are contained at SQL backups."
 msgstr "Dies erweitert alle <em>Benutzerprofil</em> -Seiten mit einem neuen Abschnitt, in dem alle für die Übersetzung erforderlichen Daten eingeben werden können. Beachten Sie bitte, daß diese Daten in der Datenbank gespeichert und in SQL-Sicherungen enthalten sind."
 
-#: codestyling-localization.php:2191
+#: codestyling-localization.php:2244
 #@ codestyling-localization
 msgid "You can activate the per user behavoir, if you define only a single constant at your <b>wp-config.php</b> file. This enables the new section at each <a target=\"_blank\" href=\"profile.php?#translations\">User Profile</a> with sufficiant permissions and is only editable by the releated logged in user."
 msgstr "Sie können die <em>pro Benutzer</em> Verhaltensweise aktivieren, wenn Sie nur eine Konstante in der <b>wp-config.php</b> -Datei definieren. Das schaltet einen neuen Abschnitt im <a target=\"_blank\" href=\"profile.php?#translations\">Benutzerprofil</a> bei ausreichender Berechtigung frei und kann nur durch den dazugehörigen eingeloggten Benutzer angepasst werden."
 
-#: codestyling-localization.php:2144
+#: codestyling-localization.php:2197
 #@ codestyling-localization
 msgid "User Profile settings..."
 msgstr "Benutzerprofileinstellungen..."
 
-#: codestyling-localization.php:2196
+#: codestyling-localization.php:2249
 #@ codestyling-localization
 msgid "Special Hosting Configuration"
 msgstr "Spezielle Hosting-Konfiguration"
 
-#: codestyling-localization.php:2199
+#: codestyling-localization.php:2252
 #@ codestyling-localization
 msgid "If your are a provider and you are hosting WordPress installations for your customer, it is possible to deactivate this help information using an additional constant at your <b>wp-config.php</b> file. At single user mode (a) this simply does not show any help for API configuration, at multiuser mode (b) it shows the link to the profile page."
 msgstr "Wenn Sie ein Dienstleister sind und Sie WordPress-Installationen für Ihre Kunden hosten, ist es möglich, diese Hilfeinformation über eine zusätzliche Konstante in Ihrer <b>wp-config.php</b> Datei zu deaktivieren. Im Einzelnutzer-Modus (a) zeigt es diese Hilfe einfach nicht mehr an, im Mehrbenutzer-Modus (b) wird der Link zur Profileseite angezeigt."
 
-#: codestyling-localization.php:2457
+#: codestyling-localization.php:2511
 #@ codestyling-localization
 msgid "Warning"
 msgstr "Warnung"
 
-#: codestyling-localization.php:2394
+#: codestyling-localization.php:2448
 #@ codestyling-localization
 msgid "(informal)"
 msgstr "(Du)"
 
-#: codestyling-localization.php:2426
+#: codestyling-localization.php:2480
 #@ codestyling-localization
 msgid "(formal)"
 msgstr "(Sie)"
 
-#: codestyling-localization.php:2457
+#: codestyling-localization.php:2511
 #@ codestyling-localization
 msgid "German translations are currently supported by a temporary workaround only, because they will be handled completely uncommon beside WordPress standards!"
 msgstr "Deutsche Übersetzungen werden gegenwärtig nur durch eine Zwischenlösung unterstützt, weil sie völlig ungewöhnlich neben WordPress Normen behandelt werden!"
@@ -1213,5 +1213,57 @@ msgstr "Sie können alle Gettext Übersetzungsdateien (*.po/*.mo) direkt von Ihr
 #: codestyling-localization.php:0
 #@ codestyling-localization
 msgid "1.99.20"
+msgstr ""
+
+#: codestyling-localization.php:2064
+#@ codestyling-localization
+msgid "If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins."
+msgstr ""
+
+#: codestyling-localization.php:2064
+#@ codestyling-localization
+msgid "There are several reason for such reports, but in each of this cases only the original author can solve it:"
+msgstr ""
+
+#: codestyling-localization.php:2065
+#@ codestyling-localization
+msgid "Loading of translation files will be performed beside the WordPress standard functionality."
+msgstr ""
+
+#: codestyling-localization.php:2065
+#@ codestyling-localization
+msgid "Textdomains can not be parsed from source files because of used coding syntax."
+msgstr ""
+
+#: codestyling-localization.php:2065
+#@ codestyling-localization
+msgid "Component seems to be translatable but doesn't use a translation file load call."
+msgstr ""
+
+#: codestyling-localization.php:2085
+#@ codestyling-localization
+msgid "For more information:"
+msgstr "Weitere Informationen:"
+
+#: codestyling-localization.php:2087
+#@ codestyling-localization
+msgid "Trac Development Log"
+msgstr ""
+
+#: codestyling-localization.php:2088
+#@ codestyling-localization
+msgid "Plugin Support Forum"
+msgstr ""
+
+#: codestyling-localization.php:2344
+#: codestyling-localization.php:2577
+#: codestyling-localization.php:2586
+#@ codestyling-localization
+msgid "What's this?"
+msgstr "Was ist das?"
+
+#: codestyling-localization.php:2587
+#@ codestyling-localization
+msgid "Project-Id-Version:"
 msgstr ""
 
