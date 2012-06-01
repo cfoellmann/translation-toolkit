@@ -874,7 +874,7 @@ class CspTranslationFile {
 			echo "}".($c != $num ? ',' : '')."\n";
 	
 			foreach($entry['LTD'] as $d) {	
-				if (!in_array($d, $ltd)) $ltd[] = $d;
+				if (!in_array($d, $ltd)) $ltd[] = esc_js($d);
 			}
 		}
 ?>	

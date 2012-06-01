@@ -2018,6 +2018,81 @@ function csp_po_init() {
 	$low_mem_mode = (bool)get_option('codestyling-localization.low-memory', false);
 	define('CSL_LOW_MEMORY', $low_mem_mode);	
 }
+function csp_callback_help_overview() {
+?>
+	<h4>Codestyling Localization <sup><small>by Heiko Rabe</small></sup></h4>
+	<p>
+	<?php _e('While get in touch with WordPress you will find out, that the initial delivery package comes only with english localization. If you want WordPress to show your native language, you have to provide the appropriated language file at languages folder. This files will be used to replace the english text phrases during the process of page generation. This translation capability has the origin at the gettext functionality which currently been used across a wide range of open source projects.', CSP_PO_TEXTDOMAIN); ?>
+	</p>
+	<hr/>
+	<p>
+		<a href="http://wordpress.org/extend/plugins/codestyling-localization/" target="_blank">Plugin Directory</a> | 
+		<a href="http://wordpress.org/extend/plugins/codestyling-localization/changelog/" target="_blank">Change Logs</a> | 
+		<a href="<?php echo CSP_PO_BASE_URL."/license.txt";?>" target="_blank">License</a> 
+		<a class="alignright" href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank">Admin Center at your Language</a>
+	</p>
+<?php
+}
+
+function csp_callback_help_low_memory() {
+?>
+<p>
+<?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<?php
+}
+
+function csp_callback_help_compatibility() {
+?>
+<p> 
+	<?php _e("If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins.",CSP_PO_TEXTDOMAIN); ?> 
+	<?php _e("There are several reason for such reports, but in each of this cases only the original author can solve it:",CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<ul>
+		<li>
+		<?php _e("Loading of translation files will be performed beside the WordPress standard functionality.",CSP_PO_TEXTDOMAIN); ?>
+		</li>
+		<li>
+		<?php _e("Textdomains can not be parsed from source files because of used coding syntax.",CSP_PO_TEXTDOMAIN); ?>
+		</li>
+		<li>
+		<?php _e("Component seems to be translatable but doesn't use a translation file load call.",CSP_PO_TEXTDOMAIN); ?>
+		</li>
+	</ul>
+</p>
+<p>
+	<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.",CSP_PO_TEXTDOMAIN); ?>
+</p>
+<?php
+}
+
+function csp_callback_help_textdomain() {
+?>
+<p>
+	<?php _e('Textdomains are used to specified the context for the translation file to be loaded and processed. If a component tries to load a translation file using a textdomain, all texts assigned to this domain gets translated during page creation.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<?php _e('The extended feature for textdomain separation shows at dropdown box <i>Textdomain</i> the pre-selected primary textdomain.',CSP_PO_TEXTDOMAIN); ?><br/>
+	<?php _e('All other additional contained textdomains occur at the source but will not be used, if not explicitely supported by this component!',CSP_PO_TEXTDOMAIN); ?><br/>
+	<?php _e('Please contact the author, if some of the non primary textdomain based phrases will not show up translated at the required position!',CSP_PO_TEXTDOMAIN); ?><br/>
+	<?php _e('The Textdomain <i><b>default</b></i> always stands for the WordPress main language file, this could be either intentionally or accidentally!',CSP_PO_TEXTDOMAIN); ?><br/>
+</p>
+<p>
+	<strong><?php _e('Warning Messages', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('If you get warnings either at the overview page or at the editor page, somethings is wrong within the analysed component.', CSP_PO_TEXTDOMAIN); ?>
+	<?php _e('The overview page will show warnings, if the textdomain can not be found clearly. In this case the author has written the components code in a way make it hard to detect.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<?php _e('Warnings at the editors view will show up, if the component is using badly coded textdomains. This could be either by integration of other plugins code or accidentally by typing mistakes.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.",CSP_PO_TEXTDOMAIN); ?>
+</p>
+<?php
+}
 
 function csp_load_po_edit_admin_page(){
 	wp_enqueue_script( 'thickbox' );
@@ -2039,47 +2114,36 @@ function csp_load_po_edit_admin_page(){
 	wp_deregister_script('color_options_minified.js');
 	wp_deregister_script('color-picker-js-files-minified.js');	
 
-	
-	
-	
+	//new help system
 	global $wp_version;
 	if (version_compare($wp_version, '3.3', '>=')) {
 		$screen = get_current_screen();
 		//$request = unserialize(csp_fetch_remote_content('http://api.wordpress.org/plugins/info/1.0/codestyling-localization'));
-		/*
 		$screen->add_help_tab(array(
-			'title' => 'General',
-			'id' => 'general',
-			'content' => '<div style="height: 300px; overflow:scroll-x;">'.$request->sections['description'].'</div>',
-			'callback' => ''
+			'title' => __('Overview',CSP_PO_TEXTDOMAIN),
+			'id' => 'overview',
+			'content' => '',
+			'callback' => 'csp_callback_help_overview'
 		));
 		$screen->add_help_tab(array(
-			'title' => 'Change Log',
-			'id' => 'changelog',
-			'content' => '<div style="height: 300px; overflow:scroll-x;">'.$request->sections['changelog'].'</div>',
-			'callback' => ''
+			'title' => __('Low Memory Mode', CSP_PO_TEXTDOMAIN),
+			'id' => 'lowmemory',
+			'content' => '',
+			'callback' => 'csp_callback_help_low_memory'
 		));
-		*/
+		
 		$content = array();
-		$content[]= "<p>".__("If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins.",CSP_PO_TEXTDOMAIN)."<br/>".__("There are several reason for such reports, but in each of this cases only the original author can solve it:",CSP_PO_TEXTDOMAIN)."</p>";
-		$content[]= "<p><ul><li>".__("Loading of translation files will be performed beside the WordPress standard functionality.",CSP_PO_TEXTDOMAIN)."</li><li>".__("Textdomains can not be parsed from source files because of used coding syntax.",CSP_PO_TEXTDOMAIN)."</li><li>".__("Component seems to be translatable but doesn't use a translation file load call.",CSP_PO_TEXTDOMAIN)."</li></ul></p>";
 		$screen->add_help_tab(array(
-			'title' => 'Compatibility Issues',
+			'title' => __('Compatibility / Warnings', CSP_PO_TEXTDOMAIN),
 			'id' => 'compatibility',
-			'content' => implode('', $content),
-			'callback' => false
+			'content' => '',
+			'callback' => 'csp_callback_help_compatibility'
 		));
 		$screen->add_help_tab(array(
-			'title' => 'Textdomain Issues',
+			'title' => 'Textdomains / Warnings',
 			'id' => 'textdomain',
 			'content' => '',
-			'callback' => false
-		));
-		$screen->add_help_tab(array(
-			'title' => 'Searching Terms',
-			'id' => 'search',
-			'content' => '',
-			'callback' => false
+			'callback' => 'csp_callback_help_textdomain'
 		));
 		$content = array();
 		$content[]= "<p><strong>".__("For more information:",CSP_PO_TEXTDOMAIN)."</strong></p>";
@@ -2184,8 +2248,12 @@ function csp_po_main_page() {
 <div class="icon32" id="icon-tools"><br/></div>
 <h2><?php _e('Manage Language Files', CSP_PO_TEXTDOMAIN); ?></h2>
 <p>
-	<input id= "enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>> <label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label> <img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading-small.gif"?>" /><br />
-	<small><?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?></small>
+	<input id= "enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>> <label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label> <img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading-small.gif"?>" />
+	<?php if (version_compare($wp_version, '3.3', '<')) : ?>
+	<br /><small><?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?></small>
+	<?php else : ?>
+	&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
+	<?php endif; ?>
 </p>
 <p class="translation-apis">
 	<label class="alignleft"><strong><?php _e('Translation Service-APIs:',CSP_PO_TEXTDOMAIN); ?></strong></label> 
@@ -2341,7 +2409,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 			<?php if (isset($data['dev-hints'])) : ?>
 			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 			<tr>
-				<td><strong style="color: #f00;"><?php _e('Compatibility',CSP_PO_TEXTDOMAIN); ?>:</strong>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
+				<td><strong style="color: #f00;"><?php _e('Compatibility',CSP_PO_TEXTDOMAIN); ?>:</strong>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
 				<td class="csp-info-value"><?php echo $data['dev-hints'];?></td>
 			</tr>
 			<?php endif; ?>
@@ -2557,9 +2625,10 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 	<div class="icon32" id="icon-tools"><br/></div>
 	<h2><?php _e('Translate Language File', CSP_PO_TEXTDOMAIN); ?>&nbsp;&nbsp;&nbsp;<a class="clickable button" onclick="window.location.reload()"><?php _e('back to overview page &raquo;', CSP_PO_TEXTDOMAIN) ?></a></h2>
 	<div id="csp-json-header">
-		<div class="po-header-toggle"><strong><?php _e('File:', CSP_PO_TEXTDOMAIN); ?></strong> <a onclick="csp_toggle_header(this,'po-hdr');"><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></a></div>
+		<div class="po-header-toggle"><span><b><?php _e('Project-Id-Version:',CSP_PO_TEXTDOMAIN); ?></b></span> <span id="prj-id-ver">---</span> | <strong><?php _e('File:', CSP_PO_TEXTDOMAIN); ?></strong> <a onclick="csp_toggle_header(this,'po-hdr');"><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></a></div>
 	</div>
 	<div class="action-bar">
+		<?php if (version_compare($wp_version, '3.3', '<')) : ?>
 		<p>
 			<small>
 			<?php _e('<b>Hint:</b> The extended feature for textdomain separation shows at dropdown box <i>Textdomain</i> the pre-selected primary textdomain.',CSP_PO_TEXTDOMAIN); ?><br/>
@@ -2568,24 +2637,23 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 			<?php _e('The Textdomain <i><b>default</b></i> always stands for the WordPress main language file, this could be either intentionally or accidentally!',CSP_PO_TEXTDOMAIN); ?><br/>
 			</small>
 		</p>
+		<?php endif; ?>
 		<p id="textdomain-error" class="hidden"><small><?php 
 			_e('<strong>Error</strong>: The actual loaded translation content does not match the textdomain:',CSP_PO_TEXTDOMAIN); 
 			echo '&nbsp;<span></span><br/>';
 			_e('Expect, that any text you translate will not occure as long as the textdomain is mismatching!',CSP_PO_TEXTDOMAIN); 
 			echo '<br/>';
 			_e('This is a coding issue at the source files you try to translate, please contact the original Author and explain this mismatch.',CSP_PO_TEXTDOMAIN); 
-		?></small>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
+		?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
 		<p id="textdomain-warning" class="hidden"><small><?php 
 			_e('<strong>Warning</strong>: The actual loaded translation content contains mixed textdomains and is not pure translateable within one textdomain.',CSP_PO_TEXTDOMAIN); 
 			echo '<br/>';
 			_e('It seems, that there is code contained extracted out of other plugins, themes or widgets and used by copy & paste inside some source files.',CSP_PO_TEXTDOMAIN); 
 			echo '<br/>';
 			_e('The affected unknown textdomains are:',CSP_PO_TEXTDOMAIN); 
-			echo '&nbsp;<span></span>';
-			
-		?></small>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
-		<div style="margin-right:10px;padding:5px 0px;"><span><b><?php _e('Project-Id-Version:',CSP_PO_TEXTDMAIN); ?></b></span> <span id="prj-id-ver">---</span></div>
-		<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:',CSP_PO_TEXTDOMAIN); ?></b><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
+			echo '&nbsp;<span>&nbsp;</span>';		
+		?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
+		<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:',CSP_PO_TEXTDOMAIN); ?></b>&nbsp;&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
 		<div class="alignleft">&nbsp;&nbsp;<input id="csp-write-mo-file" class="button button-secondary" style="display:none" type="submit" value="<?php _e('generate mo-file', CSP_PO_TEXTDOMAIN); ?>" onclick="csp_generate_mofile(this);" /></div>
 		<div class="alignleft" style="margin-left:10px;font-size:11px;padding-top:3px;"><?php _e('last written:',CSP_PO_TEXTDOMAIN);?>&nbsp;&nbsp;<span id="catalog-last-saved" ><?php _e('unknown',CSP_PO_TEXTDOMAIN); ?></span><img id="csp-generate-mofile" src="<?php echo CSP_PO_BASE_URL."/images/";?>write-mofile.gif" /></div>
 		<br class="clear" />
@@ -2624,7 +2692,6 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 		</div>
 		<br class="clear" />
 	</div>
-	<br class="clear" />
 	<table class="widefat" cellspacing="0">
 		<thead>
 			<tr>
@@ -3976,6 +4043,7 @@ tr.csp-active .csp-info-status { color: #267F00 !important; font-weight: bold; f
 
 td.component-details { border-left: 1px solid #eee; }
 .mo-list-head td { padding-bottom: 10px !important; }
+.action-bar { margin-top: 10px; }
 <?php
 }
 

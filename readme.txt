@@ -85,6 +85,7 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 * Bugfix: *.po files writen with refreshed revision date automatically
 * Bugfix: re-scan process refreshes the Product-Id-Version field of *.po file
 * Bugfix: minor visibility adjustments 
+* Feature: using the WordPress backend help system at WordPress version >= 3.3
 
 = Version 1.99.19 = 
 * Bugfix: pot file indicator writes unstructured content and blocked new language creation
