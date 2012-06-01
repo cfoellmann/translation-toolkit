@@ -3884,12 +3884,16 @@ jQuery(document).ready(function() {
 				}
 		});	
 	});
+	<?php global $wp_version; if (version_compare($wp_version, '3.3', '<')) : ?>
+	jQuery('.question-help').hide();
+	<?php else : ?>
 	jQuery('.question-help').click(function(event) {
 		event.preventDefault();
 		window.scrollTo(0,0);
 		jQuery('#tab-link-'+jQuery(this).attr('rel')+' a').trigger('click');
 		if (!jQuery('#contextual-help-link').hasClass('screen-meta-active')) jQuery('#contextual-help-link').trigger('click');
 	});
+	<?php endif; ?>
 });
 
 /* TODO: implement context sensitive help 
@@ -4044,6 +4048,7 @@ tr.csp-active .csp-info-status { color: #267F00 !important; font-weight: bold; f
 td.component-details { border-left: 1px solid #eee; }
 .mo-list-head td { padding-bottom: 10px !important; }
 .action-bar { margin-top: 10px; }
+
 <?php
 }
 
