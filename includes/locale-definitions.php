@@ -45,7 +45,7 @@ $csp_l10n_langs = array(
 	'my' => array('my_MM'),
 	'nb' => array('nb_NB', 'nb_NO'),
 	'nl' => array('nl_BE','nl_NL'),
-	'nn' => array('nn_NN'),
+	'nn' => array('nn_NO'),
 	'no' => array('no_NO'),
 	'pl' => array('pl_PL'),
 	'pt' => array('pt_BR','pt_PT'),
@@ -1368,7 +1368,7 @@ $csp_l10n_sys_locales = array(
 		'google-api' => 'nl',
 		'microsoft-api' => 'nl'
 	),
-	'nn_NN' => array (
+	'nn_NO' => array (
 		'country' => "Norway",
 		'country-www' => 'nn',
 		'lang' => 'Norwegian-Nynorsk',
