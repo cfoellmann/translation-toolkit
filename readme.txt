@@ -77,11 +77,11 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 == Changelog ==
 
 = Version 1.99.20 =
-* Bugfix: translated plugin/theme descriptions accidentally states, that Codestyling Localization uses more than one textdomain
-* Bugfix: admin ajax url not longer lowercase completely, only "same origin policy" parts lowercased, stops function on installions with uppercased folder names.
-* Bugfix: false positive XSS vulnerablities handled anyway, all reported vulnerability requires always an admin login (admin permission) to be useable and are all false positive.
+* Bugfix: translating the plugin/theme descriptions accidentally states, that Codestyling Localization uses more than one textdomain
+* Bugfix: admin ajax url not longer lowercase completely, only "same origin policy" parts will be lowercased to avoid broken ajax calls
+* Bugfix: false positive XSS vulnerablities handled anyway, all reported vulnerabilities require always an admin login (admin permission) to be executable and are all false positive
 * Bugfix: last 4 plugin versions damaged the backward compatibility downto WordPress version 2.5 and has been repaired to support also this old versions of WordPress again
-* Bugfix: show writing indicator during long time write operations of large mo files.
+* Bugfix: writing indicator during long time write operations of large mo files was missing
 * Bugfix: *.po files writen with refreshed revision date automatically
 * Bugfix: re-scan process refreshes the Product-Id-Version field of *.po file
 * Bugfix: minor visibility adjustments 

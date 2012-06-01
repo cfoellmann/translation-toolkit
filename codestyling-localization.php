@@ -2029,7 +2029,7 @@ function csp_callback_help_overview() {
 		<a href="http://wordpress.org/extend/plugins/codestyling-localization/" target="_blank">Plugin Directory</a> | 
 		<a href="http://wordpress.org/extend/plugins/codestyling-localization/changelog/" target="_blank">Change Logs</a> | 
 		<a href="<?php echo CSP_PO_BASE_URL."/license.txt";?>" target="_blank">License</a> 
-		<a class="alignright" href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank">Admin Center at your Language</a>
+		<a class="alignright" href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank"><?php _e('Dashboard in your Language',CSP_PO_TEXTDOMAIN);?></a>
 	</p>
 <?php
 }
