@@ -200,10 +200,80 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 	}
 	
 	function write_pofile($pofile, $last = false, $textdomain = false, $tds = 'yes') {
+		global $wp_filesystem, $parent_file;
+		$current_parent  = $parent_file;
+		$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+		if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+					
+		//check the file system
+		ob_start();
+		$url = 'admin-ajax.php';
+		if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+			$data = ob_get_contents();
+			ob_end_clean();
+			if( ! empty($data) ){
+				header('Status: 401 Unauthorized');
+				header('HTTP/1.1 401 Unauthorized');
+				echo $data;
+				exit;
+			}
+			return;
+		}
+
+		if ( ! WP_Filesystem($credentials) ) {
+			request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+			$data = ob_get_contents();
+			ob_end_clean();
+			if( ! empty($data) ){
+				header('Status: 401 Unauthorized');
+				header('HTTP/1.1 401 Unauthorized');
+				echo $data;
+				exit;
+			}
+			return;
+		}
+		ob_end_clean();
+		$parent_file = $current_parent;
+		
 		return parent::write_pofile($pofile, $last, $textdomain, $tds);
 	}
 
 	function write_mofile($mofile, $textdomain) {
+		global $wp_filesystem, $parent_file;
+		$current_parent  = $parent_file;
+		$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+		if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+					
+		//check the file system
+		ob_start();
+		$url = 'admin-ajax.php';
+		if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+			$data = ob_get_contents();
+			ob_end_clean();
+			if( ! empty($data) ){
+				header('Status: 401 Unauthorized');
+				header('HTTP/1.1 401 Unauthorized');
+				echo $data;
+				exit;
+			}
+			return;
+		}
+
+		if ( ! WP_Filesystem($credentials) ) {
+			request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+			$data = ob_get_contents();
+			ob_end_clean();
+			if( ! empty($data) ){
+				header('Status: 401 Unauthorized');
+				header('HTTP/1.1 401 Unauthorized');
+				echo $data;
+				exit;
+			}
+			return;
+		}
+		ob_end_clean();
+		$parent_file = $current_parent;
+		
 		return parent::write_mofile($mofile, $textdomain);
 	}
 	

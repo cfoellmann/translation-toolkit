@@ -1480,12 +1480,11 @@ function csp_po_ajax_handle_create() {
 	
 	$pofile = new CspFileSystem_TranslationFile();
 	$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
-	/*
+
 	$ok = $pofile->read_pofile(strip_tags($_POST['transtemplate']));
 	if ($ok) 
 		$ok = $pofile->write_pofile($filename, false, strip_tags($_POST['textdomain']));
-	if (!$ok)
-	*/
+	if (!$ok) {
 		$ok = $pofile->create_pofile(
 			$filename, 
 			strip_tags($_POST['subpath']),
@@ -1496,7 +1495,7 @@ function csp_po_ajax_handle_create() {
 			$csp_l10n_sys_locales[$_POST['language']]['lang'], 
 			$csp_l10n_sys_locales[$_POST['language']]['country']
 		);
-	
+	}
 	if(!$ok) {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
@@ -3243,6 +3242,7 @@ function csp_scan_source_files() {
 		if ($('csp-dialog-cancel').visible()) {
 			csp_cancel_dialog();
 			csp_php_source_json = 0;
+			csp_ajax_params.action = '';
 			return false;
 		}
 		$('csp-dialog-scan-info').hide();
@@ -3254,19 +3254,30 @@ function csp_scan_source_files() {
 		elem.title = csp_php_source_json.title;
 		return false;
 	}
+	
+	if(csp_ajax_params.action.length) {
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});		
+	}
+	else{
+		csp_ajax_params.action = 'csp_po_scan_source_file';
+		csp_ajax_params.name = csp_php_source_json.name;
+		csp_ajax_params.type = csp_php_source_json.type;
+		csp_ajax_params.pofile = csp_php_source_json.pofile;
+		csp_ajax_params.textdomain = csp_php_source_json.textdomain;
+		csp_ajax_params.num = csp_php_source_json.next;
+		csp_ajax_params.cnt = csp_chuck_size;
+		csp_ajax_params.path = csp_php_source_json.path;
+		csp_ajax_params.php = csp_php_source_json.files.join("|");
+	}
+	
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_scan_source_file',
-				name: csp_php_source_json.name,
-				type: csp_php_source_json.type,
-				pofile: csp_php_source_json.pofile,
-				textdomain: csp_php_source_json.textdomain,
-				num: csp_php_source_json.next,
-				cnt: csp_chuck_size,
-				path: csp_php_source_json.path,
-				php: csp_php_source_json.files.join("|")
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 				try{
 					csp_php_source_json.title = transport.responseJSON.title;
@@ -3279,8 +3290,10 @@ function csp_scan_source_files() {
 					mem_reg.exec(transport.responseText);
 					error_text = "<?php _e('You are trying to rescan files which expands above your PHP Memory Limit at %s MB during the analysis.<br/>Please enable the <em>low memory mode</em> for scanning this component.',CSP_PO_TEXTDOMAIN); ?>";
 					csp_show_error(error_text.replace('%s', RegExp.$1 / 1024.0 / 1024.0));
+					csp_ajax_params.action = '';
 				}
 				csp_php_source_json.next += csp_chuck_size;
+				csp_ajax_params.num = csp_php_source_json.next;
 				var perc = Math.min(Math.round(csp_php_source_json.next*1000.0/csp_php_source_json.files.size())/10.0, 100.00);
 				$('csp-dialog-progressvalue').update(Math.min(csp_php_source_json.next, csp_php_source_json.files.size()));
 				$('csp-dialog-progressbar').setStyle({'width' : ''+perc+'%'});
@@ -3288,11 +3301,40 @@ function csp_scan_source_files() {
 				csp_scan_source_files().delay(0.1);
 			},
 			onFailure: function(transport) {
-				$('csp-dialog-scan-info').hide();
-				$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', CSP_PO_TEXTDOMAIN); ?>' });
-				$('csp-dialog-cancel').show();
-				csp_php_source_json = 0;
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								csp_scan_source_files();
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+								csp_php_source_json = 0;
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {			
+					$('csp-dialog-scan-info').hide();
+					$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', CSP_PO_TEXTDOMAIN); ?>' });
+					$('csp-dialog-cancel').show();
+					csp_php_source_json = 0;
+					csp_show_error(transport.responseText);
+				}
 			}
 		}
 	); 	
@@ -3442,19 +3484,29 @@ function csp_cancel_dialog(){
 }
 
 function csp_launch_editor(elem, file, path, textdomain) {
-	var a = $(elem).up('table').summary.split('|');
-	$('csp-wrap-main').hide();
-	$('csp-wrap-editor').show();
-	$('prj-id-ver').update(a[2]);
+	if(csp_ajax_params.action.length) {
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});		
+	}
+	else{
+		var a = $(elem).up('table').summary.split('|');
+		$('csp-wrap-main').hide();
+		$('csp-wrap-editor').show();
+		$('prj-id-ver').update(a[2]);
+
+		csp_ajax_params.action = 'csp_po_launch_editor';
+		csp_ajax_params.basepath = path;
+		csp_ajax_params.file = file;
+		csp_ajax_params.textdomain = textdomain;
+		csp_ajax_params.type = a[1];
+	}		
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_launch_editor',
-				basepath: path,
-				file: file,
-				textdomain: textdomain,
-				type: a[1]
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 				//switch to editor now
 				try{
@@ -3480,7 +3532,35 @@ function csp_launch_editor(elem, file, path, textdomain) {
 				csp_init_editor(a[0], a[1]);
 			},
 			onFailure: function(transport) {
-				$('catalog-body').update('<tr><td colspan="4" align="center" style="color:#f00;">'+transport.responseText+'</td></tr>');
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					$('catalog-body').update('<tr><td colspan="4" align="center" style="color:#f00;">'+transport.responseText+'</td></tr>');
+				}
 			}
 		}
 	); 
@@ -3812,17 +3892,25 @@ function csp_save_translation(elem, isplural, additional_action){
 	}
 	//add the context in front of again
 	if (csp_pofile[idx].ctx) msgid = csp_pofile[idx].ctx+ String.fromCharCode(4) + msgid;
+	
+	jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+		if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+		var s = jQuery(e).attr('name');
+		var v = jQuery(e).val();
+		csp_ajax_params[s] = v;
+	});
+	
+	csp_ajax_params.action = 'csp_po_save_catalog_entry';
+	csp_ajax_params.path = csp_path;
+	csp_ajax_params.file = csp_file;
+	csp_ajax_params.isplural = isplural;
+	csp_ajax_params.msgid = msgid;
+	csp_ajax_params.msgstr = msgstr;
+	csp_ajax_params.msgidx = idx;
+		
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_save_catalog_entry',
-				path: csp_path,
-				file: csp_file,
-				isplural: isplural,
-				msgid: msgid,
-				msgstr: msgstr,
-				msgidx: idx
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 				if (isplural && (csp_num_plurals != 1)) {
 					csp_pofile[idx].val = msgstr.split(glue);
@@ -3856,12 +3944,45 @@ function csp_save_translation(elem, isplural, additional_action){
 				else {
 					csp_cancel_dialog();
 				}
+				csp_ajax_params.action = '';
 			},
 			onFailure: function(transport) {
-				$('csp-dialog-saving').hide();
-				$('csp-dialog-body').show();
-				//opera bug: Opera has in case of error no valid responseText (always empty), even if server sends it! Ensure status text instead (dirty fallback)
-				csp_show_error( (Prototype.Browser.Opera ? transport.statusText : transport.responseText));
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								csp_save_translation(elem, isplural, additional_action);
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+								if (additional_action != 'close') {
+									$('csp-dialog-body').show();
+									$('csp-dialog-saving').hide();
+								}
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {				
+					$('csp-dialog-saving').hide();
+					$('csp-dialog-body').show();
+					//opera bug: Opera has in case of error no valid responseText (always empty), even if server sends it! Ensure status text instead (dirty fallback)
+					csp_show_error( (Prototype.Browser.Opera ? transport.statusText : transport.responseText));
+				}
 			}
 		}
 	); 	
@@ -3875,6 +3996,14 @@ function csp_suppress_enter(event) {
 function csp_copy_catalog(elem) {
 	elem = $(elem);
 	elem.blur();
+
+	jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+		if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+		var s = jQuery(e).attr('name');
+		var v = jQuery(e).val();
+		csp_ajax_params[s] = v;
+	});
+		
 	var msg_idx = parseInt(elem.up().up().id.replace('msg-row-',''));
 	msgid = csp_pofile[msg_idx].key;
 	msgstr = csp_pofile[msg_idx].key;
@@ -3887,17 +4016,18 @@ function csp_copy_catalog(elem) {
 			msgstr = msgid;
 		}
 	}
+	
+	csp_ajax_params.action = 'csp_po_save_catalog_entry';
+	csp_ajax_params.path = csp_path;
+	csp_ajax_params.file = csp_file;
+	csp_ajax_params.isplural =  Object.isArray(csp_pofile[msg_idx].key);
+	csp_ajax_params.msgid = msgid;
+	csp_ajax_params.msgstr = msgstr;
+	csp_ajax_params.msgidx = msg_idx;
+	
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_save_catalog_entry',
-				path: csp_path,
-				file: csp_file,
-				isplural: Object.isArray(csp_pofile[msg_idx].key),
-				msgid: msgid,
-				msgstr: msgstr,
-				msgidx: msg_idx
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 				idx = msg_idx;
 				if (Object.isArray(csp_pofile[msg_idx].key) && (csp_num_plurals != 1)) {
@@ -3911,9 +4041,38 @@ function csp_copy_catalog(elem) {
 					csp_idx.open = csp_idx.open.without(idx); 
 				}
 				csp_change_pagenum(csp_pagenum);
+				csp_ajax_params.action = '';
 			},
 			onFailure: function(transport) {
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					csp_show_error(transport.responseText);
+				}
 			}
 		}
 	); 	
@@ -4035,22 +4194,60 @@ function csp_generate_mofile(elem) {
 	elem.blur();
 	$('csp-generate-mofile').show();
 	$('catalog-last-saved').hide();
+	
+	jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+		if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+		var s = jQuery(e).attr('name');
+		var v = jQuery(e).val();
+		csp_ajax_params[s] = v;
+	});
+
+	csp_ajax_params.action = 'csp_po_generate_mo_file';
+	csp_ajax_params.pofile = csp_path + csp_file;
+	csp_ajax_params.textdomain = $('csp-mo-textdomain-val').value;
+	
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_generate_mo_file',
-				pofile: csp_path + csp_file,
-				textdomain: $('csp-mo-textdomain-val').value
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 			$('csp-generate-mofile').hide();
 			$('catalog-last-saved').show();
 				new Effect.Highlight($('catalog-last-saved').update(transport.responseJSON.filetime), { startcolor: '#25FF00', endcolor: '#FFFFCF' });
 			},
 			onFailure: function(transport) {
-				$('csp-generate-mofile').hide();
-				$('catalog-last-saved').show();
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+								$('csp-generate-mofile').hide();
+								$('catalog-last-saved').show();
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					$('csp-generate-mofile').hide();
+					$('catalog-last-saved').show();
+					csp_show_error(transport.responseText);
+				}
 			}
 		}
 	); 
