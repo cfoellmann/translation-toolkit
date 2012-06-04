@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: CodeStyling Localization v1.99.21-beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-25 03:13+0100\n"
-"PO-Revision-Date: 2012-06-04 05:42:11+0000\n"
+"PO-Revision-Date: 2012-06-04 11:08:40+0000\n"
 "Last-Translator: Heiko Rabe <info@code-styling.de>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1391,7 +1391,7 @@ msgstr ""
 #: codestyling-localization.php:2158
 #@ codestyling-localization
 msgid "How to edit files with this error message ?"
-msgstr "Gewusst wie: Bearbeiten von Dateien mit dieser Fehlermeldung?"
+msgstr "Wie bearbeitet man Dateien mit dieser Fehlermeldung?"
 
 #: codestyling-localization.php:2161
 #@ codestyling-localization

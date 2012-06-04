@@ -252,7 +252,7 @@ class CspTranslationFile {
 		return ($this->header['X-Textdomain-Support'] == 'yes');
 	}
 	
-	function create_pofile($pofile, $base_file, $proj_id, $timestamp, $translator, $pluralforms, $language, $country) {
+	function new_pofile($pofile, $base_file, $proj_id, $timestamp, $translator, $pluralforms, $language, $country) {
 		$rel = $this->_build_rel_path($base_file);
 		preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $pofile, $hits);
 		$po_lang = $this->strings->_substr($hits[1],0,2);
@@ -261,9 +261,9 @@ class CspTranslationFile {
 			"Project-Id-Version: $proj_id\nPO-Revision-Date: $timestamp\nLast-Translator: $translator\nX-Poedit-Language: $language\nX-Poedit-Country: $country\nX-Poedit-Basepath: $rel\nPlural-Forms: \nX-Textdomain-Support: yes",
 			$po_lang
 		);
-		return $this->write_pofile($pofile);
+		return true;
 	}
-	
+		
 	function read_pofile($pofile, $check_plurals=false, $base_file=false) {
 		if (!empty($pofile) && file_exists($pofile) && is_readable($pofile)) {		
 			$handle = fopen($pofile,'rb');
@@ -413,6 +413,78 @@ class CspTranslationFile {
 		}
 		fclose($handle);	
 		return true;
+	}
+
+	function ftp_get_pofile_content($pofile, $last = false, $textdomain = false, $tds = 'yes') {
+		$content = '';
+		//set the plurals and multi textdomain support
+		//update the revision date
+		$stamp = date("Y-m-d H:i:sO");
+		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds");
+
+		//write header if last because it has no code ref anyway
+		if ($last === true) {
+			$content .= 'msgid ""'."\n";
+			$content .= 'msgstr '.$this->_clean_export($this->map['']['T'])."\n\n";
+		}
+		
+		foreach($this->map as $key => $entry) {
+			
+			if ((is_array($entry['R']) && (count($entry['R']) > 0)) || ($last === false)) {
+						
+				if (is_array($entry['CT'])) {
+					foreach($entry['CT'] as $comt) {
+						$content .= '#  '.$comt."\n";
+					}
+				}
+				if (is_array($entry['CC'])) {
+					foreach($entry['CC'] as $comc) {
+						$content .= '#. '.$comc."\n";
+					}
+				}
+				if (is_array($entry['R'])) {
+					foreach($entry['R'] as $ref) {
+						$content .=  '#: '.$ref."\n";
+					}
+				}
+				if (is_array($entry['F']) && count($entry['F'])) {
+					$content .= '#, '.implode(', ', $entry['F'])."\n";
+				}				
+				if (is_array($entry['LTD']) && count($entry['LTD'])) {
+					foreach($entry['LTD'] as $domain) {
+						if(!empty($domain)) $content .= '#@ '.$domain."\n";
+					}
+				}elseif($textdomain) {
+					$content .= '#@ '.$textdomain."\n";
+				}
+				
+				if($entry['P'] !== false) {
+					list($msgid, $msgid_plural) = explode("\0", $key);
+					if ($entry['X'] !== false) {
+						list($ctx, $msgid) = explode("\04", $msgid);
+						$content .= 'msgctxt '.$this->_clean_export($ctx)."\n";
+					}
+					$content .= 'msgid '.$this->_clean_export($msgid)."\n";
+					$content .= 'msgid_plural '.$this->_clean_export($msgid_plural)."\n";
+					$msgstr_arr = explode("\0", $entry['T']);
+					for ($i=0; $i<count($msgstr_arr); $i++) {
+						$content .= 'msgstr['.$i.'] '.$this->_clean_export($msgstr_arr[$i])."\n";
+					}
+				}
+				else{
+					$msgid = $key;
+					if ($entry['X'] !== false) {
+						list($ctx, $msgid) = explode("\04", $key);
+						$content .= 'msgctxt '.$this->_clean_export($ctx)."\n";
+					}
+					$content .= 'msgid '.$this->_clean_export($msgid)."\n";
+					$content .= 'msgstr '.$this->_clean_export($entry['T'])."\n";
+				}
+				$content .= "\n";
+				
+			}
+		}
+		return $content;
 	}
 	
 	function read_mofile($mofile, $check_plurals, $base_file=false, $default_textdomain='') {
@@ -584,6 +656,49 @@ class CspTranslationFile {
 		fwrite($handle,$trans_table);
 		fclose($handle);	
 		return true;
+	}
+	
+	function ftp_get_mofile_content($mofile, $textdomain) {
+		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
+		if (isset($this->map["continents-cities\04Center"])) {
+			$trans = $this->map["continents-cities\04Center"];
+			unset($this->map["continents-cities\04Center"]);
+			$this->map["Center"] = $trans;
+		}
+		
+		$content = '';
+		
+		ksort($this->map, SORT_REGULAR);
+		//let's calculate none empty values	
+		$entries = 0;
+		foreach($this->map as $key => $value) {
+			if($this->_is_valid_entry($value, $textdomain)) { $entries++; }
+		}
+		$tab_size = $entries * 8;
+		//header: little endian magic|revision|entries|offset originals|offset translations|hashing table size|hashing table ofs
+		$header = pack('NVVVVVV@'.(28+$tab_size*2),0xDE120495,0x00000000,$entries,28,28+$tab_size,0x00000000,28+$tab_size*2);
+		$org_table = '';
+		$trans_table = '';
+		$content .= $header;
+		foreach($this->map as $key => $value) {
+			if ($this->_is_valid_entry($value, $textdomain)) {
+				$l=$this->strings->_strlen($key);
+				$org_table .= pack('VV', $l, strlen($content)); 
+				$res = pack('A'.$l.'x',$key);
+				$content .= $res;
+			}
+		}
+		foreach($this->map as $key => $value) {
+			if ($this->_is_valid_entry($value, $textdomain)) {
+				$l=$this->strings->_strlen($value['T']);
+				$trans_table .= pack('VV', $l, strlen($content)); 
+				$res = pack('A'.$l.'x',$value['T']);
+				$content .= $res;
+			}
+		}
+		$content = substr_replace($content, $org_table, 28, strlen($org_table));
+		$content = substr_replace($content, $trans_table, 28 + strlen($org_table), strlen($trans_table));
+		return $content;
 	}
 	
 	function _reset_data(&$val, $key) {

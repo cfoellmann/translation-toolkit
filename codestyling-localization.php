@@ -1480,12 +1480,13 @@ function csp_po_ajax_handle_create() {
 	
 	$pofile = new CspFileSystem_TranslationFile();
 	$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
-
+/*
 	$ok = $pofile->read_pofile(strip_tags($_POST['transtemplate']));
 	if ($ok) 
 		$ok = $pofile->write_pofile($filename, false, strip_tags($_POST['textdomain']));
 	if (!$ok) {
-		$ok = $pofile->create_pofile(
+*/	
+		$pofile->new_pofile(
 			$filename, 
 			strip_tags($_POST['subpath']),
 			strip_tags($_POST['name']), 
@@ -1495,7 +1496,8 @@ function csp_po_ajax_handle_create() {
 			$csp_l10n_sys_locales[$_POST['language']]['lang'], 
 			$csp_l10n_sys_locales[$_POST['language']]['country']
 		);
-	}
+		$ok = $pofile->write_pofile($filename);
+//	}
 	if(!$ok) {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
@@ -2062,6 +2064,9 @@ function csp_callback_help_low_memory() {
 </p>
 <p>
 <?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+<?php _e('It could be, that your provider confirms, that you have enough PHP memory for your installation but it is not. You can detect your real available memory limit using the plugin <a href="http://wordpress.org/extend/plugins/wp-system-health/" target="_blank">WP System Health</a>. It has a build in feature (called <em>Test Suite</em>) to evaluate correctly the memory limit the server will permit.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 <?php
 }
