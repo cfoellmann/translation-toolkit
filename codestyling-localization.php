@@ -2136,7 +2136,7 @@ function csp_callback_help_filepermissions() {
 	<strong><?php _e('Permit File Modifications without prompting for User Credentials', CSP_PO_TEXTDOMAIN); ?></strong>
 </p>
 <p>
-	<?php _e('You can define the necessary constants at your <em>wp-config.php</em> file as described at the <a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants" target="_blank">WordPress Codex Page - Upgrade Constants</a> to get it working at your installation. If your constants are properly defined, this plugin will work smoothly and the WordPress Automatic Updates will work without any further question about FTP User Credentials too.', CSP_PO_TEXTDOMAIN); ?>
+	<?php _e('You can define the necessary constants at your <em>wp-config.php</em> file as described at the <a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants" target="_blank">WordPress Codex Page - Upgrade Constants</a> to get it working at your installation without recurrently occuring credential requests. If your constants are properly defined, this plugin will work smoothly and the WordPress Automatic Updates will work without any further question about FTP User Credentials too.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 
 <?php
