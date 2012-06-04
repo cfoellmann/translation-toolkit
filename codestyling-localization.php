@@ -2,8 +2,8 @@
 /*
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
-Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation.<b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.20
+Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
+Version: 1.99.21-beta
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -1476,23 +1476,25 @@ function csp_po_ajax_handle_create() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
 	require_once('includes/locale-definitions.php');
-	require_once('includes/class-translationfile.php');
-	$pofile = new CspTranslationFile();
-	$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
+	require_once('includes/class-filesystem-translationfile.php');
 	
+	$pofile = new CspFileSystem_TranslationFile();
+	$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
+	/*
 	$ok = $pofile->read_pofile(strip_tags($_POST['transtemplate']));
 	if ($ok) 
 		$ok = $pofile->write_pofile($filename, false, strip_tags($_POST['textdomain']));
 	if (!$ok)
+	*/
 		$ok = $pofile->create_pofile(
-		$filename, 
-		strip_tags($_POST['subpath']),
-		strip_tags($_POST['name']), 
-		strip_tags($_POST['timestamp']), 
-		$_POST['translator'], 
-		$csp_l10n_plurals[substr($_POST['language'],0,2)], 
-		$csp_l10n_sys_locales[$_POST['language']]['lang'], 
-		$csp_l10n_sys_locales[$_POST['language']]['country']
+			$filename, 
+			strip_tags($_POST['subpath']),
+			strip_tags($_POST['name']), 
+			strip_tags($_POST['timestamp']), 
+			$_POST['translator'], 
+			$csp_l10n_plurals[substr($_POST['language'],0,2)], 
+			$csp_l10n_sys_locales[$_POST['language']]['lang'], 
+			$csp_l10n_sys_locales[$_POST['language']]['country']
 		);
 	
 	if(!$ok) {
@@ -1531,14 +1533,13 @@ function csp_po_ajax_handle_destroy() {
 	$pofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
 	$mofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.mo';
 	$error = false;
-	if (file_exists($pofile)) if (!@unlink($pofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $pofile);
-	if (file_exists($mofile)) if (!@unlink($mofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
-	if ($error) {
-		header('Status: 404 Not Found');
-		header('HTTP/1.1 404 Not Found');
-		echo $error;
-		exit();
-	}
+	
+	require_once('includes/class-filesystem-translationfile.php');
+	$transfile = new CspFileSystem_TranslationFile();
+	
+	$transfile->destroy_pofile($pofile);
+	$transfile->destroy_mofile($mofile);
+	
 	$num = (int)$_POST['numlangs'] - 1;
 	header('Content-Type: application/json');
 ?>
@@ -1571,11 +1572,11 @@ function csp_po_ajax_handle_scan_source_file() {
 
 	$low_mem_scanning = (bool)get_option('codestyling-localization.low-memory', false);
 	
-	require_once('includes/class-translationfile.php');
+	require_once('includes/class-filesystem-translationfile.php');
 	require_once('includes/locale-definitions.php');
 	$textdomain = $_POST['textdomain'];
 	//TODO: give the domain into translation file as default domain
-	$pofile = new CspTranslationFile($_POST['type']);
+	$pofile = new CspFileSystem_TranslationFile($_POST['type']);
 	//BUGFIX: 1.90 - may be, we have only the mo but no po, so we dump it out as base po file first
 	if (!file_exists($_POST['pofile'])) {
 		//try implicite convert first and reopen as po second
@@ -1604,7 +1605,7 @@ function csp_po_ajax_handle_scan_source_file() {
 			}
 		}
 	}		
-	$pofile = new CspTranslationFile($_POST['type']);
+	$pofile = new CspFileSystem_TranslationFile($_POST['type']);
 	if ($pofile->read_pofile($_POST['pofile'])) {
 		if ((int)$_POST['num'] == 0) { 
 		
@@ -1672,6 +1673,12 @@ function csp_po_ajax_handle_change_permission() {
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
 	$filename = strip_tags($_POST['file']);
 	$error = false;
+	
+	require_once('includes/class-filesystem-translationfile.php');
+	$transfile = new CspFileSystem_TranslationFile();
+	
+	$transfile->change_permission($filename);
+/*	
 	if (file_exists($filename)) {
 		@chmod($filename, 0644);
 		if(!is_writable($filename)) {
@@ -1686,12 +1693,12 @@ function csp_po_ajax_handle_change_permission() {
 	if ($error) {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
-		echo $error;			
+		echo $error;	
+		exit();
 	}
-	else{
-		header('Content-Type: application/json');
-		echo '{ title: "'.date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename).'" }';
-	}
+*/
+	header('Content-Type: application/json');
+	echo '{ title: "'.date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename).'" }';
 	exit();
 }
 
@@ -1699,8 +1706,9 @@ function csp_po_ajax_handle_launch_editor() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
 	require_once('includes/locale-definitions.php');
-	require_once('includes/class-translationfile.php');
-	$f = new CspTranslationFile($_POST['type']);
+//	require_once('includes/class-translationfile.php');
+	require_once('includes/class-filesystem-translationfile.php');
+	$f = new CspFileSystem_TranslationFile($_POST['type']);
 	if (!file_exists($_POST['basepath'].$_POST['file'])) {
 		//try implicite convert first
 		if($f->read_mofile(substr($_POST['basepath'].$_POST['file'],0,-2)."mo", $csp_l10n_plurals, $_POST['file'], $_POST['textdomain'])) {
@@ -1728,7 +1736,7 @@ function csp_po_ajax_handle_launch_editor() {
 			}
 		}
 	}
-	$f = new CspTranslationFile($_POST['type']);
+	$f = new CspFileSystem_TranslationFile($_POST['type']);
 	$f->read_pofile($_POST['basepath'].$_POST['file'], $csp_l10n_plurals, $_POST['file']);
 	if (!$f->supports_textdomain_extension() && $_POST['type'] == 'wordpress'){
 		//try to merge up first all splitted translations.
@@ -1754,6 +1762,7 @@ function csp_po_ajax_handle_launch_editor() {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
 		_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",CSP_PO_TEXTDOMAIN);
+		?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="translationformat"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><?php
 	}
 	exit();
 }
@@ -1847,8 +1856,9 @@ function csp_po_ajax_handle_translate_by_microsoft() {
 function csp_po_ajax_handle_save_catalog_entry() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
-	require_once('includes/class-translationfile.php');
-	$f = new CspTranslationFile();
+//	require_once('includes/class-translationfile.php');
+	require_once('includes/class-filesystem-translationfile.php');
+	$f = new CspFileSystem_TranslationFile();
 	//opera bugfix: replace embedded \1 with \0 because Opera can't send embeded 0
 	$_POST['msgid'] = str_replace("\1", "\0", $_POST['msgid']);
 	$_POST['msgstr'] = str_replace("\1", "\0", $_POST['msgstr']);
@@ -1877,10 +1887,11 @@ function csp_po_ajax_handle_save_catalog_entry() {
 function csp_po_ajax_handle_generate_mo_file(){
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
-	require_once('includes/class-translationfile.php');
+//	require_once('includes/class-translationfile.php');
+	require_once('includes/class-filesystem-translationfile.php');
 	$pofile = (string)$_POST['pofile'];
 	$textdomain = (string)$_POST['textdomain'];
-	$f = new CspTranslationFile();
+	$f = new CspFileSystem_TranslationFile();
 	if (!$f->read_pofile($pofile)) {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
@@ -1995,6 +2006,17 @@ if (function_exists('add_action')) {
 	}
 	if(is_admin()) {
 		add_action('admin_init', 'csp_po_init_per_user_trans');	
+		add_action('admin_init', 'csp_check_filesystem');
+	}
+}
+
+function csp_check_filesystem() {
+	//file system investigation
+	if (function_exists('get_filesystem_method')) {
+		$fsm = get_filesystem_method(array());
+		define("CSL_FILESYSTEM_DIRECT", $fsm == 'direct');
+	}else{
+		define("CSL_FILESYSTEM_DIRECT", true);
 	}
 }
 
@@ -2037,6 +2059,9 @@ function csp_callback_help_overview() {
 function csp_callback_help_low_memory() {
 ?>
 <p>
+	<strong><?php _e('PHP Memory Limit Problems', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
 <?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 <?php
@@ -2044,6 +2069,9 @@ function csp_callback_help_low_memory() {
 
 function csp_callback_help_compatibility() {
 ?>
+<p>
+	<strong><?php _e('Compatibility - Hints and Errors', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
 <p> 
 	<?php _e("If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins.",CSP_PO_TEXTDOMAIN); ?> 
 	<?php _e("There are several reason for such reports, but in each of this cases only the original author can solve it:",CSP_PO_TEXTDOMAIN); ?>
@@ -2070,6 +2098,9 @@ function csp_callback_help_compatibility() {
 function csp_callback_help_textdomain() {
 ?>
 <p>
+	<strong><?php _e('What is a textdomain?', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
 	<?php _e('Textdomains are used to specified the context for the translation file to be loaded and processed. If a component tries to load a translation file using a textdomain, all texts assigned to this domain gets translated during page creation.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 <p>
@@ -2094,12 +2125,52 @@ function csp_callback_help_textdomain() {
 <?php
 }
 
+function csp_callback_help_filepermissions() {
+?>
+<p>
+	<strong><?php _e('File Permission and Access Rights', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('Your provider does not permit the ability to modify files at your installation by executed scripts. This translation plugins requires this permission to work properly. WordPress solves this at updates by presenting a dialog for your FTP parameters. This plugin will prompt for your FTP credentials if they are required.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<strong><?php _e('Permit File Modifications without prompting for User Credentials', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('You can define the necessary constants at your <em>wp-config.php</em> file as described at the <a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants" target="_blank">WordPress Codex Page - Upgrade Constants</a> to get it working at your installation. If your constants are properly defined, this plugin will work smoothly and the WordPress Automatic Updates will work without any further question about FTP User Credentials too.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+
+<?php
+}
+
+function csp_callback_help_translationformat() {
+?>
+<p>
+	<strong><?php _e('Extended Translation File Format', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('You may get an error message if you try to open a translation file for editing. The reason behind is the necessary separation of contained textdomains within your components code to be translated.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<?php _e('Many authors do not care, if they mix up textdomains during code writing. Furthermore the textdomain <b><em>default</em></b> will be used by WordPress itself only. Any text assigned to the textdomain <b><em>default</em></b> will become untranslated at output even if you would translate it. Thats why this plugin separates this textdomains to show up possible mistakes.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<strong><?php _e('How to edit files with this error message ?', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('Just go back the the overview page, search your affected plugin/theme and re-scan the translation content. Afterwards it will be possible to open the translation file for editing.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<?php
+}
+
 function csp_load_po_edit_admin_page(){
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_script('prototype');
+	wp_enqueue_script('jquery-ui-dialog');
 	wp_enqueue_script('scriptaculous-effects');
 	if (function_exists('wp_enqueue_style')) {
 		wp_enqueue_style( 'thickbox' );
+		wp_enqueue_style('codestyling-localization-ui', CSP_PO_BASE_URL.'/css/ui.all.css');
 		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/codestyling-localization.php?css=default&amp;dir='.((function_exists('is_rtl') && is_rtl()) ? 'rtl' : 'ltr'));
 	}
 	//prevent WP E-Commerce scripts from removing protoype at my pages!
@@ -2134,17 +2205,31 @@ function csp_load_po_edit_admin_page(){
 		
 		$content = array();
 		$screen->add_help_tab(array(
-			'title' => __('Compatibility / Warnings', CSP_PO_TEXTDOMAIN),
+			'title' => __('Compatibility', CSP_PO_TEXTDOMAIN),
 			'id' => 'compatibility',
 			'content' => '',
 			'callback' => 'csp_callback_help_compatibility'
 		));
 		$screen->add_help_tab(array(
-			'title' => 'Textdomains / Warnings',
+			'title' => __('Textdomains', CSP_PO_TEXTDOMAIN),
 			'id' => 'textdomain',
 			'content' => '',
 			'callback' => 'csp_callback_help_textdomain'
 		));
+		$screen->add_help_tab(array(
+			'title' => __('Translation Format', CSP_PO_TEXTDOMAIN),
+			'id' => 'translationformat',
+			'content' => '',
+			'callback' => 'csp_callback_help_translationformat'
+		));	
+		if (CSL_FILESYSTEM_DIRECT !== true) {
+			$screen->add_help_tab(array(
+				'title' => __('File Permissions', CSP_PO_TEXTDOMAIN),
+				'id' => 'filepermissions',
+				'content' => '',
+				'callback' => 'csp_callback_help_filepermissions'
+			));
+		}
 		$content = array();
 		$content[]= "<p><strong>".__("For more information:",CSP_PO_TEXTDOMAIN)."</strong></p>";
 		$content[]= "<p><a target=\"_blank\" href=\"http://www.code-styling.de/\">Code Styling Project</a></p>";
@@ -2181,7 +2266,7 @@ function csp_po_admin_menu() {
 	}	
 }
 function csp_extend_user_profile($profileuser) {
-	if (!is_object($profiluser)) {
+	if (!@is_object($profiluser)) {
 		$profileuser = wp_get_current_user();
 	}
 	$func = function_exists('get_user_meta') ? 'get_user_meta' : 'get_usermeta';
@@ -2247,12 +2332,17 @@ function csp_po_main_page() {
 <div id="csp-wrap-main" class="wrap">
 <div class="icon32" id="icon-tools"><br/></div>
 <h2><?php _e('Manage Language Files', CSP_PO_TEXTDOMAIN); ?></h2>
+<?php if (CSL_FILESYSTEM_DIRECT !== true) : ?>
+	<div>
+	<p class="warning"><strong><?php _e('File Permission Problem:',CSP_PO_TEXTDOMAIN);?></strong> <?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', CSP_PO_TEXTDOMAIN); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="filepermissions"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
+	</div>
+<?php endif; ?>
 <p>
 	<input id= "enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>> <label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label> <img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading-small.gif"?>" />
 	<?php if (version_compare($wp_version, '3.3', '<')) : ?>
 	<br /><small><?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?></small>
 	<?php else : ?>
-	&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
+	&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
 	<?php endif; ?>
 </p>
 <p class="translation-apis">
@@ -2409,7 +2499,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 			<?php if (isset($data['dev-hints'])) : ?>
 			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 			<tr>
-				<td><strong style="color: #f00;"><?php _e('Compatibility',CSP_PO_TEXTDOMAIN); ?>:</strong>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
+				<td><strong style="color: #f00;"><?php _e('Compatibility',CSP_PO_TEXTDOMAIN); ?>:</strong>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
 				<td class="csp-info-value"><?php echo $data['dev-hints'];?></td>
 			</tr>
 			<?php endif; ?>
@@ -2644,7 +2734,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 			_e('Expect, that any text you translate will not occure as long as the textdomain is mismatching!',CSP_PO_TEXTDOMAIN); 
 			echo '<br/>';
 			_e('This is a coding issue at the source files you try to translate, please contact the original Author and explain this mismatch.',CSP_PO_TEXTDOMAIN); 
-		?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
+		?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
 		<p id="textdomain-warning" class="hidden"><small><?php 
 			_e('<strong>Warning</strong>: The actual loaded translation content contains mixed textdomains and is not pure translateable within one textdomain.',CSP_PO_TEXTDOMAIN); 
 			echo '<br/>';
@@ -2652,8 +2742,8 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 			echo '<br/>';
 			_e('The affected unknown textdomains are:',CSP_PO_TEXTDOMAIN); 
 			echo '&nbsp;<span>&nbsp;</span>';		
-		?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
-		<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:',CSP_PO_TEXTDOMAIN); ?></b>&nbsp;&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What's this?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
+		?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
+		<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:',CSP_PO_TEXTDOMAIN); ?></b>&nbsp;&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
 		<div class="alignleft">&nbsp;&nbsp;<input id="csp-write-mo-file" class="button button-secondary" style="display:none" type="submit" value="<?php _e('generate mo-file', CSP_PO_TEXTDOMAIN); ?>" onclick="csp_generate_mofile(this);" /></div>
 		<div class="alignleft" style="margin-left:10px;font-size:11px;padding-top:3px;"><?php _e('last written:',CSP_PO_TEXTDOMAIN);?>&nbsp;&nbsp;<span id="catalog-last-saved" ><?php _e('unknown',CSP_PO_TEXTDOMAIN); ?></span><img id="csp-generate-mofile" src="<?php echo CSP_PO_BASE_URL."/images/";?>write-mofile.gif" /></div>
 		<br class="clear" />
@@ -2759,9 +2849,43 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 		<div style="text-align:center;"><img id="csp-dialog-saving" src="<?php echo CSP_PO_BASE_URL; ?>/images/saving.gif" style="margin-top:20%;display:none;" /></div>
 	</div>
 </div><!-- csp-dialog-container closed -->
+<div id="csp-credentials"></div><!-- credential for filesystem -->
 <br />
 <script type="text/javascript">
 /* <![CDATA[ */
+
+//ajax call parameter
+var csp_ajax_params = {
+	'action' 			: '',
+	'file'				: '',
+	'type'				: '',
+	'name'				: '',
+	'row'				: '',
+	'path'				: '',
+	'subpath'			: '',
+	'existing'			: '',
+	'simplefilename'	: '',
+	'transtemplate'		: '',
+	'textdomain'		: '',
+	'denyscan'			: '',
+	'timestamp'			: '',
+	'translator'		: '',
+	'language'			: '',
+	'numlangs'			: '',
+
+	'pofile'			: '',
+	'potfile'			: '',
+	'num'				: '',
+	'cnt'				: '',
+	'php'				: '',
+	
+	'isplural'			: '',
+	'msgid'				: '',
+	'msgstr'			: '',
+	'msgidx'			: '',
+	'destlang'			: ''
+
+};
 
 Object.extend(Array.prototype, {
   intersect: function(array){
@@ -2776,19 +2900,57 @@ $('csp-generate-mofile').hide();
 function csp_make_writable(elem, file, success_class) {
 	elem = $(elem);
 	elem.blur();
+	
+	if(csp_ajax_params.action.length) {
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});		
+	}else{
+		csp_ajax_params.action = 'csp_po_change_permission';
+		csp_ajax_params.file = file;
+	}
+
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_change_permission',
-				file: file
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {		
 				elem.className=success_class;
 				elem.title=transport.responseJSON.title;
 				elem.onclick = null;
 			},
 			onFailure: function(transport) {
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					csp_show_error(transport.responseText);
+				}
 			}
 		}
 	);
@@ -2828,24 +2990,33 @@ function csp_create_new_pofile(elem, type){
 	elem = $(elem);
 	elem.blur();
 	
+	if(csp_ajax_params.action.length) {
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});		
+	}else{
+		csp_ajax_params.action = 'csp_po_create';
+		csp_ajax_params.name = $('csp-dialog-name').value;
+		csp_ajax_params.timestamp = $('csp-dialog-timestamp').value,
+		csp_ajax_params.translator = $('csp-dialog-translator').value,
+		csp_ajax_params.path = $('csp-dialog-path').value,
+		csp_ajax_params.subpath = $('csp-dialog-subpath').value,
+		csp_ajax_params.language = $('csp-dialog-language').value,
+		csp_ajax_params.row = $('csp-dialog-row').value,
+		csp_ajax_params.numlangs = $('csp-dialog-numlangs').value,
+		csp_ajax_params.type  = type,
+		csp_ajax_params.simplefilename = $('csp-dialog-simplefilename').value,
+		csp_ajax_params.transtemplate  =  $('csp-dialog-transtemplate').value,
+		csp_ajax_params.textdomain  =  $('csp-dialog-textdomain').value,
+		csp_ajax_params.denyscan = $('csp-dialog-denyscan').value
+	}
+	
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_create',
-				name: $('csp-dialog-name').value,
-				timestamp: $('csp-dialog-timestamp').value,
-				translator: $('csp-dialog-translator').value,
-				path: $('csp-dialog-path').value,
-				subpath: $('csp-dialog-subpath').value,
-				language: $('csp-dialog-language').value,
-				row : $('csp-dialog-row').value,
-				numlangs: $('csp-dialog-numlangs').value,
-				type: type,
-				simplefilename: $('csp-dialog-simplefilename').value,
-				transtemplate: $('csp-dialog-transtemplate').value,
-				textdomain: $('csp-dialog-textdomain').value,
-				denyscan: $('csp-dialog-denyscan').value
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {	
 				$$('#'+transport.responseJSON.row+' .mo-list-head').first().down(3).update(transport.responseJSON.head);
 				rel = $$('#'+transport.responseJSON.row+' .mo-list-head').first().down(2).rel;
@@ -2886,9 +3057,38 @@ function csp_create_new_pofile(elem, type){
 				if (Object.isElement(elem_after)) { ne = elem_after.insert({ 'before' : content }).previous(); }
 				else { ne = $$('#'+transport.responseJSON.row+' tbody').first().insert(content).childElements().last(); }
 				new Effect.Highlight(ne, { startcolor: '#25FF00', endcolor: '#FFFFCF' });
+				csp_ajax_params.action = ''; //reset
 			},
 			onFailure: function(transport) {
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					csp_show_error(transport.responseText);
+				}
 			}
 		}
 	); 	
@@ -2924,17 +3124,27 @@ function csp_destroy_files(elem, name, row, path, subpath, language, numlangs){
 	elem = $(elem);
 	elem.blur();
 	csp_cancel_dialog();
+
+	if(csp_ajax_params.action.length) {
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});		
+	}
+	else{
+		csp_ajax_params.action = 'csp_po_destroy';
+		csp_ajax_params.name = name;
+		csp_ajax_params.row = row;
+		csp_ajax_params.path = path;
+		csp_ajax_params.subpath = subpath;
+		csp_ajax_params.language = language;
+		csp_ajax_params.numlangs = numlangs;
+	}
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_destroy',
-				name: name,
-				row: row,
-				path: path,
-				subpath: subpath,
-				language: language,
-				numlangs: numlangs
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 				$$('#'+transport.responseJSON.row+' .mo-file').each(function(tr) {
 					if (tr.lang == transport.responseJSON.language) { 
@@ -2951,9 +3161,38 @@ function csp_destroy_files(elem, name, row, path, subpath, language, numlangs){
 						});
 					}
 				});
+				csp_ajax_params.action = ''; //reset
 			},
 			onFailure: function(transport) {
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					csp_show_error(transport.responseText);
+				}
 			}
 		}
 	); 	
@@ -3887,7 +4126,7 @@ jQuery(document).ready(function() {
 	<?php global $wp_version; if (version_compare($wp_version, '3.3', '<')) : ?>
 	jQuery('.question-help').hide();
 	<?php else : ?>
-	jQuery('.question-help').click(function(event) {
+	jQuery('.question-help').live('click', function(event) {
 		event.preventDefault();
 		window.scrollTo(0,0);
 		jQuery('#tab-link-'+jQuery(this).attr('rel')+' a').trigger('click');
@@ -4017,7 +4256,7 @@ td.lang-info-desc { border-left: dotted 1px #ccc !important; padding-left: 5px !
 .csp-area-multi { height: 24px; }
 
 #textdomain-error { background-color: #ffebe8; padding: 5px; border: solid 1px #666; }
-#textdomain-warning { background-color: #cfe1ef; padding: 5px; border: solid 1px #666; }
+#textdomain-warning, .warning { background-color: #cfe1ef; padding: 5px; border: solid 1px #666; }
 #textdomain-error span, #textdomain-warning span { font-weight: bold; font-size: 11px; }
 #explain-apis { cursor: help; }
 
@@ -4032,7 +4271,7 @@ div.translation-apis-info p { margin-left: 20px; }
 div.translation-apis-info textarea { font-family: courier,monotype;width:99%;background-color:#dfdfdf; }
 div.translation-apis-info textarea.google { height:24px; }
 div.translation-apis-info textarea.microsoft { height:58px; }
-label.disabled { color: gray; cursor: not-allowed; }
+label.disabled, a.disabled { color: gray; cursor: not-allowed; }
 
 body.rtl p.translation-apis label { margin-right: 5px; }
 body.rtl p.translation-apis img { margin-right: 25px; }
@@ -4048,6 +4287,7 @@ tr.csp-active .csp-info-status { color: #267F00 !important; font-weight: bold; f
 td.component-details { border-left: 1px solid #eee; }
 .mo-list-head td { padding-bottom: 10px !important; }
 .action-bar { margin-top: 10px; }
+.question-help { cursor: help; }
 
 <?php
 }

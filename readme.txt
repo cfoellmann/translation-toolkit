@@ -76,6 +76,12 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 
 == Changelog ==
 
+= Version 1.99.21 =
+* Bugfix: missing space char at plugin description added
+* Bugfix: warning message at profile page handled and removed
+* Feature: using WordPress filesystem if direct modification of files are not permitted at the webspace
+* Feature: help system again extended for WordPress versions >= 3.3 
+
 = Version 1.99.20 =
 * Bugfix: translating the plugin/theme descriptions accidentally states, that Codestyling Localization uses more than one textdomain
 * Bugfix: admin ajax url not longer lowercase completely, only "same origin policy" parts will be lowercased to avoid broken ajax calls

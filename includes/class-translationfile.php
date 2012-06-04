@@ -61,6 +61,10 @@ class CspStringsAreMultibyte {
 class CspTranslationFile {
 	
 	function CspTranslationFile($type = 'unknown') {
+		$this->__construct($type);
+	}
+	
+	function __construct($type = 'unknown') {
 		//now lets check whether overloaded functions been used and provide the correct str_* functions as usual
 		if(( ini_get( 'mbstring.func_overload' ) & 0x02) === 0x02 && extension_loaded('mbstring') && is_callable( 'mb_substr' )) {
 			$this->strings = new CspStringsAreMultibyte();
@@ -272,7 +276,6 @@ class CspTranslationFile {
 				if (!$this->strings->_seems_utf8($line)) $line = $this->strings->_utf8_encode($line);
 			
 				if (empty($line)) {
-
 					if ($msgid !== false) {		
 						$temp = ($cur_entry['X'] !== false ? $cur_entry['X']."\04".$msgid : $msgid);
 						$this->map[$temp] = $this->_new_entry(
@@ -783,6 +786,7 @@ class CspTranslationFile {
 		$search = array( '"\"', "\\", "\n", "\r", "\t", "\"");
 		$replace = array( '"\\\\"', '\\\\', '\\\\n', '\\\\r', '\\\\t', '\\\\\"');
 		$str = str_replace( $search, $replace, $str );
+
 		return $str;
 	}
 	
