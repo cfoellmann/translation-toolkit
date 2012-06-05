@@ -1076,6 +1076,7 @@ if (function_exists('add_action')) {
 	add_action('wp_ajax_csp_po_create_language_path', 'csp_po_ajax_handle_create_language_path');
 	add_action('wp_ajax_csp_po_create_pot_indicator', 'csp_po_ajax_handle_create_pot_indicator');
 
+	add_action('wp_ajax_csp_self_protection_result', 'csp_handle_csp_self_protection_result');
 }
 
 //WP 2.7 help extensions
@@ -1480,25 +1481,17 @@ function csp_po_ajax_handle_create() {
 	
 	$pofile = new CspFileSystem_TranslationFile();
 	$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
-/*
-	$ok = $pofile->read_pofile(strip_tags($_POST['transtemplate']));
-	if ($ok) 
-		$ok = $pofile->write_pofile($filename, false, strip_tags($_POST['textdomain']));
-	if (!$ok) {
-*/	
-		$pofile->new_pofile(
-			$filename, 
-			strip_tags($_POST['subpath']),
-			strip_tags($_POST['name']), 
-			strip_tags($_POST['timestamp']), 
-			$_POST['translator'], 
-			$csp_l10n_plurals[substr($_POST['language'],0,2)], 
-			$csp_l10n_sys_locales[$_POST['language']]['lang'], 
-			$csp_l10n_sys_locales[$_POST['language']]['country']
-		);
-		$ok = $pofile->write_pofile($filename);
-//	}
-	if(!$ok) {
+	$pofile->new_pofile(
+		$filename, 
+		strip_tags($_POST['subpath']),
+		strip_tags($_POST['name']), 
+		strip_tags($_POST['timestamp']), 
+		$_POST['translator'], 
+		$csp_l10n_plurals[substr($_POST['language'],0,2)], 
+		$csp_l10n_sys_locales[$_POST['language']]['lang'], 
+		$csp_l10n_sys_locales[$_POST['language']]['country']
+	);
+	if(!$pofile->write_pofile($filename)) {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
 		echo sprintf(__("You do not have the permission to create the file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
@@ -2043,12 +2036,14 @@ function csp_po_init() {
 }
 function csp_callback_help_overview() {
 ?>
-	<h4>Codestyling Localization <sup><small>by Heiko Rabe</small></sup></h4>
+	<p>
+		<strong>Codestyling Localization </strong> - <em>"<?php _e('... translate your WordPress, Plugins and Themes', CSP_PO_TEXTDOMAIN); ?>"</em>
+	</p>
 	<p>
 	<?php _e('While get in touch with WordPress you will find out, that the initial delivery package comes only with english localization. If you want WordPress to show your native language, you have to provide the appropriated language file at languages folder. This files will be used to replace the english text phrases during the process of page generation. This translation capability has the origin at the gettext functionality which currently been used across a wide range of open source projects.', CSP_PO_TEXTDOMAIN); ?>
 	</p>
-	<hr/>
-	<p>
+	<p style="margin-top: 50px;padding-top:10px; border-top: solid 1px #ccc;">
+		<small class="alignright" style="position:relative; margin-top: -30px; color: #aaa;">&copy; 2008 - 2012 by Heiko Rabe</small>
 		<a href="http://wordpress.org/extend/plugins/codestyling-localization/" target="_blank">Plugin Directory</a> | 
 		<a href="http://wordpress.org/extend/plugins/codestyling-localization/changelog/" target="_blank">Change Logs</a> | 
 		<a href="<?php echo CSP_PO_BASE_URL."/license.txt";?>" target="_blank">License</a> 
@@ -2176,25 +2171,64 @@ function csp_callback_help_selfprotection() {
 	<?php _e('Some authors of plugins and themes does not care about how they attach javascripts into WordPress backend pages. They pollute pages from other plugins with their own script code and damage the proper function of those plugins.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 <p>
-	<?php _e('The plugin <em>Codestyling Localization</em> introduced a high sophisticated inject detection and will show error messages, if themes of plugins try to inject their own scripts into this plugin pages. Furthermore all embedded scripts will be safe guarded and traced in case they will raise runtime exceptions. Doing so this plugin protects itself of malfunction caused by 3rd party plugin/theme authors.', CSP_PO_TEXTDOMAIN); ?>
+	<?php _e('The plugin <em>Codestyling Localization</em> introduced a high sophisticated inject detection and will show error messages, if themes or plugins try to inject their own scripts into this plugin pages. Furthermore all embedded scripts will be safe guarded and traced in case they will raise runtime exceptions. Doing so this plugin protects itself of malfunction caused by 3rd party plugin/theme authors. This will ensure the correct behavoir for this page, but expect at other backend pages malfunctioning code, because this is a global issue.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 <p>
-	<?php _e('If you are running into such a reported case, please contact the author of named theme or plugin. He/she should repair the affected theme/plugin to play nicely with other plugins at WordPress backend.', CSP_PO_TEXTDOMAIN); ?>
+	<strong><?php _e('What can I do, if I get this protection message alert?', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('If your Installation has this kind of problems, please contact the author of theme or plugin(s) which inject their script code either accidentally or intentionally (click message details). He/she must repair the affected theme/plugin to play nicely with other plugins at WordPress backend and/or restrict its scripts to the 3rd party theme/plugin pages only.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 <?php
+}
+
+function csp_try_jquery_document_ready_hardening($script) {
+	$pattern = 'jQuery(document).ready(';
+	if ($pos = stripos($script,$pattern) !== false) {
+		$counter = 0;
+		$startofready = -1;
+		$endofready = -1;
+		for($i=$pos+strlen($pattern); $i < strlen($script); $i++) {
+			switch(substr($script, $i, 1)) {
+				case '{':
+					$counter++;
+					if ($counter == 1) {
+						$startofready = $i;
+					}
+					break;
+				case '}';
+					$counter--;
+					if ($counter == 0) {
+						$endofready = $i;
+						$i = strlen($script);
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		if ($startofready != -1 && $endofready != -1) {
+			$sub = substr($script, $startofready+1, $endofready-$startofready-2);
+			$script = str_replace($sub, "try{".$sub."}catch(e){csp_self_protection.runtime.push(e.message);}" , $script);
+		}
+	}
+	return $script;
 }
 
 function csp_start_protection($hook_suffix) {
 	ob_start();
 }
 
-function csp_self_script_protection() {
+function csp_self_script_protection_head() {
 	$content = ob_get_clean();
 	//1st - unify script tags
 	$content = preg_replace("/(<script[^>]*)(\/\s*>)/i", '$1></script>', $content);
 	$scripts = array();
+	$dirty_plugins = array();
+	$dirty_theme = array();
 	$dirty_scripts = array();
 	$dirty_index = array();
+	//2nd - analyse scripts
 	if (preg_match_all("/<script[^>]*>([\s\S]*?)<\/script>/i", $content, $scripts)) {	
 		$num = count($scripts[0]);
 		for($i=0; $i<$num; $i++) {
@@ -2205,28 +2239,167 @@ function csp_self_script_protection() {
 					if(stripos($url[1], WP_CONTENT_URL) !== false) {
 						$dirty_scripts[] = $url[1];
 						$dirty_index[] = $i;
+						if (stripos($url[1], WP_PLUGIN_URL) !== false) {
+							$dirty_plugins[] = $url[1];
+						}else{
+							$dirty_theme[] = $url[1];
+						}
 					}
 				}
 			}else{
 				//embedded scripts - wrap within exception handler
+				$content = str_replace($scripts[0][$i], '<script type="text/javascript">'."\n//<![CDATA[\ntry {\n".csp_try_jquery_document_ready_hardening($scripts[1][$i])."\n}catch (e) {\n\tcsp_self_protection.runtime.push(e.message); \n}\n//]]>\n</script>", $content);
 			}
 		}
 	}
+	//3rd - remove critical injected scripts
 	if (count($dirty_scripts) > 0) {
 		foreach($dirty_index as $i) {
 			$content = str_replace($scripts[0][$i], '', $content);
 		}
 	}
-	echo '<script type="text\javascript">var csp_self_protection = { "dirty_scripts" : '.json_encode($dirty_scripts).";</script>\n";
+	//4th - define our protection
+	echo '<script type="text/javascript">var csp_self_protection = { "dirty_theme" : '.json_encode($dirty_theme).', "dirty_plugins" : ' . json_encode($dirty_plugins). ", \"runtime\" : [] };</script>\n";
 	echo $content;
+}
+
+function csp_self_script_protection_footer() {
+	$content = ob_get_clean();
+	//1st - unify script tags
+	$content = preg_replace("/(<script[^>]*)(\/\s*>)/i", '$1></script>', $content);
+	$scripts = array();
+	$dirty_theme = array();
+	$dirty_scripts = array();
+	$dirty_scripts = array();
+	$dirty_index = array();
+	//2nd - analyse scripts
+	if (preg_match_all("/<script[^>]*>([\s\S]*?)<\/script>/i", $content, $scripts)) {	
+		$num = count($scripts[0]);
+		for($i=0; $i<$num; $i++) {
+			if (empty($scripts[1][$i])) {
+				//url based scripts - mark as dirty if required
+				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
+				if (isset($url[1]) && !empty($url[1])){
+					if(stripos($url[1], WP_CONTENT_URL) !== false) {
+						$dirty_scripts[] = $url[1];
+						$dirty_index[] = $i;
+						if (stripos($url[1], WP_PLUGIN_URL) !== false || stripos($url[1], WPMU_PLUGIN_URL) !== false) {
+							$dirty_plugins[] = $url[1];
+						}else{
+							$dirty_theme[] = $url[1];
+						}
+					}
+				}
+			}else{
+				//embedded scripts - wrap within exception handler
+				$content = str_replace($scripts[0][$i], '<script type="text/javascript">'."\ntry {\n".csp_try_jquery_document_ready_hardening($scripts[1][$i])."\n }\ncatch(e) {\n\tcsp_self_protection.runtime.push(e.message); \n};\n</script>", $content);
+			}
+		}
+	}
+	//3rd - remove critical injected scripts
+	if (count($dirty_scripts) > 0) {
+		foreach($dirty_index as $i) {
+			$content = str_replace($scripts[0][$i], '', $content);
+		}
+	}
+	//4th - define our protection
+	echo '<script type="text/javascript">csp_self_protection.dirty_theme.concat('.json_encode($dirty_theme).");</script>\n";
+	echo '<script type="text/javascript">csp_self_protection.dirty_plugins.concat('.json_encode($dirty_plugins).");</script>\n";
+	echo $content;
+?>
+<script type="text/javascript">
+	jQuery(document).ready(function($) { 
+		if (csp_self_protection.dirty_theme.length || csp_self_protection.dirty_plugins.length || csp_self_protection.runtime.length) {
+			$.post("<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>", { "action" : "csp_self_protection_result" , "data" :  csp_self_protection }, function(data) {
+				$('#csp-wrap-main h2').after(data);
+				$('.self-protection-details').live('click', function(event) {
+					event.preventDefault();
+					$('#self-protection-details').toggle();
+				});
+			});
+		}
+	});
+</script>
+<?php	
+}
+
+function csp_handle_csp_self_protection_result() {
+	//var_dump($_POST);
+	csp_po_check_security();
+?>
+<p class="self-protection"><strong><?php _e('Self Protection Shield',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php _e('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process!', CSP_PO_TEXTDOMAIN); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
+</p>
+<div class="warning" id="self-protection-details" style="display:none;">
+<?php
+	if (isset($_POST['data']['dirty_theme']) && count($_POST['data']['dirty_theme'])) : $ct = current_theme_info(); ?>
+		<div>
+		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/themes.gif"; ?>" />
+		<strong style="color:#800;"><?php _e('Malfunction at current Theme detected!',CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Name:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct['Name']; ?></strong> | 
+		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct['Author']; ?></strong><br/>
+		<?php _e('Below listed scripts has been automatically stripped because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<ol>
+		<?php foreach($_POST['data']['dirty_theme'] as $script) : ?>
+			<li><?php echo strip_tags($script); ?></li>
+		<?php endforeach; ?>
+		</ol>
+		</div>
+	<?php endif; ?>
+<?php
+	if (isset($_POST['data']['dirty_plugins']) && count($_POST['data']['dirty_plugins'])) : 
+		//WARNING: Plugin handling is not well coded by WordPress core
+		$err = error_reporting(0);
+		$plugs = get_plugins(); 
+		error_reporting($err);
+
+		foreach($plugs as $slug => $data) :
+			list($slug) = explode('/', $slug);
+			$affected = array();
+			foreach($_POST['data']['dirty_plugins'] as $script) {
+				if (stripos($script, $slug) !== false) $affected[] = $script;
+			}
+			if (count($affected) == 0) continue;
+?>
+		<div>
+		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/plugins.gif"; ?>" />
+		<strong style="color:#800;"><?php _e('Malfunction at 3rd party Plugin detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Name:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $data['Name']; ?></strong> | 
+		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $data['Author']; ?></strong><br/>
+		<?php _e('Below listed scripts has been automatically stripped because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<ol>
+		<?php foreach($affected as $script) : ?>
+			<li><?php echo strip_tags($script); ?></li>
+		<?php endforeach; ?>
+		</ol>
+		</div>
+		<?php endforeach; ?>
+	<?php endif; ?>
+<?php
+	if (isset($_POST['data']['runtime']) && count($_POST['data']['runtime'])) : ?>
+		<div>
+		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/badscript.png"; ?>" />
+		<strong style="color:#800;"><?php _e('Malfunction at 3rd party inlined Javascript(s) detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('javascript runtime exception', CSP_PO_TEXTDOMAIN); ?></strong> | 
+		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Below listed exception(s) has been caught and traced:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<ol>
+		<?php foreach($_POST['data']['runtime'] as $script) : ?>
+			<li><?php echo strip_tags(stripslashes($script)); ?></li>
+		<?php endforeach; ?>
+		</ol>
+		</div>
+	<?php endif; ?>
+</div>
+<?php
+	exit();
 }
 
 function csp_load_po_edit_admin_page(){
 
 	add_action('admin_enqueue_scripts', 'csp_start_protection', 0);
 	add_action('in_admin_footer', 'csp_start_protection', 0);
-	add_action('admin_head', 'csp_self_script_protection', 9999);
-	add_action('admin_print_footer_scripts', 'csp_self_script_protection', 9999);
+	add_action('admin_head', 'csp_self_script_protection_head', 9999);
+	add_action('admin_print_footer_scripts', 'csp_self_script_protection_footer', 9999);
 
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_script('prototype');
@@ -2237,18 +2410,7 @@ function csp_load_po_edit_admin_page(){
 		wp_enqueue_style('codestyling-localization-ui', CSP_PO_BASE_URL.'/css/ui.all.css');
 		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/codestyling-localization.php?css=default&amp;dir='.((function_exists('is_rtl') && is_rtl()) ? 'rtl' : 'ltr'));
 	}
-	//prevent WP E-Commerce scripts from removing protoype at my pages!
-	$wpec = false;
-	$wpec |= remove_action( 'admin_head', 'wpsc_admin_include_css_and_js' );
-	$wpec |= remove_action( 'admin_head', 'wpsc_admin_include_css_and_js_refac' );
-	$wpec |= remove_action( 'admin_enqueue_scripts', 'wpsc_admin_include_css_and_js_refac' );
 	
-	define('CSL_WPEC_PATCH', $wpec);
-		
-	//prevent script injections of badly coded NomNom theme 
-	wp_deregister_script('color_options_minified.js');
-	wp_deregister_script('color-picker-js-files-minified.js');	
-
 	//new help system
 	global $wp_version;
 	if (version_compare($wp_version, '3.3', '>=')) {
@@ -2482,11 +2644,6 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 		</small>
 	</div>
 </div>
-<?php endif; ?>
-<?php if (CSL_WPEC_PATCH) : ?>
-<p>
-	<small><strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong>&nbsp;<?php _e("You have a running version of WP e-Commerce and it has been programmed to deactivate the javascript library prototype.js at each WordPress backend page! I did a work arround that, in case of issues read my article: <a href=\"http://www.code-styling.de/english/wp-e-commerce-breaks-intentionally-other-plugins-or-themes\">WP e-Commerce breaks intentionally other Plugins or Themes</a>", CSP_PO_TEXTDOMAIN); ?></small>
-</p>
 <?php endif; ?>
 <ul class="subsubsub">
 <li>
@@ -3005,7 +3162,6 @@ function csp_make_writable(elem, file, success_class) {
 								jQuery(elem).trigger('click');
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 							} 
@@ -3144,7 +3300,6 @@ function csp_create_new_pofile(elem, type){
 								jQuery(elem).trigger('click');
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 							} 
@@ -3249,7 +3404,6 @@ function csp_destroy_files(elem, name, row, path, subpath, language, numlangs){
 								jQuery(elem).trigger('click');
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 							} 
@@ -3388,10 +3542,10 @@ function csp_scan_source_files() {
 								csp_scan_source_files();
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 								csp_php_source_json = 0;
+								csp_cancel_dialog();
 							} 
 						},
 						open: function(event, ui) {
@@ -3620,7 +3774,6 @@ function csp_launch_editor(elem, file, path, textdomain) {
 								jQuery(elem).trigger('click');
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 							} 
@@ -4036,7 +4189,6 @@ function csp_save_translation(elem, isplural, additional_action){
 								csp_save_translation(elem, isplural, additional_action);
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 								if (additional_action != 'close') {
@@ -4134,7 +4286,6 @@ function csp_copy_catalog(elem) {
 								jQuery(elem).trigger('click');
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 							} 
@@ -4306,7 +4457,6 @@ function csp_generate_mofile(elem) {
 								jQuery(elem).trigger('click');
 							},
 							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
-								jQuery(elem).parent().find('.ajax-feedback').css({visibility : 'hidden' });
 								jQuery('#csp-credentials').dialog("close"); 
 								csp_ajax_params.action = '';
 								$('csp-generate-mofile').hide();
@@ -4565,6 +4715,16 @@ td.component-details { border-left: 1px solid #eee; }
 .action-bar { margin-top: 10px; }
 .question-help { cursor: help; }
 
+.self-protection { 
+	background: #ffebe8 url('images/self-protection.png') 5px 5px no-repeat; 
+	padding: 8px 20px; padding-left: 40px;
+	border: solid 1px #666;
+}
+#self-protection-details ol { list-style-type: circle; margin-left: 80px; }
+#self-protection-details ol li { font-size: 10px; margin-bottom: 0; }
+#self-protection-details > div { padding: 5px; }
+#self-protection-details > div img { margin-right: 10px; }
+.ui-dialog-titlebar-close { display: none; }
 <?php
 }
 
