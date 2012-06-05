@@ -153,7 +153,7 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		$parent_file = $current_parent;
 	
 		$error = false;
-		if($wp_filesystem->method == 'direct') {		
+		if($wp_filesystem->method == 'direct' || stripos(php_uname('s'),'windows') !== false) {		
 			if (file_exists($filename)) {
 				@chmod($filename, 0644);
 				if(!is_writable($filename)) {

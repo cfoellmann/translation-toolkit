@@ -2167,7 +2167,67 @@ function csp_callback_help_translationformat() {
 <?php
 }
 
+function csp_callback_help_selfprotection() {
+?>
+<p>
+	<strong><?php _e('Self Protection Shield - hardening against plugin/theme based malformed script injections', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('Some authors of plugins and themes does not care about how they attach javascripts into WordPress backend pages. They pollute pages from other plugins with their own script code and damage the proper function of those plugins.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<?php _e('The plugin <em>Codestyling Localization</em> introduced a high sophisticated inject detection and will show error messages, if themes of plugins try to inject their own scripts into this plugin pages. Furthermore all embedded scripts will be safe guarded and traced in case they will raise runtime exceptions. Doing so this plugin protects itself of malfunction caused by 3rd party plugin/theme authors.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<?php _e('If you are running into such a reported case, please contact the author of named theme or plugin. He/she should repair the affected theme/plugin to play nicely with other plugins at WordPress backend.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<?php
+}
+
+function csp_start_protection($hook_suffix) {
+	ob_start();
+}
+
+function csp_self_script_protection() {
+	$content = ob_get_clean();
+	//1st - unify script tags
+	$content = preg_replace("/(<script[^>]*)(\/\s*>)/i", '$1></script>', $content);
+	$scripts = array();
+	$dirty_scripts = array();
+	$dirty_index = array();
+	if (preg_match_all("/<script[^>]*>([\s\S]*?)<\/script>/i", $content, $scripts)) {	
+		$num = count($scripts[0]);
+		for($i=0; $i<$num; $i++) {
+			if (empty($scripts[1][$i])) {
+				//url based scripts - mark as dirty if required
+				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
+				if (isset($url[1]) && !empty($url[1])){
+					if(stripos($url[1], WP_CONTENT_URL) !== false) {
+						$dirty_scripts[] = $url[1];
+						$dirty_index[] = $i;
+					}
+				}
+			}else{
+				//embedded scripts - wrap within exception handler
+			}
+		}
+	}
+	if (count($dirty_scripts) > 0) {
+		foreach($dirty_index as $i) {
+			$content = str_replace($scripts[0][$i], '', $content);
+		}
+	}
+	echo '<script type="text\javascript">var csp_self_protection = { "dirty_scripts" : '.json_encode($dirty_scripts).";</script>\n";
+	echo $content;
+}
+
 function csp_load_po_edit_admin_page(){
+
+	add_action('admin_enqueue_scripts', 'csp_start_protection', 0);
+	add_action('in_admin_footer', 'csp_start_protection', 0);
+	add_action('admin_head', 'csp_self_script_protection', 9999);
+	add_action('admin_print_footer_scripts', 'csp_self_script_protection', 9999);
+
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_script('prototype');
 	wp_enqueue_script('jquery-ui-dialog');
@@ -2234,6 +2294,12 @@ function csp_load_po_edit_admin_page(){
 				'callback' => 'csp_callback_help_filepermissions'
 			));
 		}
+		$screen->add_help_tab(array(
+			'title' => __('Self Protection Shield', CSP_PO_TEXTDOMAIN),
+			'id' => 'selfprotection',
+			'content' => '',
+			'callback' => 'csp_callback_help_selfprotection'
+		));	
 		$content = array();
 		$content[]= "<p><strong>".__("For more information:",CSP_PO_TEXTDOMAIN)."</strong></p>";
 		$content[]= "<p><a target=\"_blank\" href=\"http://www.code-styling.de/\">Code Styling Project</a></p>";
@@ -2954,6 +3020,7 @@ function csp_make_writable(elem, file, success_class) {
 					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
 				}else {
 					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
 				}
 			}
 		}
@@ -3092,6 +3159,7 @@ function csp_create_new_pofile(elem, type){
 					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
 				}else {
 					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
 				}
 			}
 		}
@@ -3196,6 +3264,7 @@ function csp_destroy_files(elem, name, row, path, subpath, language, numlangs){
 					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
 				}else {
 					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
 				}
 			}
 		}
@@ -3339,6 +3408,7 @@ function csp_scan_source_files() {
 					$('csp-dialog-cancel').show();
 					csp_php_source_json = 0;
 					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
 				}
 			}
 		}
@@ -3565,6 +3635,7 @@ function csp_launch_editor(elem, file, path, textdomain) {
 					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
 				}else {
 					$('catalog-body').update('<tr><td colspan="4" align="center" style="color:#f00;">'+transport.responseText+'</td></tr>');
+					csp_ajax_params.action = '';
 				}
 			}
 		}
@@ -3987,6 +4058,7 @@ function csp_save_translation(elem, isplural, additional_action){
 					$('csp-dialog-body').show();
 					//opera bug: Opera has in case of error no valid responseText (always empty), even if server sends it! Ensure status text instead (dirty fallback)
 					csp_show_error( (Prototype.Browser.Opera ? transport.statusText : transport.responseText));
+					csp_ajax_params.action = '';
 				}
 			}
 		}
@@ -4077,6 +4149,7 @@ function csp_copy_catalog(elem) {
 					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
 				}else {
 					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
 				}
 			}
 		}
@@ -4252,6 +4325,7 @@ function csp_generate_mofile(elem) {
 					$('csp-generate-mofile').hide();
 					$('catalog-last-saved').show();
 					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
 				}
 			}
 		}
