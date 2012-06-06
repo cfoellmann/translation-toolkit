@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.21-beta
+Version: 1.99.21-RC1
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -710,7 +710,8 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	$data['author'] = $values['Author'];
 	$data['version'] = $values['Version'];
 	$data['description'] = $values['Description'];
-	$data['status'] = $theme == $active->name ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
+	$data['status'] = $values['Name'] == $active->name ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
+//	$data['status'] = $theme == $active->name ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
 	if ($is_child_theme) {
 		$data['status'] .= ' / <b></i>'.__('child theme of',CSP_PO_TEXTDOMAIN).' '.$values['Parent Theme'].'</i></b>';
 	}
@@ -1039,7 +1040,7 @@ function csp_po_collect_by_type($type){
 		$themes = function_exists('wp_get_themes') ? wp_get_themes() : get_themes();
 		//WARNING: Theme handling is not well coded by WordPress core
 		$err = error_reporting(0);
-		$ct = current_theme_info();
+		$ct = function_exists('wp_get_theme') ? wp_get_theme() : current_theme_info();
 		error_reporting($err);
 		foreach($themes as $key => $value) { 
 			$data = csp_po_get_theme_capabilities($key, $value, $ct);
@@ -2165,7 +2166,7 @@ function csp_callback_help_translationformat() {
 function csp_callback_help_selfprotection() {
 ?>
 <p>
-	<strong><?php _e('Self Protection Shield - hardening against plugin/theme based malformed script injections', CSP_PO_TEXTDOMAIN); ?></strong>
+	<strong><?php _e('Scripting Guard - hardening against plugin/theme based malformed script injections', CSP_PO_TEXTDOMAIN); ?></strong>
 </p>
 <p>
 	<?php _e('Some authors of plugins and themes does not care about how they attach javascripts into WordPress backend pages. They pollute pages from other plugins with their own script code and damage the proper function of those plugins.', CSP_PO_TEXTDOMAIN); ?>
@@ -2268,8 +2269,8 @@ function csp_self_script_protection_footer() {
 	//1st - unify script tags
 	$content = preg_replace("/(<script[^>]*)(\/\s*>)/i", '$1></script>', $content);
 	$scripts = array();
+	$dirty_plugins = array();
 	$dirty_theme = array();
-	$dirty_scripts = array();
 	$dirty_scripts = array();
 	$dirty_index = array();
 	//2nd - analyse scripts
@@ -2324,14 +2325,18 @@ function csp_self_script_protection_footer() {
 }
 
 function csp_handle_csp_self_protection_result() {
-	//var_dump($_POST);
 	csp_po_check_security();
+	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');	
+	$incidents = 0;
+	if (isset($_POST['data']['dirty_theme'])) $incidents += count($_POST['data']['dirty_theme']);
+	if (isset($_POST['data']['dirty_plugins'])) $incidents += count($_POST['data']['dirty_plugins']);
+	if (isset($_POST['data']['runtime'])) $incidents += count($_POST['data']['runtime']);
 ?>
-<p class="self-protection"><strong><?php _e('Self Protection Shield',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php _e('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process!', CSP_PO_TEXTDOMAIN); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
+<p class="self-protection"><strong><?php _e('Scripting Guard',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> incident(s) !', CSP_PO_TEXTDOMAIN), $incidents); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
 </p>
 <div class="warning" id="self-protection-details" style="display:none;">
 <?php
-	if (isset($_POST['data']['dirty_theme']) && count($_POST['data']['dirty_theme'])) : $ct = current_theme_info(); ?>
+	if (isset($_POST['data']['dirty_theme']) && count($_POST['data']['dirty_theme'])) : $ct = function_exists('wp_get_theme') ? wp_get_theme() : current_theme_info(); ?>
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/themes.gif"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at current Theme detected!',CSP_PO_TEXTDOMAIN); ?></strong><br/>
@@ -2408,7 +2413,10 @@ function csp_load_po_edit_admin_page(){
 	if (function_exists('wp_enqueue_style')) {
 		wp_enqueue_style( 'thickbox' );
 		wp_enqueue_style('codestyling-localization-ui', CSP_PO_BASE_URL.'/css/ui.all.css');
-		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/codestyling-localization.php?css=default&amp;dir='.((function_exists('is_rtl') && is_rtl()) ? 'rtl' : 'ltr'));
+		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/css/plugin.css');
+		if(function_exists('is_rtl') && is_rtl())
+			wp_enqueue_style('codestyling-localization-rtl', CSP_PO_BASE_URL.'/css/plugin-rtl.css');
+//		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/codestyling-localization.php?css=default&amp;dir='.((function_exists('is_rtl') && is_rtl()) ? 'rtl' : 'ltr'));
 	}
 	
 	//new help system
@@ -2457,7 +2465,7 @@ function csp_load_po_edit_admin_page(){
 			));
 		}
 		$screen->add_help_tab(array(
-			'title' => __('Self Protection Shield', CSP_PO_TEXTDOMAIN),
+			'title' => __('Scripting Guard', CSP_PO_TEXTDOMAIN),
 			'id' => 'selfprotection',
 			'content' => '',
 			'callback' => 'csp_callback_help_selfprotection'
@@ -4597,135 +4605,3 @@ document.observe("keypress", csp_term_help_key);
 </script>
 <?php	
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//	stylesheet handling during direct plugin file call
-//////////////////////////////////////////////////////////////////////////////////////////
-if (isset($_GET['css']) && $_GET['css'] == 'default') {
-	header("Content-Type: text/css");
-?>
-/* general usage */
-.clickable { cursor: pointer; }
-.regexp { display:block;width:16px;height:16px;background-image:url(images/regexp.gif); }
-.regexp:hover { background-image:url(images/regexp-hover.gif); }
-.pot-folder { padding-left: 20px; background: url(images/folder.gif) no-repeat 0 2px; }
-.csp-filetype-po, .csp-filetype-po-r, .csp-filetype-po-rw, 
-.csp-filetype-mo, .csp-filetype-mo-r, .csp-filetype-mo-rw { cursor: default; display:block; float: left; margin-top: 2px; height: 12px; width: 18px;}
-.csp-filetype-po { background: url(images/po.gif) no-repeat 0 0; }
-.csp-filetype-po-r { cursor: pointer !important; background: url(images/po.gif) no-repeat -18px 0; }
-.csp-filetype-po-rw { background: url(images/po.gif) no-repeat -36px 0; }
-.csp-filetype-mo { margin-left: 5px; background: url(images/mo.gif) no-repeat 0 0; } 
-.csp-filetype-mo-r { cursor: pointer !important; margin-left: 5px; background: url(images/mo.gif) no-repeat -18px 0; }
-.csp-filetype-mo-rw { margin-left: 5px; background: url(images/mo.gif) no-repeat -36px 0; }
-
-/* overview page styles */
-#the-gettext-list tr { background-color: /*#E7F7D3*/#F4F4F4/*#FCFCFC*/; }
-#the-gettext-list tr.csp-active, #the-gettext-list tr.csp-active table tr { background-color: /*#E7F7D3*//*#F4F4F4*/#FCFCFC; }
-#the-gettext-list a.button, #the-gettext-list table a.button { padding: 1px 10px; color: #21759B; border-radius: 0 0 0 0; }
-#the-gettext-list a.button:hover, #the-gettext-list table a.button:hover { color: #d54e21; }
-*:first-child + html tr.csp-active td{ background-color: #E7F7D3; }
-.csp-type-name { 	margin: 0pt 10px 1em 0pt; }
-.csp-type-info {}
-table.csp-type-info td {	padding:0; border-bottom: 0px; }
-table.csp-type-info td.csp-desc-value { padding-top: 5px; color: #666; border-top: 1px solid #ddd !important; }
-table.mo-list td { padding:3px 0 3px 5px;border-bottom: 0px !important; }
-table.mo-list tr.mo-list-head td, table.mo-list tr.mo-list-desc td { border-bottom: 1px solid #aaa !important; }
-.csp-ta-right { text-align: right; }
-tr.mo-file td { border-bottom: 1px solid transparent !important; }
-tr.mo-file:hover td { border-bottom: 1px dashed #666 !important; }
-tr.mo-list-desc {background-color: #eee !important; }
-tr.mo-list-desc td { vertical-align: middle; }
-td.lang-info-api { padding-right: 5px !important; }
-td.lang-info-desc { border-left: dotted 1px #ccc !important; padding-left: 5px !important; }
-
-/* new ajax dialogs */
-#TB_ajaxContent { background-color: #EAF3FA !important; width: auto !important; overflow: hidden !important; }
-#TB_ajaxContent.TB_modal { padding: 0px; }
-#csp-dialog-header { background-color:#222 !important; margin:0; padding:0px 2px; color:#D7D7D7; height:20px; font-size:13px; }
-#csp-dialog-header img { width: 16px; height:16px; padding-top: 2px;}
-#csp-dialog-caption { padding: 1px 0 0 5px; }
-#TB_window a.service-api:hover { color: #D54E21 !important; }
-
-/* catalog editor styles */
-#catalog-body a { cursor: pointer; }
-#catalog-body td { overflow: hidden; }
-#catalog-body tr.odd { background-color: #eee; }
-*:first-child + html #catalog-body tr.odd td { background-color: #eee; }
-#catalog-body tr.highlight-editing { background-color: #FFF36F !important; }
-*:first-child + html #catalog-body tr.highlight-editing td { background-color: #FFF36F !important; }
-#catalog-body .csp-pl-form { padding-top: 5px; font-weight: bold; color:#aaa; display:block; border-bottom: 1px dotted #ccc; }
-#csp-filter-search, #csp-filter-regexp { font-weight: bold; color: #FF0000; }
-.page-numbers { cursor: pointer; }
-#php-files a, .subsubsub a.csp-filter { cursor: pointer; }
-#php-files { padding: 3px; border: 1px solid #ccc; overflow:auto; height: 100px;}
-
-/* file and comment tooltip */
-.csp-msg-tip span { display: none; }
-.csp-msg-tip:hover span { display:block; position: absolute; z-index:50; margin-top: -5px; padding: 3px; background-color:#FFF79F; border: solid 1px #333; color:black; }
-*:first-child + html .csp-msg-tip span { margin: 10px 0 0 -26px !important; }
-.csp-msg-tip:hover span strong { margin-bottom: 3px; border-bottom: dotted 1px #333; display:block; cursor: default; }
-.csp-msg-tip:hover span em { font-style: normal; color: #328AB2; }
-.csp-msg-tip:hover span em:hover { color: #D54E21; }
-
-#po-hdr { border-top: 1px dotted #ccc;}
-<?php if ($_GET['dir'] == 'rtl') : ?>
-.po-header-toggle { margin: 10px 0 0 0; padding-right:20px; cursor: pointer; background: transparent url('images/expand.gif') right 3px no-repeat; }
-.po-header-collapse { background: transparent url('images/collapse.gif') right 3px no-repeat; margin-bottom: 3px;}
-<?php else : ?>
-.po-header-toggle { margin: 10px 0 0 0; padding-left:20px; cursor: pointer; background: transparent url('images/expand.gif') 0 3px no-repeat; }
-.po-header-collapse { background: transparent url('images/collapse.gif') 0 3px no-repeat; margin-bottom: 3px;}
-<?php endif; ?>
-.po-hdr-key { font-family: monospace; font-size: 11px; font-weight:bold; }
-.po-hdr-val { font-family: monospace; font-size: 11px; padding-left: 10px; }
-
-.csp-area-single { height: 110px; }
-.csp-area-multi { height: 24px; }
-
-#textdomain-error { background-color: #ffebe8; padding: 5px; border: solid 1px #666; }
-#textdomain-warning, .warning { background-color: #cfe1ef; padding: 5px; border: solid 1px #666; }
-#textdomain-error span, #textdomain-warning span { font-weight: bold; font-size: 11px; }
-#explain-apis { cursor: help; }
-
-p.translation-apis label { margin-right: 25px; }
-p.translation-apis a { text-decoration: none; }
-p.translation-apis img { margin-right: 5px; }
-p.translation-apis input { margin-right: 5px; }
-p.translation-apis { overflow: hidden; border-top: solid 1px #cfcfcf; border-bottom: 1px solid #cfcfcf; padding: 5px 0; }
-div.translation-apis-info { border-bottom: 1px solid #cfcfcf; padding: 5px 0; display: none; }
-div.translation-apis-info h5 { margin-top: 0px; margin-bottom: 0.7em; font-weight: bold; font-size: 11px; }
-div.translation-apis-info p { margin-left: 20px; }
-div.translation-apis-info textarea { font-family: courier,monotype;width:99%;background-color:#dfdfdf; }
-div.translation-apis-info textarea.google { height:24px; }
-div.translation-apis-info textarea.microsoft { height:58px; }
-label.disabled, a.disabled { color: gray; cursor: not-allowed; }
-
-body.rtl p.translation-apis label { margin-right: 5px; }
-body.rtl p.translation-apis img { margin-right: 25px; }
-
-#the-gettext-list table td, #the-gettext-list table th {
-    border-style: none;
-}
-#the-gettext-list > tr > td { padding-bottom: 15px; }
-
-tr.csp-active .csp-info-status { color: #267F00 !important; font-weight: bold; font-style: italic; }
-.csp-info-status { color: #888 !important; font-weight: bold; font-style: italic; }
-
-td.component-details { border-left: 1px solid #eee; }
-.mo-list-head td { padding-bottom: 10px !important; }
-.action-bar { margin-top: 10px; }
-.question-help { cursor: help; }
-
-.self-protection { 
-	background: #ffebe8 url('images/self-protection.png') 5px 5px no-repeat; 
-	padding: 8px 20px; padding-left: 40px;
-	border: solid 1px #666;
-}
-#self-protection-details ol { list-style-type: circle; margin-left: 80px; }
-#self-protection-details ol li { font-size: 10px; margin-bottom: 0; }
-#self-protection-details > div { padding: 5px; }
-#self-protection-details > div img { margin-right: 10px; }
-.ui-dialog-titlebar-close { display: none; }
-<?php
-}
-
-?>

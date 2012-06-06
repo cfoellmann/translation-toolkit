@@ -44,6 +44,11 @@ Please visit [the official website](http://www.code-styling.de/english/developme
 1. support of low memory conditions (32M memory_limit) with big translation files or source codes
 1. support of IDN based installations if PHP version is 5.0 or higher
 
+= Scripting Guard =
+This plugin work with a world unique technology to protect it's proper function against malfunction 3rd party plugins or bad behavior themes.
+Often Authors are attaching javascript at global space regardless if the damage other plugins backend pages. This plugin detects now any kind of unrelated javascripts that have been attached to it's pages but are bad behavior.
+In such cases this scripts will be stipped and a warning message occures. Furthermore the protection also detects runtime exceptions of injected inline scripts and displays them too.
+
 = Announcement =
 Starting with version 3.4 of WordPress I faced a restructured handling of localization within the Core Files, can be read here: [Important Changes for WordPress 3.4](http://wppolyglots.wordpress.com/important-changes-for-wordpress-3-4/)
 Because I had to cope with this, the translation process of WordPress itself has been rewritten. The pugin now supports backward compatibility (for older WordPress versions) and also generates two new structured *.mo files.
@@ -79,7 +84,10 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 = Version 1.99.21 =
 * Bugfix: missing space char at plugin description added
 * Bugfix: warning message at profile page handled and removed
+* Bugfix: active theme detection was not working at WP 3.4
+* Feature: plugin stylesheet removed from code into dedicated CSS file
 * Feature: using WordPress filesystem if direct modification of files are not permitted at the webspace
+* Feature: first introducing "Scripting Guard" plugin self protection
 * Feature: help system again extended for WordPress versions >= 3.3 
 
 = Version 1.99.20 =
