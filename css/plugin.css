@@ -17,6 +17,7 @@
 #the-gettext-list tr.csp-active, #the-gettext-list tr.csp-active table tr { background-color: /*#E7F7D3*//*#F4F4F4*/#FCFCFC; }
 #the-gettext-list a.button, #the-gettext-list table a.button { padding: 1px 10px; color: #21759B; border-radius: 0 0 0 0; }
 #the-gettext-list a.button:hover, #the-gettext-list table a.button:hover { color: #d54e21; }
+#csp-wrap-editor a.button, #csp-wrap-editor input.button { border-radius: 0 0 0 0; }
 *:first-child + html tr.csp-active td{ background-color: #E7F7D3; }
 .csp-type-name { 	margin: 0pt 10px 1em 0pt; }
 .csp-type-info {}

@@ -85,10 +85,13 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 * Bugfix: missing space char at plugin description added
 * Bugfix: warning message at profile page handled and removed
 * Bugfix: active theme detection was not working at WP 3.4
+* Bugfix: consider last component the editor was launche for and scroll to it, if "back to overview page" was clicked or F5 gets pressed
+* Bugfix: minor CSS changes for RTL target languages. Editor have to show source box in LTR anyway even if target remains as RTL
 * Feature: plugin stylesheet removed from code into dedicated CSS file
 * Feature: using WordPress filesystem if direct modification of files are not permitted at the webspace
 * Feature: first introducing "Scripting Guard" plugin self protection
 * Feature: help system again extended for WordPress versions >= 3.3 
+* Compatibility: still backward compatible downto WordPress 2.5 but without the filesystem writing (direct write required)
 
 = Version 1.99.20 =
 * Bugfix: translating the plugin/theme descriptions accidentally states, that Codestyling Localization uses more than one textdomain
@@ -119,7 +122,6 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 * Feature: supports Uighur language
 * Feature: supports Albanian language
 * Feature: supports Burmese language
-
 
 = Version 1.99.18 =
 * Bugfix: compatibility with upcomming WordPress 3.4 and rewritten WordPress Theme Core

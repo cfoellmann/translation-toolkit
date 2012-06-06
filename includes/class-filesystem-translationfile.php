@@ -10,46 +10,52 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 	
 	function __construct($type = 'unknown') {
 		parent::__construct($type);
+		//backward compatibility
+		$this->supports_filesystem = function_exists('request_filesystem_credentials');
 	}
 
 	function destroy_pofile($pofile) {
 		global $wp_filesystem, $parent_file;
-		$current_parent  = $parent_file;
-		$parent_file 	 = 'tools.php'; //needed for screen icon :-)
-		if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
-					
-		//check the file system
-		ob_start();
-		$url = 'admin-ajax.php';
-		if ( false === ($credentials = request_filesystem_credentials($url)) ) {
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
+		
+		if ($this->supports_filesystem) {
+		
+			$current_parent  = $parent_file;
+			$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+			if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+						
+			//check the file system
+			ob_start();
+			$url = 'admin-ajax.php';
+			if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
 			}
-			return;
-		}
 
-		if ( ! WP_Filesystem($credentials) ) {
-			request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
+			if ( ! WP_Filesystem($credentials) ) {
+				request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
 			}
-			return;
-		}
-		ob_end_clean();
-		$parent_file = $current_parent;	
+			ob_end_clean();
+			$parent_file = $current_parent;	
+		}		
 		
 		$error = false;
-		if($wp_filesystem->method == 'direct') {
+		if(!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			if (file_exists($pofile)) if (!@unlink($pofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
 		}else {
 			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
@@ -66,42 +72,46 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 	
 	function destroy_mofile($mofile) {
 		global $wp_filesystem, $parent_file;
-		$current_parent  = $parent_file;
-		$parent_file 	 = 'tools.php'; //needed for screen icon :-)
-		if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
-					
-		//check the file system
-		ob_start();
-		$url = 'admin-ajax.php';
-		if ( false === ($credentials = request_filesystem_credentials($url)) ) {
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
-			}
-			return;
-		}
+		
+		if ($this->supports_filesystem) {
 
-		if ( ! WP_Filesystem($credentials) ) {
-			request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
+			$current_parent  = $parent_file;
+			$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+			if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+						
+			//check the file system
+			ob_start();
+			$url = 'admin-ajax.php';
+			if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
 			}
-			return;
+
+			if ( ! WP_Filesystem($credentials) ) {
+				request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
+			}
+			ob_end_clean();
+			$parent_file = $current_parent;
 		}
-		ob_end_clean();
-		$parent_file = $current_parent;
 	
 		$error = false;
-		if($wp_filesystem->method == 'direct') {
+		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			if (file_exists($mofile)) if (!@unlink($mofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
 		}else {
 			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
@@ -118,42 +128,46 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 	
 	function change_permission($filename) {
 		global $wp_filesystem, $parent_file;
-		$current_parent  = $parent_file;
-		$parent_file 	 = 'tools.php'; //needed for screen icon :-)
-		if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
-					
-		//check the file system
-		ob_start();
-		$url = 'admin-ajax.php';
-		if ( false === ($credentials = request_filesystem_credentials($url)) ) {
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
-			}
-			return;
-		}
+		
+		if ($this->supports_filesystem) {
 
-		if ( ! WP_Filesystem($credentials) ) {
-			request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
+			$current_parent  = $parent_file;
+			$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+			if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+						
+			//check the file system
+			ob_start();
+			$url = 'admin-ajax.php';
+			if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
 			}
-			return;
+
+			if ( ! WP_Filesystem($credentials) ) {
+				request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
+			}
+			ob_end_clean();
+			$parent_file = $current_parent;
 		}
-		ob_end_clean();
-		$parent_file = $current_parent;
 	
 		$error = false;
-		if($wp_filesystem->method == 'direct' || stripos(php_uname('s'),'windows') !== false) {		
+		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct' || stripos(php_uname('s'),'windows') !== false) {		
 			if (file_exists($filename)) {
 				@chmod($filename, 0644);
 				if(!is_writable($filename)) {
@@ -192,41 +206,43 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 	
 	function write_pofile($pofile, $last = false, $textdomain = false, $tds = 'yes') {
 		global $wp_filesystem, $parent_file;
-		$current_parent  = $parent_file;
-		$parent_file 	 = 'tools.php'; //needed for screen icon :-)
-		if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
-					
-		//check the file system
-		ob_start();
-		$url = 'admin-ajax.php';
-		if ( false === ($credentials = request_filesystem_credentials($url)) ) {
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
+		if ($this->supports_filesystem) {
+			$current_parent  = $parent_file;
+			$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+			if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+						
+			//check the file system
+			ob_start();
+			$url = 'admin-ajax.php';
+			if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
 			}
-			return;
+
+			if ( ! WP_Filesystem($credentials) ) {
+				request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
+			}
+			ob_end_clean();
+			$parent_file = $current_parent;
 		}
 
-		if ( ! WP_Filesystem($credentials) ) {
-			request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
-			}
-			return;
-		}
-		ob_end_clean();
-		$parent_file = $current_parent;
-
-		if($wp_filesystem->method == 'direct') {
+		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			return parent::write_pofile($pofile, $last, $textdomain, $tds);
 		}else{
 			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
@@ -238,41 +254,44 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 
 	function write_mofile($mofile, $textdomain) {
 		global $wp_filesystem, $parent_file;
-		$current_parent  = $parent_file;
-		$parent_file 	 = 'tools.php'; //needed for screen icon :-)
-		if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
-					
-		//check the file system
-		ob_start();
-		$url = 'admin-ajax.php';
-		if ( false === ($credentials = request_filesystem_credentials($url)) ) {
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
-			}
-			return;
-		}
-
-		if ( ! WP_Filesystem($credentials) ) {
-			request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
-			$data = ob_get_contents();
-			ob_end_clean();
-			if( ! empty($data) ){
-				header('Status: 401 Unauthorized');
-				header('HTTP/1.1 401 Unauthorized');
-				echo $data;
-				exit;
-			}
-			return;
-		}
-		ob_end_clean();
-		$parent_file = $current_parent;
 		
-		if($wp_filesystem->method == 'direct') {
+		if ($this->supports_filesystem) {
+			$current_parent  = $parent_file;
+			$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+			if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+						
+			//check the file system
+			ob_start();
+			$url = 'admin-ajax.php';
+			if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
+			}
+
+			if ( ! WP_Filesystem($credentials) ) {
+				request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
+			}
+			ob_end_clean();
+			$parent_file = $current_parent;
+		}
+		
+		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			return parent::write_mofile($mofile, $textdomain);
 		}else{
 			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
