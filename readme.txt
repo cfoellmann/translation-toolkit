@@ -3,7 +3,7 @@ Contributors: codestyling
 Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, microsoft-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
 Tested up to: 3.4-RC1
-Stable tag: 1.99.20
+Stable tag: 1.99.21
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
@@ -45,8 +45,8 @@ Please visit [the official website](http://www.code-styling.de/english/developme
 1. support of IDN based installations if PHP version is 5.0 or higher
 
 = Scripting Guard =
-This plugin work with a world unique technology to protect it's proper function against malfunction 3rd party plugins or bad behavior themes.
-Often Authors are attaching javascript at global space regardless if the damage other plugins backend pages. This plugin detects now any kind of unrelated javascripts that have been attached to it's pages but are bad behavior.
+This plugin work with a world unique technology to protect it's proper function against malfunction 3rd party plugins or bad behavior themes (see screenshot section).
+Often Authors are attaching javascripts at global space regardless if they damage other plugins backend pages. This plugin detects now any kind of unrelated javascripts that have been attached to it's pages but are bad behavior.
 In such cases this scripts will be stipped and a warning message occures. Furthermore the protection also detects runtime exceptions of injected inline scripts and displays them too.
 
 = Announcement =
@@ -440,6 +440,7 @@ Please visit [the official website](http://www.code-styling.de/english/developme
 1. separate multiple textdomains during mo-file generation
 1. BuddyPress and bbPress will be special supported
 1. texts with trailing space detection and visualization
+1. Scripting Guard - plugin self protection feature
 
 
 == Other Notes ==
