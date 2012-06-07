@@ -2216,12 +2216,17 @@ function csp_try_jquery_document_ready_hardening($script) {
 	return $script;
 }
 
+function csp_filter_print_scripts_array($scripts) {
+	//protect against injected media upload script, modifies thickbox for media uploads not required here!
+	if (in_array('media-upload', $scripts)) {
+		if (!defined('CSL_MEDIA_UPLOAD_STRIPPED')) define('CSL_MEDIA_UPLOAD_STRIPPED', true);
+		return array_diff($scripts, array('media-upload'));
+	}
+	return $scripts;
+}
+
 function csp_start_protection($hook_suffix) {
 	ob_start();
-	//protect against injected media upload script, modifies thickbox for media uploads not required here!
-	//to get this as message, deep inspection of script enqueue tree required but not provided by WP core
-	//done in any case, warning integration for future versions planned
-	if(function_exists('wp_deregister_script')) wp_deregister_script('media-upload');
 }
 
 function csp_self_script_protection_head() {
@@ -2310,6 +2315,12 @@ function csp_self_script_protection_footer() {
 	//4th - define our protection
 	echo '<script type="text/javascript">csp_self_protection.dirty_theme.concat('.json_encode($dirty_theme).");</script>\n";
 	echo '<script type="text/javascript">csp_self_protection.dirty_plugins.concat('.json_encode($dirty_plugins).");</script>\n";
+	$media_upload = ((defined('CSL_MEDIA_UPLOAD_STRIPPED') && CSL_MEDIA_UPLOAD_STRIPPED === true) ? ( function_exists("admin_url") ? admin_url('js/media-upload.js') : get_option('siteurl').'/wp-admin/js/media-upload.js' ) : '');
+	if (!empty($media_upload))
+		echo '<script type="text/javascript">csp_self_protection.dirty_enqueues = ["'.$media_upload."\"];</script>\n";
+	else
+		echo "<script type=\"text/javascript\">csp_self_protection.dirty_enqueues = [];</script>\n";
+
 	echo $content;
 ?>
 <script type="text/javascript">
@@ -2332,12 +2343,28 @@ function csp_handle_csp_self_protection_result() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');	
 	$incidents = 0;
+	if (isset($_POST['data']['dirty_enqueues'])) $incidents += count($_POST['data']['dirty_enqueues']);
 	if (isset($_POST['data']['dirty_theme'])) $incidents += count($_POST['data']['dirty_theme']);
 	if (isset($_POST['data']['dirty_plugins'])) $incidents += count($_POST['data']['dirty_plugins']);
 	if (isset($_POST['data']['runtime'])) $incidents += count($_POST['data']['runtime']);
 ?>
 <p class="self-protection"><strong><?php _e('Scripting Guard',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', CSP_PO_TEXTDOMAIN), $incidents, _n('incident', 'incidents', $incidents, CSP_PO_TEXTDOMAIN)); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 <div class="warning" id="self-protection-details" style="display:none;">
+<?php
+	if (isset($_POST['data']['dirty_enqueues']) && count($_POST['data']['dirty_enqueues'])) : ?>
+		<div>
+		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/wordpress.gif"; ?>" />
+		<strong style="color:#800;"><?php _e('Malfunction at admin script core detected !',CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('misplaced core file(s) enqueued',CSP_PO_TEXTDOMAIN); ?></strong> | 
+		<?php _e('Polluter:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong> <small>(<?php _e('probably by Theme or Plugin',CSP_PO_TEXTDOMAIN); ?>)</small><br/>
+		<?php _e('Below listed scripts has been dequeued because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<ol>
+		<?php foreach($_POST['data']['dirty_enqueues'] as $script) : ?>
+			<li><?php echo strip_tags($script); ?></li>
+		<?php endforeach; ?>
+		</ol>
+		</div>
+	<?php endif; ?>
 <?php
 	if (isset($_POST['data']['dirty_theme']) && count($_POST['data']['dirty_theme'])) : $ct = function_exists('wp_get_theme') ? wp_get_theme() : current_theme_info(); ?>
 		<div>
@@ -2388,7 +2415,7 @@ function csp_handle_csp_self_protection_result() {
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/badscript.png"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at 3rd party inlined Javascript(s) detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
 		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('javascript runtime exception', CSP_PO_TEXTDOMAIN); ?></strong> | 
-		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Polluter:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong><br/>
 		<?php _e('Below listed exception(s) has been caught and traced:',CSP_PO_TEXTDOMAIN); ?><br/>
 		<ol>
 		<?php foreach($_POST['data']['runtime'] as $script) : ?>
@@ -2396,7 +2423,7 @@ function csp_handle_csp_self_protection_result() {
 		<?php endforeach; ?>
 		</ol>
 		</div>
-	<?php endif; ?>
+	<?php endif; ?>	
 </div>
 <?php
 	exit();
@@ -2404,6 +2431,7 @@ function csp_handle_csp_self_protection_result() {
 
 function csp_load_po_edit_admin_page(){
 
+	add_filter('print_scripts_array', 'csp_filter_print_scripts_array');
 	add_action('admin_enqueue_scripts', 'csp_start_protection', 0);
 	add_action('in_admin_footer', 'csp_start_protection', 0);
 	add_action('admin_head', 'csp_self_script_protection_head', 9999);

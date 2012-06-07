@@ -12,6 +12,7 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		parent::__construct($type);
 		//backward compatibility
 		$this->supports_filesystem = function_exists('request_filesystem_credentials');
+		$this->real_abspath = str_replace('\\', '/', ABSPATH);
 	}
 
 	function destroy_pofile($pofile) {
@@ -58,8 +59,7 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		if(!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			if (file_exists($pofile)) if (!@unlink($pofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
 		}else {
-			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
-			$target_file = str_replace($root_dir, '', $pofile);			
+			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$pofile));			
 			if($wp_filesystem->is_file($target_file)) if (!$wp_filesystem->delete($target_file)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $pofile);
 		}
 		if ($error) {
@@ -114,8 +114,7 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			if (file_exists($mofile)) if (!@unlink($mofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
 		}else {
-			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
-			$target_file = str_replace($root_dir, '', $mofile);			
+			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$mofile));			
 			if($wp_filesystem->is_file($target_file)) if (!$wp_filesystem->delete($target_file)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
 		}
 		if ($error) {
@@ -180,8 +179,7 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 			}
 			else $error = sprintf(__("You do not have the permission to modify the file rights for a not existing file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
 		} else {
-			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
-			$target_file = str_replace($root_dir, '', $filename);			
+			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$filename));			
 			if($wp_filesystem->is_file($target_file)) {
 				$wp_filesystem->chmod($target_file, 0644);
 				if(!is_writable($filename)) {
@@ -245,9 +243,8 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			return parent::write_pofile($pofile, $last, $textdomain, $tds);
 		}else{
-			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
-			$target_file = str_replace($root_dir, '', $pofile);			
-			return $wp_filesystem->put_contents($target_file, parent::ftp_get_pofile_content($pofile, $last, $textdomain, $tds));
+			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$pofile));			
+			return $wp_filesystem->put_contents($target_file, parent::ftp_get_pofile_content($pofile, $last, $textdomain, $tds), FS_CHMOD_FILE);
 		}
 		
 	}
@@ -294,15 +291,8 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
 			return parent::write_mofile($mofile, $textdomain);
 		}else{
-			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
-			$target_file = str_replace($root_dir, '', $mofile);
-			/*
-			var_dump($wp_filesystem->abspath());
-			var_dump(ABSPATH);
-			var_dump($mofile);
-			var_dump($target_file);
-			*/
-			return $wp_filesystem->put_contents($target_file, parent::ftp_get_mofile_content($mofile, $textdomain));
+			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$mofile));			
+			return $wp_filesystem->put_contents($target_file, parent::ftp_get_mofile_content($mofile, $textdomain), FS_CHMOD_FILE);
 		}
 		
 	}
