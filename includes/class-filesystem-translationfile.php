@@ -296,6 +296,12 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		}else{
 			$root_dir = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
 			$target_file = str_replace($root_dir, '', $mofile);
+			/*
+			var_dump($wp_filesystem->abspath());
+			var_dump(ABSPATH);
+			var_dump($mofile);
+			var_dump($target_file);
+			*/
 			return $wp_filesystem->put_contents($target_file, parent::ftp_get_mofile_content($mofile, $textdomain));
 		}
 		

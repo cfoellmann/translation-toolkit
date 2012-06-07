@@ -81,6 +81,10 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 
 == Changelog ==
 
+= Version 1.99.22 = 
+* Bugfix: Scripting Guard Message was damaged, only affects the message not the function, repaired
+* Bugfix: Thickbox gets damaged by Themes/Plugins injecting wp-admin/js/media-upload.js, has been handled silently, will be reported in future versions
+
 = Version 1.99.21 =
 * Bugfix: missing space char at plugin description added
 * Bugfix: warning message at profile page handled and removed

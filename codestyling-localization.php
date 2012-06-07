@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.21
+Version: 1.99.22
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -2218,6 +2218,10 @@ function csp_try_jquery_document_ready_hardening($script) {
 
 function csp_start_protection($hook_suffix) {
 	ob_start();
+	//protect against injected media upload script, modifies thickbox for media uploads not required here!
+	//to get this as message, deep inspection of script enqueue tree required but not provided by WP core
+	//done in any case, warning integration for future versions planned
+	if(function_exists('wp_deregister_script')) wp_deregister_script('media-upload');
 }
 
 function csp_self_script_protection_head() {
@@ -2339,8 +2343,8 @@ function csp_handle_csp_self_protection_result() {
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/themes.gif"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at current Theme detected!',CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Name:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct['Name']; ?></strong> | 
-		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct['Author']; ?></strong><br/>
+		<?php _e('Name:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct->name; ?></strong> | 
+		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct->author; ?></strong><br/>
 		<?php _e('Below listed scripts has been automatically stripped because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
 		<ol>
 		<?php foreach($_POST['data']['dirty_theme'] as $script) : ?>
