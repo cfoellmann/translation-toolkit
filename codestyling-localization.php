@@ -2325,7 +2325,7 @@ function csp_self_script_protection_footer() {
 ?>
 <script type="text/javascript">
 	jQuery(document).ready(function($) { 
-		if (csp_self_protection.dirty_theme.length || csp_self_protection.dirty_plugins.length || csp_self_protection.runtime.length) {
+		if (csp_self_protection.dirty_theme.length || csp_self_protection.dirty_plugins.length || csp_self_protection.runtime.length || csp_self_protection.dirty_enqueues.length) {
 			$.post("<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>", { "action" : "csp_self_protection_result" , "data" :  csp_self_protection }, function(data) {
 				$('#csp-wrap-main h2').after(data);
 				$('.self-protection-details').live('click', function(event) {

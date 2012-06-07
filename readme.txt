@@ -82,7 +82,7 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 == Changelog ==
 
 = Version 1.99.22 = 
-* Bugfix: Scripting Guard Message was damaged, only affects the message itself not the function behind, repaired
+* Bugfix: Scripting Guard message was damaged, only affects the message itself not the function behind, repaired
 * Bugfix: Thickbox gets damaged by Themes/Plugins injecting wp-admin/js/media-upload.js, has been handled and will be reported too.
 * Bugfix: FTP filesystem handling changed to more server installations.
 
