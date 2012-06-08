@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.22
+Version: 1.99.23-beta
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -2216,7 +2216,25 @@ function csp_try_jquery_document_ready_hardening($script) {
 	return $script;
 }
 
+$csp_cdn_scripts = array();
+
 function csp_filter_print_scripts_array($scripts) {
+	//detect CDN script redirecting
+	global $wp_scripts, $csp_cdn_scripts;
+	//var_dump($wp_scripts);
+	if (is_object($wp_scripts)) {
+		foreach($scripts as $token) {
+			if(isset($wp_scripts->registered[$token])) {
+				if (isset($wp_scripts->registered[$token]->src) && !empty($wp_scripts->registered[$token]->src)) {
+					if (preg_match('|^http|', $wp_scripts->registered[$token]->src)) {
+						if(!preg_match('|^'.str_replace('.','\.',get_option('siteurl')).'|', $wp_scripts->registered[$token]->src)) {
+							$csp_cdn_scripts[$token] = $wp_scripts->registered[$token]->src;
+						}
+					}
+				}
+			}
+		}
+	}
 	//protect against injected media upload script, modifies thickbox for media uploads not required here!
 	if (in_array('media-upload', $scripts)) {
 		if (!defined('CSL_MEDIA_UPLOAD_STRIPPED')) define('CSL_MEDIA_UPLOAD_STRIPPED', true);
@@ -2246,7 +2264,7 @@ function csp_self_script_protection_head() {
 				//url based scripts - mark as dirty if required
 				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
 				if (isset($url[1]) && !empty($url[1])){
-					if(stripos($url[1], WP_CONTENT_URL) !== false) {
+					if(stripos($url[1], WP_CONTENT_URL) !== false  && stripos($url[1], '/wp-native-dashboard/') === false) {
 						$dirty_scripts[] = $url[1];
 						$dirty_index[] = $i;
 						if (stripos($url[1], WP_PLUGIN_URL) !== false) {
@@ -2290,7 +2308,7 @@ function csp_self_script_protection_footer() {
 				//url based scripts - mark as dirty if required
 				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
 				if (isset($url[1]) && !empty($url[1])){
-					if(stripos($url[1], WP_CONTENT_URL) !== false) {
+					if(stripos($url[1], WP_CONTENT_URL) !== false && stripos($url[1], '/wp-native-dashboard/') === false) {
 						$dirty_scripts[] = $url[1];
 						$dirty_index[] = $i;
 						if (stripos($url[1], WP_PLUGIN_URL) !== false || stripos($url[1], WPMU_PLUGIN_URL) !== false) {
@@ -2321,6 +2339,14 @@ function csp_self_script_protection_footer() {
 	else
 		echo "<script type=\"text/javascript\">csp_self_protection.dirty_enqueues = [];</script>\n";
 
+	global $csp_cdn_scripts;
+	if (count($csp_cdn_scripts) > 0)
+		echo '<script type="text/javascript">csp_self_protection.cdn_scripts = '.json_encode($csp_cdn_scripts).";</script>\n";
+	else
+		echo "<script type=\"text/javascript\">csp_self_protection.cdn_scripts = [];</script>\n";
+	
+	
+		
 	echo $content;
 ?>
 <script type="text/javascript">
@@ -2347,6 +2373,7 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['dirty_theme'])) $incidents += count($_POST['data']['dirty_theme']);
 	if (isset($_POST['data']['dirty_plugins'])) $incidents += count($_POST['data']['dirty_plugins']);
 	if (isset($_POST['data']['runtime'])) $incidents += count($_POST['data']['runtime']);
+	if (isset($_POST['data']['cdn_scripts'])) $incidents += count($_POST['data']['cdn_scripts']);
 ?>
 <p class="self-protection"><strong><?php _e('Scripting Guard',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', CSP_PO_TEXTDOMAIN), $incidents, _n('incident', 'incidents', $incidents, CSP_PO_TEXTDOMAIN)); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 <div class="warning" id="self-protection-details" style="display:none;">
@@ -2424,6 +2451,20 @@ function csp_handle_csp_self_protection_result() {
 		</ol>
 		</div>
 	<?php endif; ?>	
+<?php
+	if (isset($_POST['data']['cdn_scripts']) && count($_POST['data']['cdn_scripts'])) : ?>
+		<div style="border-top: 1px dashed gray; padding-top: 10px;">
+		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/cdn-scripts.png"; ?>" />
+		<strong style="color:#008;"><?php _e('CDN based redirected script loading detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Warning:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('may break the dependency based script loading within WordPress core files.', CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Below listed redirects have been traced but not changed:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<ol>
+		<?php foreach($_POST['data']['cdn_scripts'] as $token => $script) : ?>
+			<li>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <?php echo strip_tags(stripslashes($script)); ?></li>
+		<?php endforeach; ?>
+		</ol>
+		</div>
+	<?php endif; ?>		
 </div>
 <?php
 	exit();

@@ -40,6 +40,7 @@ td.lang-info-desc { border-left: dotted 1px #ccc !important; padding-left: 5px !
 #csp-dialog-header img { width: 16px; height:16px; padding-top: 2px;}
 #csp-dialog-caption { padding: 1px 0 0 5px; }
 #TB_window a.service-api:hover { color: #D54E21 !important; }
+#csp-dialog-body .widefat td { padding: 4px 7px 2px !important; }
 
 /* catalog editor styles */
 #catalog-body a { cursor: pointer; }

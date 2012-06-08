@@ -81,6 +81,11 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 
 == Changelog ==
 
+= Version 1.99.23 = 
+* Bugfix: injected stylesheets may modifiy the thickbox content and have be handled too.
+* Feature: Scripting Guard now also reports CDN based script redirection as warning hint (e.g. ajax.googleapis.com) 
+* Languages: added Hindi Translation based on 1.99.23
+
 = Version 1.99.22 = 
 * Bugfix: Scripting Guard message was damaged, only affects the message itself not the function behind, repaired
 * Bugfix: Thickbox gets damaged by Themes/Plugins injecting wp-admin/js/media-upload.js, has been handled and will be reported too.
