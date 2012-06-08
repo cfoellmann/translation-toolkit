@@ -2376,7 +2376,7 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['cdn_scripts'])) $incidents += count($_POST['data']['cdn_scripts']);
 ?>
 <p class="self-protection"><strong><?php _e('Scripting Guard',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', CSP_PO_TEXTDOMAIN), $incidents, _n('incident', 'incidents', $incidents, CSP_PO_TEXTDOMAIN)); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
-<div class="warning" id="self-protection-details" style="display:none;">
+<div id="self-protection-details" style="display:none;">
 <?php
 	if (isset($_POST['data']['dirty_enqueues']) && count($_POST['data']['dirty_enqueues'])) : ?>
 		<div>
@@ -2452,17 +2452,26 @@ function csp_handle_csp_self_protection_result() {
 		</div>
 	<?php endif; ?>	
 <?php
-	if (isset($_POST['data']['cdn_scripts']) && count($_POST['data']['cdn_scripts'])) : ?>
+	if (isset($_POST['data']['cdn_scripts']) && count($_POST['data']['cdn_scripts'])) : $errors = 0; ?>
 		<div style="border-top: 1px dashed gray; padding-top: 10px;">
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/cdn-scripts.png"; ?>" />
-		<strong style="color:#008;"><?php _e('CDN based redirected script loading detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Warning:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('may break the dependency based script loading within WordPress core files.', CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Below listed redirects have been traced but not changed:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#008;"><?php _e('CDN based script loading redirection detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Warning:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('may break the dependency script loading feature within WordPress core files.', CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Below listed redirects have been traced and verified but not revoked:',CSP_PO_TEXTDOMAIN); ?><br/>
 		<ol>
-		<?php foreach($_POST['data']['cdn_scripts'] as $token => $script) : ?>
-			<li>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <?php echo strip_tags(stripslashes($script)); ?></li>
+		<?php  foreach($_POST['data']['cdn_scripts'] as $token => $script) : 
+				$res = wp_remote_head($script);
+				$style = (($res === false || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
+				if(!empty($style)) $errors += 1; ?>
+			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
 		<?php endforeach; ?>
 		</ol>
+		<?php if ($errors > 0) : ?>
+		<p style="color:#800;font-weight:bold;"><?php 
+			$text = sprintf(_n('%d file', '%d files', $errors, CSP_PO_TEXTDOMAIN), $errors);
+			echo sprintf(__('This page will not work as expected because %s could not be get from CDN. Check and update the Plugin doing your CDN redirection!',CSP_PO_TEXTDOMAIN), $text); 
+		?></p>
+		<?php endif; ?>
 		</div>
 	<?php endif; ?>		
 </div>
