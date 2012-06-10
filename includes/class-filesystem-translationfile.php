@@ -125,6 +125,55 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		}
 	}
 	
+	function create_directory($path) {
+		global $wp_filesystem, $parent_file;
+				
+		if ($this->supports_filesystem) {
+
+			$current_parent  = $parent_file;
+			$parent_file 	 = 'tools.php'; //needed for screen icon :-)
+			if (function_exists('set_current_screen')) set_current_screen('tools'); //WP 3.0 fix
+						
+			//check the file system
+			ob_start();
+			$url = 'admin-ajax.php';
+			if ( false === ($credentials = request_filesystem_credentials($url)) ) {
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
+			}
+
+			if ( ! WP_Filesystem($credentials) ) {
+				request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+				$data = ob_get_contents();
+				ob_end_clean();
+				if( ! empty($data) ){
+					header('Status: 401 Unauthorized');
+					header('HTTP/1.1 401 Unauthorized');
+					echo $data;
+					exit;
+				}
+				return;
+			}
+			ob_end_clean();
+			$parent_file = $current_parent;
+		}
+		
+		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
+			return @mkdir($path);
+		}else{
+			$target_dir = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$path));
+			if(!$wp_filesystem->mkdir($target_dir, FS_CHMOD_DIR) && ! $wp_filesystem->is_dir($target_dir)) return false;
+			else return true;
+		}	
+	}
+	
 	function change_permission($filename) {
 		global $wp_filesystem, $parent_file;
 		

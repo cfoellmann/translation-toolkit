@@ -254,7 +254,7 @@ class CspTranslationFile {
 	
 	function new_pofile($pofile, $base_file, $proj_id, $timestamp, $translator, $pluralforms, $language, $country) {
 		$rel = $this->_build_rel_path($base_file);
-		preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $pofile, $hits);
+		preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po|pot)$/", $pofile, $hits);
 		$po_lang = $this->strings->_substr($hits[1],0,2);
 		$country = strtoupper($country);
 		$this->_set_header_from_string(
@@ -278,15 +278,18 @@ class CspTranslationFile {
 				if (empty($line)) {
 					if ($msgid !== false) {		
 						$temp = ($cur_entry['X'] !== false ? $cur_entry['X']."\04".$msgid : $msgid);
-						$this->map[$temp] = $this->_new_entry(
-							$temp, 
-							$cur_entry['T'], 
-							$cur_entry['R'], 
-							$cur_entry['F'], 
-							$cur_entry['CT'], 
-							$cur_entry['CC'], 
-							$cur_entry['LTD']
-						);
+						//merge test: existing do not kill by empty!
+						if(!isset($this->map[$temp]) || !(!empty($this->map[$temp]['T']) && empty($cur_entry['T']))) {
+							$this->map[$temp] = $this->_new_entry(
+								$temp, 
+								$cur_entry['T'], 
+								$cur_entry['R'], 
+								$cur_entry['F'], 
+								$cur_entry['CT'], 
+								$cur_entry['CC'], 
+								$cur_entry['LTD']
+							);
+						}
 					}
 					$msgid = false;
 					unset($cur_entry);

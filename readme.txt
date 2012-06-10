@@ -82,8 +82,13 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 == Changelog ==
 
 = Version 1.99.23 = 
-* Bugfix: injected stylesheets may modifiy the thickbox content and have be handled too.
-* Feature: Scripting Guard now also reports CDN based script redirection as warning hint (e.g. ajax.googleapis.com) 
+* Bugfix: injected stylesheets may modifiy the thickbox content and will not have any influence now.
+* Bugfix: potfile indicator was created without filesystem api
+* Bugfix: WordPress Language directory creation was done without filesystem api
+* Feature: Scripting Guard now additionally reports CDN based script redirection as warning hint (e.g. ajax.googleapis.com) 
+* Feature: Child Theme translations will be supported completely
+* Feature: Language files from Main Theme can be synchronized with existing Child Theme files (see help)
+* Feature: Plugin Help System has been extended again (upper right corner help)
 * Languages: added Hindi Translation based on 1.99.23
 
 = Version 1.99.22 = 

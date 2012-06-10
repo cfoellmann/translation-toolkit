@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.23-beta
+Version: 1.99.23
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -701,6 +701,8 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	$folder_filesys = end(explode('/',rtrim($data['base_path'], '/')));
 	$folder_data = $values['Template']; 
 	$is_child_theme = $folder_filesys != $folder_data;
+	$data['theme-self'] = $folder_filesys;
+	$data['theme-template'] = $folder_data;
 	
 	$data['locale'] = get_locale();
 	$data['type'] = 'themes';
@@ -1063,6 +1065,7 @@ if (function_exists('add_action')) {
 	add_action('wp_ajax_csp_po_dlg_rescan', 'csp_po_ajax_handle_dlg_rescan');
 	add_action('wp_ajax_csp_po_dlg_show_source', 'csp_po_ajax_handle_dlg_show_source');
 	
+	add_action('wp_ajax_csp_po_merge_from_maintheme', 'csp_po_ajax_handle_merge_from_maintheme');
 	add_action('wp_ajax_csp_po_create', 'csp_po_ajax_handle_create');
 	add_action('wp_ajax_csp_po_destroy', 'csp_po_ajax_handle_destroy');
 	add_action('wp_ajax_csp_po_scan_source_file', 'csp_po_ajax_handle_scan_source_file');	
@@ -1251,6 +1254,9 @@ function csp_po_ajax_handle_dlg_rescan() {
 		$excludes = array();
 		if (isset($_POST['simplefilename']) && !empty($_POST['simplefilename'])) { $files[] = strip_tags($_POST['simplefilename']); }
 		else { rscandir_php(strip_tags($_POST['path']), $excludes, $files); }
+		if ($_POST['type'] == 'themes' && isset($_POST['themetemplate']) && !empty($_POST['themetemplate'])) {
+			rscandir_php(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['themetemplate']).'/',$excludes, $files);
+		}
 	}
 	$country_www = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['country-www'] : 'unknown';
 	$lang_native = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
@@ -1474,6 +1480,33 @@ Event.domReady = {
 	exit();
 }
 
+function csp_po_ajax_handle_merge_from_maintheme() {
+	csp_po_check_security();
+	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
+	require_once('includes/locale-definitions.php');
+	require_once('includes/class-filesystem-translationfile.php');
+	
+	//source|dest|basepath|textdomain|molist
+	$tmp = array();
+	$files = rscandir(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['source']).'/', "/(\.po|\.mo)$/", $tmp);
+	foreach($files as $file) {
+		$pofile = new CspFileSystem_TranslationFile();
+		$target = strip_tags($_POST['basepath']).basename($file);
+		if(preg_match('/\.mo/', $file)) {
+			$pofile->read_mofile($file, $csp_l10n_plurals, false, strip_tags($_POST['textdomain']));
+			$pofile->write_mofile($target, strip_tags($_POST['textdomain']));
+		}else{
+			$pofile->read_pofile($file);
+			if (file_exists($target)) {
+				//merge it now
+				$pofile->read_pofile($target);
+			}
+			$pofile->write_pofile($target, true, strip_tags($_POST['textdomain']));
+		}
+	}
+	exit();
+}
+
 function csp_po_ajax_handle_create() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
@@ -1673,25 +1706,7 @@ function csp_po_ajax_handle_change_permission() {
 	$transfile = new CspFileSystem_TranslationFile();
 	
 	$transfile->change_permission($filename);
-/*	
-	if (file_exists($filename)) {
-		@chmod($filename, 0644);
-		if(!is_writable($filename)) {
-			@chmod($filename, 0664);
-			if (!is_writable($filename)) {
-				@chmod($filename, 0666);
-			}
-			if (!is_writable($filename)) $error = __('Server Restrictions: Changing file rights is not permitted.', CSP_PO_TEXTDOMAIN);
-		}
-	}
-	else $error = sprintf(__("You do not have the permission to modify the file rights for a not existing file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
-	if ($error) {
-		header('Status: 404 Not Found');
-		header('HTTP/1.1 404 Not Found');
-		echo $error;	
-		exit();
-	}
-*/
+
 	header('Content-Type: application/json');
 	echo '{ title: "'.date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename).'" }';
 	exit();
@@ -1946,8 +1961,15 @@ function csp_po_ajax_handle_generate_mo_file(){
 function csp_po_ajax_handle_create_language_path() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
+	require_once('includes/locale-definitions.php');
+	require_once('includes/class-filesystem-translationfile.php');
+	
 	$path = strip_tags($_POST['path']);
-	if (!mkdir($path)) {
+	
+	$pofile = new CspFileSystem_TranslationFile();
+	$pofile->create_directory($path);
+	
+	if (!$pofile->create_directory($path)) {
 		header('Status: 404 Not Found');
 		header('HTTP/1.1 404 Not Found');
 		_e("You do not have the permission to create a new Language File Path.<br/>Please create the appropriated path using your FTP access.", CSP_PO_TEXTDOMAIN);
@@ -1964,7 +1986,35 @@ function csp_po_ajax_handle_create_language_path() {
 function csp_po_ajax_handle_create_pot_indicator() {
 	csp_po_check_security();
 	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages');
+	require_once('includes/locale-definitions.php');
+	require_once('includes/class-filesystem-translationfile.php');
 	
+	$locale = 'en_US';
+	
+	$pofile = new CspFileSystem_TranslationFile();
+	$filename = strip_tags($_POST['potfile']);
+	$pofile->new_pofile(
+		$filename, 
+		'/',
+		'PlaceHolder', 
+		date("Y-m-d H:iO"), 
+		'none', 
+		$csp_l10n_plurals[substr($locale,0,2)], 
+		$csp_l10n_sys_locales[$locale]['lang'], 
+		$csp_l10n_sys_locales[$locale]['country']
+	);
+	if(!$pofile->write_pofile($filename)) {
+		header('Status: 404 Not Found');
+		header('HTTP/1.1 404 Not Found');
+		echo sprintf(__("You do not have the permission to create the file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
+	}
+	else{	
+		header('Status: 200 ok');
+		header('HTTP/1.1 200 ok');
+		header('Content-Length: 1');	
+		print 0;
+	}
+/*	
 	$handle = @fopen(strip_tags($_POST['potfile']), "w");
 	
 	if ($handle === false) {
@@ -1987,6 +2037,7 @@ function csp_po_ajax_handle_create_pot_indicator() {
 		print 0;
 	}
 	exit();
+*/	
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2163,6 +2214,33 @@ function csp_callback_help_translationformat() {
 <?php
 }
 
+function csp_callback_help_workonchildthemes() {
+?>
+<p>
+	<strong><?php _e('Working with Child Theme Translations', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('Child Themes are using in normal cases the translation files of the main theme. In some cases it could be necessary to have a separate language file handling at the Child Theme itself.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<strong><?php _e('How to make your Child Theme ready to use its own translation files?', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('First of all you have to modify your Child Themes <em>functions.php</em> file and call the appropriated load method as shown below. Assume the textdomain is defined at the Main Theme as <b>supertheme</b> the load function should look like:', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p><pre>       load_child_theme_textdomain('supertheme', get_stylesheet_directory().'/languages');</pre></p>
+<p>
+	<?php _e('The path has been defined as subdirectory within the Child Themes directory but you can skip the directory parameter and place the language files at the Child Themes main folder.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
+	<strong><?php _e('(Re)scan process and Synchronization at Child Themes', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('Scanning a Child Theme always includes the files from Main Theme too. So you always get the mixed translation from Main and Child Theme. Doing a Synchronization with the Main Theme will preserve the texts from Child Theme and will attach new texts from Main Theme only.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<?php
+}
+
 function csp_callback_help_selfprotection() {
 ?>
 <p>
@@ -2175,11 +2253,24 @@ function csp_callback_help_selfprotection() {
 	<?php _e('The plugin <em>Codestyling Localization</em> introduced a high sophisticated inject detection and will show error messages, if themes or plugins try to inject their own scripts into this plugin pages. Furthermore all embedded scripts will be safe guarded and traced in case they will raise runtime exceptions. Doing so this plugin protects itself of malfunction caused by 3rd party plugin/theme authors. This will ensure the correct behavoir for this page, but expect at other backend pages malfunctioning code, because this is a global issue.', CSP_PO_TEXTDOMAIN); ?>
 </p>
 <p>
+	<strong><?php _e('CDN - Javascripts loaded using Content Delivery Networks instead of WordPress provide files', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('Some Blog owner decide to replace the location where the Javascripts will be loaded from by using a Plugin. In normal cases this should work proper but sometimes WordPress includes versions of Scripts not yet hosted at CDN provider. The Guard will threat CDN usage as warning and checks if all files can be load from CDN. If not possible to load at least one file, additionally an error message will be issued to show, that this page will not work as expected.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<p>
 	<strong><?php _e('What can I do, if I get this protection message alert?', CSP_PO_TEXTDOMAIN); ?></strong>
 </p>
 <p>
 	<?php _e('If your Installation has this kind of problems, please contact the author of theme or plugin(s) which inject their script code either accidentally or intentionally (click message details). He/she must repair the affected theme/plugin to play nicely with other plugins at WordPress backend and/or restrict its scripts to the 3rd party theme/plugin pages only.', CSP_PO_TEXTDOMAIN); ?>
 </p>
+<p>
+	<strong><?php _e('Theme & Plugin Authors - exclusion from Guard for developers', CSP_PO_TEXTDOMAIN); ?></strong>
+</p>
+<p>
+	<?php _e('You may have written a Plugin or Theme that requires scripts at all pages but play nicely at backend pages. In those cases please send me an email with your repository link. I will check this Plugin or Theme and exclude it from trace, if the test will show, that it is working well.', CSP_PO_TEXTDOMAIN); ?>
+</p>
+
 <?php
 }
 
@@ -2546,6 +2637,12 @@ function csp_load_po_edit_admin_page(){
 			));
 		}
 		$screen->add_help_tab(array(
+			'title' => __('Child Themes', CSP_PO_TEXTDOMAIN),
+			'id' => 'workonchildthemes',
+			'content' => '',
+			'callback' => 'csp_callback_help_workonchildthemes'
+		));	
+		$screen->add_help_tab(array(
 			'title' => __('Scripting Guard', CSP_PO_TEXTDOMAIN),
 			'id' => 'selfprotection',
 			'content' => '',
@@ -2896,8 +2993,12 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 		<table width="100%" cellspacing="0" class="mo-list" id="mo-list-<?php echo ++$mo_list_counter; ?>" summary="<?php echo $data['textdomain']['identifier'].'|'.$data['type'].'|'.$data['name'].' v'.$data['version']; ?>">
 			<tr class="mo-list-head">
 				<td colspan="4" nowrap="nowrap">
-					<img alt="GNU GetText" class="alignleft" src="<?php echo CSP_PO_BASE_URL; ?>/images/gettext.gif" />
-					&nbsp;<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile button" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", CSP_PO_TEXTDOMAIN); ?></a>
+					<img alt="GNU GetText" class="alignleft" src="<?php echo CSP_PO_BASE_URL; ?>/images/gettext.gif" style="display:none;" />
+					<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile button" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", CSP_PO_TEXTDOMAIN); ?></a>
+					<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
+					&nbsp;<a class="clickable mofile button" onclick="csp_merge_maintheme_languages(this,'<?php echo $data['theme-template']; ?>','<?php echo $data['theme-self']; ?>','<?php echo $data['base_path']; if(!empty($data['special_path'])) echo $data['special_path'].'/' ?>','<?php echo $data['textdomain']['identifier']; ?>','mo-list-<?php echo $mo_list_counter; ?>');"><?php _e("Sync Files with Main Theme", CSP_PO_TEXTDOMAIN); ?></a>
+					<a rel="workonchildthemes" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" href="javascript:void(0);" class="question-help" align="left"><img src="http://wp34.de/wp-content/plugins/codestyling-localization/images/question.gif"></a>
+					<?php endif; ?>
 				</td>
 				<td colspan="1" nowrap="nowrap" class="csp-ta-right"><?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',count($data['languages']),CSP_PO_TEXTDOMAIN), count($data['languages'])); ?></td>
 			</tr>
@@ -3008,7 +3109,11 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 					<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>');"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
 					<span>&nbsp;</span>
 					<?php if (!$data['deny_scanning']) : ?>
-					<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+						<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
+							<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."','".$data['theme-template']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+						<?php else: ?>
+							<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."',''"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+						<?php endif; ?>
 					<span>&nbsp;</span>
 					<?php else: ?>
 					<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
@@ -3302,6 +3407,71 @@ function csp_add_language(elem, type, name, row, path, subpath, existing, type, 
 	return false;
 }
 
+function csp_merge_maintheme_languages(elem, source, dest, basepath, textdomain, molist) {
+	
+	elem = $(elem);
+	elem.blur();
+	
+	if(csp_ajax_params.action.length) {
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});		
+	}else{
+		csp_ajax_params.action = 'csp_po_merge_from_maintheme';
+		csp_ajax_params.source = source;
+		csp_ajax_params.dest = dest;
+		csp_ajax_params.basepath = basepath;
+		csp_ajax_params.textdomain = textdomain;
+		csp_ajax_params.molist = molist;
+	}
+	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		{  
+			parameters: csp_ajax_params,
+			onSuccess: function(transport) {
+				//remeber the last edited component by id hash 
+				//old jquery is unable to do that in WP 2.5
+				csp_ajax_params.action = '';
+				try{ window.location.hash = csp_ajax_params.molist; } catch(e) {}
+				window.location.reload();
+			},
+			onFailure: function(transport) {
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
+				}
+			}
+		}
+	);
+}
+
 function csp_create_new_pofile(elem, type){
 	elem = $(elem);
 	elem.blur();
@@ -3334,7 +3504,7 @@ function csp_create_new_pofile(elem, type){
 		{  
 			parameters: csp_ajax_params,
 			onSuccess: function(transport) {	
-				$$('#'+transport.responseJSON.row+' .mo-list-head').first().down(3).update(transport.responseJSON.head);
+				jQuery('#'+transport.responseJSON.row+' .mo-list-head  td.csp-ta-right').html(transport.responseJSON.head);
 				rel = $$('#'+transport.responseJSON.row+' .mo-list-head').first().down(2).rel;
 				$$('#'+transport.responseJSON.row+' .mo-list-head').first().down(2).rel += ((rel.empty() ? '' : "|" ) + transport.responseJSON.language);
 				elem_after = null;
@@ -3469,7 +3639,7 @@ function csp_destroy_files(elem, name, row, path, subpath, language, numlangs){
 							endcolor: '#FFFFCF', 
 							duration: 1,
 							afterFinish: function(obj) { 
-								$$('#'+transport.responseJSON.row+' .mo-list-head').first().down(3).update(transport.responseJSON.head);
+								jQuery('#'+transport.responseJSON.row+' .mo-list-head  td.csp-ta-right').html(transport.responseJSON.head);
 								a = $$('#'+transport.responseJSON.row+' .mo-list-head').first().down(2).rel.split('|').without(transport.responseJSON.language);
 								$$('#'+transport.responseJSON.row+' .mo-list-head').first().down(2).rel = a.join('|');
 								obj.element.remove(); 
@@ -3515,7 +3685,7 @@ function csp_destroy_files(elem, name, row, path, subpath, language, numlangs){
 	return false;	
 }
 
-function csp_rescan_language(elem, name, row, path, subpath, language, type, simplefilename) {
+function csp_rescan_language(elem, name, row, path, subpath, language, type, simplefilename, themetemplate) {
 	elem = $(elem);
 	elem.blur();
 	var a = elem.up('table').summary.split('|');
@@ -3533,7 +3703,8 @@ function csp_rescan_language(elem, name, row, path, subpath, language, type, sim
 				numlangs: $$('#'+row+' .mo-list-head').first().down(2).rel.split('|').size(),
 				type: type,
 				textdomain: actual_domain,
-				simplefilename: simplefilename
+				simplefilename: simplefilename,
+				themetemplate: themetemplate
 			},
 			onSuccess: function(transport) {
 				$('csp-dialog-caption').update("<?php _e('Rescanning PHP Source Files',CSP_PO_TEXTDOMAIN); ?>");
@@ -4578,17 +4749,55 @@ function csp_generate_mofile(elem) {
 
 function csp_create_languange_path(elem, path) {
 	elem.blur();
+	
+	if(csp_ajax_params.action.length) {	
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});
+	} else {
+		csp_ajax_params.action = 'csp_po_create_language_path';
+		csp_ajax_params.path = path;
+	}
+	
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_create_language_path',
-				path: path
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 				window.location.reload();
 			},
 			onFailure: function(transport) {
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				} else {
+					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
+				}
 			}
 		}
 	); 
@@ -4597,17 +4806,55 @@ function csp_create_languange_path(elem, path) {
 
 function csp_create_pot_indicator(elem, potfile) {
 	elem.blur();
+
+	if(csp_ajax_params.action.length) {	
+		jQuery('#csp-credentials > form').find('input').each(function(i, e) {
+			if ((jQuery(e).attr('type') == 'radio') && !jQuery(e).attr('checked')) return;
+			var s = jQuery(e).attr('name');
+			var v = jQuery(e).val();
+			csp_ajax_params[s] = v;
+		});
+	}else{
+		csp_ajax_params.action = 'csp_po_create_pot_indicator';
+		csp_ajax_params.potfile = potfile;
+	}
+	
 	new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
 		{  
-			parameters: {
-				action: 'csp_po_create_pot_indicator',
-				potfile: potfile
-			},
+			parameters: csp_ajax_params,
 			onSuccess: function(transport) {
 				window.location.reload();
 			},
 			onFailure: function(transport) {
-				csp_show_error(transport.responseText);
+				if (transport.status == '401') {
+					jQuery('#csp-credentials').html(transport.responseText).dialog({
+						width: '500px',
+						closeOnEscape: false,
+						modal: true,
+						resizable: false,
+						title: '<b><?php echo esc_js(__('User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+						buttons: { 
+							"<?php echo esc_js(__('Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close");
+								jQuery(elem).trigger('click');
+							},
+							"<?php echo esc_js(__('Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								jQuery('#csp-credentials').dialog("close"); 
+								csp_ajax_params.action = '';
+							} 
+						},
+						open: function(event, ui) {
+							jQuery('#csp-credentials').show().css('width', 'auto');
+						},
+						close: function() {
+							jQuery('#csp-credentials').dialog("destroy");
+						}
+					});
+					jQuery('#upgrade').hide().attr('disabled', 'disabled');	
+				}else {
+					csp_show_error(transport.responseText);
+					csp_ajax_params.action = '';
+				}
 			}
 		}
 	); 
