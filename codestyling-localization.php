@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.23
+Version: 1.99.24-beta
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -91,7 +91,7 @@ if (function_exists('add_action')) {
 		
 	//Bugfix: ensure valid JSON requests at IDN locations!
 	//Attention: Google Chrome and Safari behave in different way (shared WebKit issue or all other are wrong?)!
-	list($domain, $target) = csp_split_url( ( function_exists("admin_url") ? rtrim(admin_url(), '/') : rtrim(get_option('siteurl').'/wp-admin/', '/') ) );
+	list($csp_domain, $csp_target) = csp_split_url( ( function_exists("admin_url") ? rtrim(admin_url(), '/') : rtrim(get_option('siteurl').'/wp-admin/', '/') ) );
 	if (
 		stripos($_SERVER['HTTP_USER_AGENT'], 'chrome') !== false 
 		|| 
@@ -99,13 +99,13 @@ if (function_exists('add_action')) {
 		||
 		version_compare(phpversion(), '5.2.1', '<') //IDNA class requires PHP 5.2.1 or higher
 	) {
-		define('CSP_PO_ADMIN_URL', strtolower($domain).$target);
+		define('CSP_PO_ADMIN_URL', strtolower($csp_domain).$csp_target);
 	}
 	else{
 		if (!class_exists('idna_convert'))
 			require_once('includes/idna_convert.class.php');
 		$idn = new idna_convert();
-		define('CSP_PO_ADMIN_URL', $idn->decode(strtolower($domain), 'utf8').$target);
+		define('CSP_PO_ADMIN_URL', $idn->decode(strtolower($csp_domain), 'utf8').$csp_target);
 	}
 	
     define('CSP_PO_BASE_PATH', WP_PLUGIN_DIR . CSP_PO_PLUGINPATH);
@@ -2307,11 +2307,44 @@ function csp_try_jquery_document_ready_hardening($script) {
 	return $script;
 }
 
-$csp_cdn_scripts = array();
+$csp_external_scripts = array(
+	'cdn' => array(
+		'tokens' => array(),
+		'scripts' => array()
+	),
+	'dubious' => array(
+		'tokens' => array(),
+		'scripts' => array()
+	)
+);
+
+$csp_known_wordpress_externals = array(
+	//none wordpress own files
+	'colorpicker', 'prototype', 'scriptaculous-root', 'scriptaculous-builder', 'scriptaculous-dragdrop', 'scriptaculous-effects',
+	'scriptaculous-slider', 'scriptaculous-sound', 'scriptaculous-controls', 'scriptaculous', 'cropper', 'jquery',
+	'jquery-ui-core', 'jquery-effects-core', 'jquery-effects-blind', 'jquery-effects-bounce', 'jquery-effects-clip', 
+	'jquery-effects-drop', 'jquery-effects-explode', 'jquery-effects-fade', 'jquery-effects-fold', 'jquery-effects-highlight',
+	'jquery-effects-pulsate', 'jquery-effects-scale', 'jquery-effects-shake', 'jquery-effects-slide', 'jquery-effects-transfer',
+	'jquery-ui-accordion', 'jquery-ui-autocomplete', 'jquery-ui-button', 'jquery-ui-datepicker', 'jquery-ui-dialog', 'jquery-ui-draggable',
+	'jquery-ui-droppable', 'jquery-ui-mouse', 'jquery-ui-position', 'jquery-ui-progressbar', 'jquery-ui-resizable', 'jquery-ui-selectable',
+	'jquery-ui-slider', 'jquery-ui-sortable', 'jquery-ui-tabs', 'jquery-ui-widget', 'jquery-form', 'jquery-color', 'suggest',
+	'schedule', 'jquery-query', 'jquery-serialize-object', 'jquery-hotkeys', 'jquery-table-hotkeys', 'jquery-touch-punch',
+	'thickbox', 'jcrop', 'swfobject', 'plupload', 'plupload-html5', 'plupload-flash', 'plupload-silverlight', 'plupload-html4',
+	'plupload-all', 'plupload-handlers', 'swfupload', 'swfupload-swfobject', 'swfupload-queue', 'swfupload-speed','swfupload-all',
+	'swfupload-handlers', 'json2', 'farbtastic',
+	//wordpress admin files
+	'utils', 'common', 'sack', 'quicktags', 'editor', 'wp-fullscreen', 'wp-ajax-response', 'wp-pointer', 'autosave',
+	'wp-lists', 'comment-reply', 'imgareaselect', 'password-strength-meter', 'user-profile', 'user-search', 'site-search',
+	'admin-bar', 'wplink', 'wpdialogs', 'wpdialogs-popup', 'word-count', 'media-upload', 'hoverIntent', 'customize-base',
+	'customize-loader', 'customize-preview', 'customize-controls', 'ajaxcat', 'admin-categories', 'admin-tags', 'admin-custom-fields',
+	'admin-comments', 'xfn', 'postbox', 'post', 'link', 'comment', 'admin-gallery', 'admin-widgets', 'theme', 'theme-preview',
+	'inline-edit-post', 'inline-edit-tax', 'plugin-install', 'dashboard', 'list-revisions', 'media', 'image-edit', 'set-post-thumbnail',
+	'nav-menu', 'custom-background', 'media-gallery'
+);
 
 function csp_filter_print_scripts_array($scripts) {
 	//detect CDN script redirecting
-	global $wp_scripts, $csp_cdn_scripts;
+	global $wp_scripts, $csp_external_scripts, $csp_known_wordpress_externals;
 	//var_dump($wp_scripts);
 	if (is_object($wp_scripts)) {
 		foreach($scripts as $token) {
@@ -2319,18 +2352,31 @@ function csp_filter_print_scripts_array($scripts) {
 				if (isset($wp_scripts->registered[$token]->src) && !empty($wp_scripts->registered[$token]->src)) {
 					if (preg_match('|^http|', $wp_scripts->registered[$token]->src)) {
 						if(!preg_match('|^'.str_replace('.','\.',get_option('siteurl')).'|', $wp_scripts->registered[$token]->src)) {
-							$csp_cdn_scripts[$token] = $wp_scripts->registered[$token]->src;
+							if (in_array($token, $csp_known_wordpress_externals)) {
+								if (!in_array($token, $csp_external_scripts['cdn']['tokens'])) {
+									$csp_external_scripts['cdn']['tokens'][] = $token;
+									$csp_external_scripts['cdn']['scripts'][] = $wp_scripts->registered[$token]->src;
+								}
+							} else {
+								if (!in_array($token, $csp_external_scripts['dubious']['tokens'])) {
+									$csp_external_scripts['dubious']['tokens'][] = $token;
+									$csp_external_scripts['dubious']['scripts'][] = $wp_scripts->registered[$token]->src;
+								}
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+	
 	//protect against injected media upload script, modifies thickbox for media uploads not required here!
 	if (in_array('media-upload', $scripts)) {
 		if (!defined('CSL_MEDIA_UPLOAD_STRIPPED')) define('CSL_MEDIA_UPLOAD_STRIPPED', true);
-		return array_diff($scripts, array('media-upload'));
+		$scripts = array_diff($scripts, array('media-upload'));
 	}
+	//protect against "dubious" scripts !
+	$scripts = array_diff($scripts, $csp_external_scripts['dubious']['tokens']);
 	return $scripts;
 }
 
@@ -2355,7 +2401,9 @@ function csp_self_script_protection_head() {
 				//url based scripts - mark as dirty if required
 				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
 				if (isset($url[1]) && !empty($url[1])){
+					global $csp_external_scripts;				
 					if(stripos($url[1], WP_CONTENT_URL) !== false  && stripos($url[1], '/wp-native-dashboard/') === false) {
+						//internal scripts
 						$dirty_scripts[] = $url[1];
 						$dirty_index[] = $i;
 						if (stripos($url[1], WP_PLUGIN_URL) !== false) {
@@ -2363,6 +2411,11 @@ function csp_self_script_protection_head() {
 						}else{
 							$dirty_theme[] = $url[1];
 						}
+					}elseif (stripos($url[1], get_option('siteurl')) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+						//external
+						$dirty_index[] = $i;			
+						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_head#$i";
+						$csp_external_scripts['dubious']['scripts'][] = $url[1];
 					}
 				}
 			}else{
@@ -2372,7 +2425,7 @@ function csp_self_script_protection_head() {
 		}
 	}
 	//3rd - remove critical injected scripts
-	if (count($dirty_scripts) > 0) {
+	if (count($dirty_index) > 0) {
 		foreach($dirty_index as $i) {
 			$content = str_replace($scripts[0][$i], '', $content);
 		}
@@ -2399,7 +2452,9 @@ function csp_self_script_protection_footer() {
 				//url based scripts - mark as dirty if required
 				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
 				if (isset($url[1]) && !empty($url[1])){
+					global $csp_external_scripts;				
 					if(stripos($url[1], WP_CONTENT_URL) !== false && stripos($url[1], '/wp-native-dashboard/') === false) {
+						//internal scripts
 						$dirty_scripts[] = $url[1];
 						$dirty_index[] = $i;
 						if (stripos($url[1], WP_PLUGIN_URL) !== false || stripos($url[1], WPMU_PLUGIN_URL) !== false) {
@@ -2407,6 +2462,11 @@ function csp_self_script_protection_footer() {
 						}else{
 							$dirty_theme[] = $url[1];
 						}
+					}elseif (stripos($url[1], get_option('siteurl')) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+						//external
+						$dirty_index[] = $i;			
+						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_footer#$i";
+						$csp_external_scripts['dubious']['scripts'][] = $url[1];
 					}
 				}
 			}else{
@@ -2416,7 +2476,7 @@ function csp_self_script_protection_footer() {
 		}
 	}
 	//3rd - remove critical injected scripts
-	if (count($dirty_scripts) > 0) {
+	if (count($dirty_index) > 0) {
 		foreach($dirty_index as $i) {
 			$content = str_replace($scripts[0][$i], '', $content);
 		}
@@ -2430,11 +2490,11 @@ function csp_self_script_protection_footer() {
 	else
 		echo "<script type=\"text/javascript\">csp_self_protection.dirty_enqueues = [];</script>\n";
 
-	global $csp_cdn_scripts;
-	if (count($csp_cdn_scripts) > 0)
-		echo '<script type="text/javascript">csp_self_protection.cdn_scripts = '.json_encode($csp_cdn_scripts).";</script>\n";
+	global $csp_external_scripts;
+	if (count($csp_external_scripts['cdn']['tokens']) > 0 || count($csp_external_scripts['dubious']['tokens']) > 0)
+		echo '<script type="text/javascript">csp_self_protection.externals = '.json_encode($csp_external_scripts).";</script>\n";
 	else
-		echo "<script type=\"text/javascript\">csp_self_protection.cdn_scripts = [];</script>\n";
+		echo "<script type=\"text/javascript\">csp_self_protection.externals = { 'cdn' : { 'tokens' : [], 'scripts' : [] }, 'dubious' : { 'tokens' : [], 'scripts' : [] } };</script>\n";
 	
 	
 		
@@ -2442,7 +2502,19 @@ function csp_self_script_protection_footer() {
 ?>
 <script type="text/javascript">
 	jQuery(document).ready(function($) { 
-		if (csp_self_protection.dirty_theme.length || csp_self_protection.dirty_plugins.length || csp_self_protection.runtime.length || csp_self_protection.dirty_enqueues.length) {
+		if (
+			csp_self_protection.dirty_theme.length 
+			|| 
+			csp_self_protection.dirty_plugins.length 
+			|| 
+			csp_self_protection.runtime.length 
+			|| 
+			csp_self_protection.dirty_enqueues.length
+			||
+			csp_self_protection.externals.cdn.tokens.length
+			||
+			csp_self_protection.externals.dubious.tokens.length
+		) {
 			$.post("<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>", { "action" : "csp_self_protection_result" , "data" :  csp_self_protection }, function(data) {
 				$('#csp-wrap-main h2').after(data);
 				$('.self-protection-details').live('click', function(event) {
@@ -2464,7 +2536,8 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['dirty_theme'])) $incidents += count($_POST['data']['dirty_theme']);
 	if (isset($_POST['data']['dirty_plugins'])) $incidents += count($_POST['data']['dirty_plugins']);
 	if (isset($_POST['data']['runtime'])) $incidents += count($_POST['data']['runtime']);
-	if (isset($_POST['data']['cdn_scripts'])) $incidents += count($_POST['data']['cdn_scripts']);
+	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['cdn'])) $incidents += count($_POST['data']['externals']['cdn']['tokens']);
+	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['dubious'])) $incidents += count($_POST['data']['externals']['dubious']['tokens']);
 ?>
 <p class="self-protection"><strong><?php _e('Scripting Guard',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', CSP_PO_TEXTDOMAIN), $incidents, _n('incident', 'incidents', $incidents, CSP_PO_TEXTDOMAIN)); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 <div id="self-protection-details" style="display:none;">
@@ -2543,19 +2616,51 @@ function csp_handle_csp_self_protection_result() {
 		</div>
 	<?php endif; ?>	
 <?php
-	if (isset($_POST['data']['cdn_scripts']) && count($_POST['data']['cdn_scripts'])) : $errors = 0; ?>
+	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['dubious']) && count($_POST['data']['externals']['dubious']['tokens'])) : $errors = 0; ?>
+		<div>
+		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/dubious-scripts.png"; ?>" />
+		<strong style="color:#800;"><?php _e('Malfunction at dubious external scripts detected !' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown external script has been enqueued or hardly attached.', CSP_PO_TEXTDOMAIN); ?></strong> | 
+		<?php _e('Polluter:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong> <small>(<?php _e('probably by Theme or Plugin',CSP_PO_TEXTDOMAIN); ?>)</small><br/>
+		<?php _e('Below listed external scripts have been traced, verified and automatically stripped because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<ol>
+		<?php  
+		for($i=0;$i<count($_POST['data']['externals']['dubious']['tokens']); $i++) :
+				$token = $_POST['data']['externals']['dubious']['tokens'][$i];
+				$script = $_POST['data']['externals']['dubious']['scripts'][$i];
+				$res = wp_remote_head($script, array('sslverify' => false));
+				$style = (($res === false || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
+				if(!empty($style)) $errors += 1; 
+		?>
+			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
+		<?php endfor; ?>
+		</ol>
+		<?php if ($errors > 0) : ?>
+		<p style="color:#800;font-weight:bold;"><?php 
+			$text = sprintf(_n('%d file', '%d files', $errors, CSP_PO_TEXTDOMAIN), $errors);
+			echo sprintf(__('This page will not work as expected because %s could not be get from CDN. Check and update the Plugin doing your CDN redirection!',CSP_PO_TEXTDOMAIN), $text); 
+		?></p>
+		<?php endif; ?>
+		</div>
+	<?php endif; ?>		
+<?php
+	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['cdn']) && count($_POST['data']['externals']['cdn']['tokens'])) : $errors = 0; ?>
 		<div style="border-top: 1px dashed gray; padding-top: 10px;">
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/cdn-scripts.png"; ?>" />
 		<strong style="color:#008;"><?php _e('CDN based script loading redirection detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
 		<?php _e('Warning:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('may break the dependency script loading feature within WordPress core files.', CSP_PO_TEXTDOMAIN); ?></strong><br/>
 		<?php _e('Below listed redirects have been traced and verified but not revoked:',CSP_PO_TEXTDOMAIN); ?><br/>
 		<ol>
-		<?php  foreach($_POST['data']['cdn_scripts'] as $token => $script) : 
-				$res = wp_remote_head($script);
+		<?php  
+		for($i=0;$i<count($_POST['data']['externals']['cdn']['tokens']); $i++) :
+				$token = $_POST['data']['externals']['cdn']['tokens'][$i];
+				$script = $_POST['data']['externals']['cdn']['scripts'][$i];
+				$res = wp_remote_head($script, array('sslverify' => false));
 				$style = (($res === false || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
-				if(!empty($style)) $errors += 1; ?>
+				if(!empty($style)) $errors += 1; 
+		?>
 			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
-		<?php endforeach; ?>
+		<?php endfor; ?>
 		</ol>
 		<?php if ($errors > 0) : ?>
 		<p style="color:#800;font-weight:bold;"><?php 
