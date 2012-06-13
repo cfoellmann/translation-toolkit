@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: CodeStyling Localization v1.99.24-beta\n"
+"Project-Id-Version: CodeStyling Localization v1.99.24\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-25 03:13+0100\n"
-"PO-Revision-Date: 2012-06-13 07:33:29+0000\n"
+"PO-Revision-Date: 2012-06-13 19:55:41+0000\n"
 "Last-Translator: Heiko Rabe <info@code-styling.de>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1613,7 +1613,7 @@ msgstr "Wie können Sie Ihr Child Theme für eigene Übersetzungsdateien vorbere
 #: codestyling-localization.php:2229
 #@ codestyling-localization
 msgid "First of all you have to modify your Child Themes <em>functions.php</em> file and call the appropriated load method as shown below. Assume the textdomain is defined at the Main Theme as <b>supertheme</b> the load function should look like:"
-msgstr "Zunächst einmal müssen Sie Ihre Child Theme <em>functions.php</em> Datei ändern und die geeignete Load-Methode aufrufen, wie unten gezeigt. Angenommen die Textdomain im Main Theme ist als <b>Supertheme</b> definiert, sollte die Load-Funktion zum Beispiel so aussehen:"
+msgstr "Zunächst einmal müssen Sie Ihre Child Theme <em>functions.php</em> Datei ändern und die geeignete Load-Methode aufrufen, wie unten gezeigt. Angenommen die Textdomain im Main Theme ist als <b>supertheme</b> definiert, sollte die Load-Funktion zum Beispiel so aussehen:"
 
 #: codestyling-localization.php:2233
 #@ codestyling-localization
@@ -1633,12 +1633,12 @@ msgstr "Beim Scannen eines Child Themes werden immer auch die Dateien aus dem Ma
 #: codestyling-localization.php:2256
 #@ codestyling-localization
 msgid "CDN - Javascripts loaded using Content Delivery Networks instead of WordPress provide files"
-msgstr "CDN - Javascripts mit Content Delivery Networks laden anstelle der von WordPress bereitgestellten Dateien"
+msgstr "CDN - Javascripts aus Content Delivery Networks laden lassen statt der von WordPress bereitgestellten Dateien"
 
 #: codestyling-localization.php:2259
 #@ codestyling-localization
 msgid "Some Blog owner decide to replace the location where the Javascripts will be loaded from by using a Plugin. In normal cases this should work proper but sometimes WordPress includes versions of Scripts not yet hosted at CDN provider. The Guard will threat CDN usage as warning and checks if all files can be load from CDN. If not possible to load at least one file, additionally an error message will be issued to show, that this page will not work as expected."
-msgstr "Einige Blog-Eigentümer entscheiden dafür, die Javascripts per Plugin von einem anderen Ort laden zu lassen. Im Normalfall sollte dies richtig funktionieren, aber manchmal enthält WordPress Versionen der Skripts, die noch nicht beim CDN-Anbieter gehostet sind. Der Guard wird CDN Verwendung als Warnung ausgeben und prüfen, ob alle Dateien vom CDN geladen werden können. Wenn dies für mindestens eine Datei nicht möglich ist, wird zusätzlich eine Fehlermeldung ausgegeben um zu zeigen, dass diese Seite nicht wie erwartet funktionieren wird."
+msgstr "Einige Blog-Eigentümer entscheiden sich dafür, die Javascripts per Plugin von einem anderen Ort aus dem Netz laden zu lassen. Im Normalfall sollte dies richtig funktionieren. Manchmal enthalten neuere WordPress Versionen Skripte, die noch nicht beim CDN-Anbieter gehostet sind. Der Guard wird CDN Verwendung als Warnung ausgeben und prüfen, ob alle betroffenen Dateien vom CDN geladen werden können. Wenn dies für mindestens eine Datei nicht möglich ist, wird zusätzlich eine Fehlermeldung ausgegeben, um zu zeigen, dass diese Seite nicht wie erwartet funktionieren wird."
 
 #: codestyling-localization.php:2268
 #@ codestyling-localization
@@ -1648,7 +1648,7 @@ msgstr "Theme & Plugin-Autoren - Ausschluss vom Guard für Entwickler"
 #: codestyling-localization.php:2271
 #@ codestyling-localization
 msgid "You may have written a Plugin or Theme that requires scripts at all pages but play nicely at backend pages. In those cases please send me an email with your repository link. I will check this Plugin or Theme and exclude it from trace, if the test will show, that it is working well."
-msgstr "Sie könnten ein Plugin oder Theme geschrieben haben, das Skripts auf allen Backend Seiten benötigt aber korrekt geschrieben ist. In diesen Fällen senden Sie mir bitte eine e-Mail mit Ihrem Repository-Link. Ich werde dieses Plugin oder Theme überprüfen und es von der Ablaufverfolgung ausschliessen, wenn der Test zeigt, dass es gut funktioniert."
+msgstr "Sie könnten ein Plugin oder Theme geschrieben haben, welches Skripts auf allen Backend Seiten benötigt und korrekt geschrieben ist. In diesen Fällen senden Sie mir bitte eine e-Mail mit Ihrem Repository-Link. Ich werde dieses Plugin oder Theme überprüfen und es von der Ablaufverfolgung ausschliessen, wenn ein Test zeigt, dass es gut funktioniert."
 
 #: codestyling-localization.php:2650
 #@ codestyling-localization
@@ -1668,7 +1668,7 @@ msgstr "kann die Abhängigkeiten der Skript Lade-Funktion in WordPress Core-Date
 #: codestyling-localization.php:2652
 #@ codestyling-localization
 msgid "Below listed redirects have been traced and verified but not revoked:"
-msgstr "Unten aufgeführten Umleitungen wurden verfolgt und überprüft aber nicht aufgehoben:"
+msgstr "Die unten aufgeführten Umleitungen wurden verfolgt und überprüft aber nicht aufgehoben:"
 
 #: codestyling-localization.php:2640
 #: codestyling-localization.php:2667
@@ -1696,12 +1696,6 @@ msgstr ""
 msgid "Sync Files with Main Theme"
 msgstr "Synchronisieren mit Main Theme"
 
-#. translators: plugin header field 'Version'
-#: codestyling-localization.php:0
-#@ codestyling-localization
-msgid "1.99.24-beta"
-msgstr ""
-
 #: codestyling-localization.php:2622
 #@ codestyling-localization
 msgid "Malfunction at dubious external scripts detected !"
@@ -1710,10 +1704,16 @@ msgstr "Fehlfunktionen bei zweifelhaften externen Skripts erkannt!"
 #: codestyling-localization.php:2623
 #@ codestyling-localization
 msgid "unknown external script has been enqueued or hardly attached."
-msgstr "Unbekanntes externes Skript wurde in die Warteschlange eingereiht oder direkt eingefügt."
+msgstr "Unbekanntes externes Skript wurde gequeued oder direkt eingefügt."
 
 #: codestyling-localization.php:2625
 #@ codestyling-localization
 msgid "Below listed external scripts have been traced, verified and automatically stripped because of injection:"
 msgstr "Die unten aufgeführten externen Skripts wurden überprüft, verfolgt und und automatisch aufgrund der Injektion entfernt:"
+
+#. translators: plugin header field 'Version'
+#: codestyling-localization.php:0
+#@ codestyling-localization
+msgid "1.99.24"
+msgstr ""
 
