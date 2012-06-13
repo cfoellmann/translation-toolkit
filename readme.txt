@@ -2,8 +2,8 @@
 Contributors: codestyling
 Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, microsoft-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
-Tested up to: 3.4-RC2
-Stable tag: 1.99.23
+Tested up to: 3.4
+Stable tag: 1.99.24
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
@@ -85,7 +85,7 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 * Bugfix: at Multisite installations the global var $domain was accidentally overwritten by dealing with "same origin policy" and did break new blog creation
 * Bugfix: Scripting Guard now separates external script access from CDN mapped scripts and threat them as "dubious" an warnings
 * Bugfix: external script validation failed, if scripts are at SSL locations, verify SSL option ste to false now
-* Feature: none CDN external scripts will be stipped from page creation now always
+* Feature: none CDN external scripts will be stripped from page creation now always
 
 = Version 1.99.23 = 
 * Bugfix: injected stylesheets may modifiy the thickbox content and will not have any influence now.
