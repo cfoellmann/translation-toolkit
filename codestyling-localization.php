@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.24
+Version: 1.99.25-beta
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -115,6 +115,7 @@ if (function_exists('add_action')) {
 		
 	register_activation_hook(__FILE__, 'csp_po_install_plugin');
 
+	add_action('plugins_loaded', 'csp_trace_php_errors', 0);
 }
 
 function csp_is_multisite() {
@@ -466,7 +467,7 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 		
 		if ($data['textdomain']['is_const']) {
 			foreach($const_list as $e) {
-				$a = split(',', $e);
+				$a = explode(',', $e);
 				$c = trim($a[0], "\"' \t");
 				if ($c == $data['textdomain']['identifier']) {
 					$data['textdomain']['is_const'] = $data['textdomain']['identifier'];
@@ -686,7 +687,8 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	//let's first check the whether we have a child or base theme
 	if(is_object($values) && get_class($values) == 'WP_Theme') {
 		//WORDPRESS Version 3.4 changes theme handling!
-		$firstfile = array_shift(array_values($values['Template Files']));
+		$v = array_values($values['Template Files']);
+		$firstfile = array_shift($v);
 		$data['base_path'] = str_replace("\\","/", WP_CONTENT_DIR.str_replace('wp-content', '', dirname($firstfile)).'/');		
 		if (file_exists($firstfile)){
 			$data['base_path'] = dirname(str_replace("\\","/",$firstfile)).'/';
@@ -697,8 +699,8 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 			$data['base_path'] = dirname(str_replace("\\","/",$values['Template Files'][0])).'/';
 		}
 	}
-		
-	$folder_filesys = end(explode('/',rtrim($data['base_path'], '/')));
+	$fc = explode('/',untrailingslashit($data['base_path']));
+	$folder_filesys = end($fc);
 	$folder_data = $values['Template']; 
 	$is_child_theme = $folder_filesys != $folder_data;
 	$data['theme-self'] = $folder_filesys;
@@ -765,7 +767,8 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 			foreach($lng_files as $filename) {
 				//somebody did place buddypress themes at sub folder hierarchy like:  themes/buddypress/bp-default
 				//results at $values['Template'] to 'buddypress/bp-default' which damages the preg_match
-				$theme_langfile_check =  end(explode('/',$values['Template']));
+				$v = explode('/',$values['Template']);
+				$theme_langfile_check = end($v);
 				preg_match("/\/(|".preg_quote($theme_langfile_check)."\-)([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $filename, $hits);
 				if (empty($hits[1]) === false) {
 					$naming_convention_error = true;
@@ -830,7 +833,7 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	if ($data['gettext_ready']) {	
 		if ($data['textdomain']['is_const']) {
 			foreach($const_list as $e) {
-				$a = split(',', $e);
+				$a = explode(',', $e);
 				$c = trim($a[0], "\"' \t");
 				if ($c == $data['textdomain']['identifier']) {
 					$data['textdomain']['is_const'] = $data['textdomain']['identifier'];
@@ -2307,6 +2310,13 @@ function csp_try_jquery_document_ready_hardening($script) {
 	return $script;
 }
 
+$csp_traced_php_errors = array(
+	'suppress_errors' => false,
+	'old_handler' => null,
+	'messages' => array()
+	
+);
+
 $csp_external_scripts = array(
 	'cdn' => array(
 		'tokens' => array(),
@@ -2378,6 +2388,69 @@ function csp_filter_print_scripts_array($scripts) {
 	//protect against "dubious" scripts !
 	$scripts = array_diff($scripts, $csp_external_scripts['dubious']['tokens']);
 	return $scripts;
+}
+
+function csp_php_error_handler($errno, $errstr, $errfile, $errline) {
+	global $csp_traced_php_errors;
+	$errorType = array (  
+         E_ERROR                => 'ERROR',  
+         E_CORE_ERROR           => 'CORE ERROR',  
+         E_COMPILE_ERROR        => 'COMPILE ERROR',  
+         E_USER_ERROR           => 'USER ERROR',  
+         E_RECOVERABLE_ERROR  	=> 'RECOVERABLE ERROR',  
+         E_WARNING              => 'WARNING',  
+         E_CORE_WARNING         => 'CORE WARNING',  
+         E_COMPILE_WARNING      => 'COMPILE WARNING',  
+         E_USER_WARNING         => 'USER WARNING',  
+         E_NOTICE               => 'NOTICE',  
+         E_USER_NOTICE          => 'USER NOTICE',  
+         E_DEPRECATED           => 'DEPRECATED',  
+         E_USER_DEPRECATED      => 'USER_DEPRECATED',  
+         E_PARSE                => 'PARSING ERROR',
+		 E_STRICT				=> 'STRICT'
+    );  
+  
+    if (array_key_exists($errno, $errorType)) {  
+        $errname = $errorType[$errno];  
+    } else {  
+        $errname = 'UNKNOWN ERROR';  
+    }  
+	$csp_traced_php_errors['messages'][] = "$errname <strong>Error: [$errno] </strong> $errstr <strong>$errfile</strong> on line <strong>$errline</strong>";
+	if ($csp_traced_php_errors['old_handler'] != null && !$csp_traced_php_errors['suppress_errors']) {
+		call_user_func($csp_traced_php_errors['old_handler'], $errno, $errstr, $errfile, $errline);
+	}
+	return $csp_traced_php_errors['suppress_errors'];
+}
+
+function csp_trace_php_errors() {
+	global $csp_traced_php_errors;
+	$csp_traced_php_errors['suppress_errors'] = (is_admin() && isset($_REQUEST['page']) && $_REQUEST['page'] == 'codestyling-localization/codestyling-localization.php');
+	if(defined('DOING_AJAX') && DOING_AJAX && isset($_POST['action'])) {
+		$actions = array(
+			'csp_po_dlg_new',
+			'csp_po_dlg_delete',
+			'csp_po_dlg_rescan',
+			'csp_po_dlg_show_source',
+			'csp_po_merge_from_maintheme',
+			'csp_po_create',
+			'csp_po_destroy',
+			'csp_po_scan_source_file',
+			'csp_po_change_low_memory_mode',
+			'csp_po_change_translate_api',
+			'csp_po_change_permission',
+			'csp_po_launch_editor',
+			'csp_po_translate_by_google',
+			'csp_po_translate_by_microsoft',
+			'csp_po_save_catalog_entry',
+			'csp_po_generate_mo_file',
+			'csp_po_create_language_path',
+			'csp_po_create_pot_indicator',
+			'csp_self_protection_result'
+		);
+		if (in_array($_POST['action'], $actions)) $csp_traced_php_errors['suppress_errors'] = true;
+	}
+	if (function_exists('set_error_handler'))
+		$csp_traced_php_errors['old_handler'] = set_error_handler("csp_php_error_handler", E_ALL);
 }
 
 function csp_start_protection($hook_suffix) {
@@ -2496,7 +2569,12 @@ function csp_self_script_protection_footer() {
 	else
 		echo "<script type=\"text/javascript\">csp_self_protection.externals = { 'cdn' : { 'tokens' : [], 'scripts' : [] }, 'dubious' : { 'tokens' : [], 'scripts' : [] } };</script>\n";
 	
-	
+	global $csp_traced_php_errors;
+	if(count($csp_traced_php_errors['messages'])) {
+		echo '<script type="text/javascript">csp_self_protection.php = '.json_encode($csp_traced_php_errors['messages']).";</script>\n";
+	}else{
+		echo "<script type=\"text/javascript\">csp_self_protection.php = []; </script>\n";
+	}
 		
 	echo $content;
 ?>
@@ -2514,6 +2592,8 @@ function csp_self_script_protection_footer() {
 			csp_self_protection.externals.cdn.tokens.length
 			||
 			csp_self_protection.externals.dubious.tokens.length
+			||
+			csp_self_protection.php.length
 		) {
 			$.post("<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>", { "action" : "csp_self_protection_result" , "data" :  csp_self_protection }, function(data) {
 				$('#csp-wrap-main h2').after(data);
@@ -2538,9 +2618,25 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['runtime'])) $incidents += count($_POST['data']['runtime']);
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['cdn'])) $incidents += count($_POST['data']['externals']['cdn']['tokens']);
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['dubious'])) $incidents += count($_POST['data']['externals']['dubious']['tokens']);
+	if (isset($_POST['data']['php'])) $incidents += count($_POST['data']['php']);
 ?>
 <p class="self-protection"><strong><?php _e('Scripting Guard',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', CSP_PO_TEXTDOMAIN), $incidents, _n('incident', 'incidents', $incidents, CSP_PO_TEXTDOMAIN)); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 <div id="self-protection-details" style="display:none;">
+<?php
+	if (isset($_POST['data']['php']) && count($_POST['data']['php'])) : ?>
+		<div>
+		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/php-core.gif"; ?>" />
+		<strong style="color:#800;"><?php _e('PHP runtime error reporting detected !',CSP_PO_TEXTDOMAIN); ?></strong><br/>
+		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('some executed PHP code is not written proper',CSP_PO_TEXTDOMAIN); ?></strong> | 
+		<?php _e('Originator:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong> <small>(<?php _e('probably by Theme or Plugin',CSP_PO_TEXTDOMAIN); ?>)</small><br/>
+		<?php _e('Below listed error reports has been traced and removed during page creation:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<ol>
+		<?php foreach($_POST['data']['php'] as $message) : ?>
+			<li><?php echo $message; ?></li>
+		<?php endforeach; ?>
+		</ol>
+		</div>
+	<?php endif; ?>
 <?php
 	if (isset($_POST['data']['dirty_enqueues']) && count($_POST['data']['dirty_enqueues'])) : ?>
 		<div>

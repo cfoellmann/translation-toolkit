@@ -81,6 +81,9 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 
 == Changelog ==
 
+= Version 1.99.25 =
+* Feature: tracing PHP error messages as best as possible, STRICT currently not utilize, comming soon.
+
 = Version 1.99.24 =
 * Bugfix: at Multisite installations the global var $domain was accidentally overwritten by dealing with "same origin policy" and did break new blog creation
 * Bugfix: Scripting Guard now separates external script access from CDN mapped scripts and threat them as "dubious" an warnings
