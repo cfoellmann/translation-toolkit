@@ -117,7 +117,7 @@ class csp_l10n_parser {
 				} elseif (T_CONSTANT_ENCAPSED_STRING == $id) {
 					if ($in_func && $args_started) {
 						if ($text{0} == '"') {
-							$text = trim($text, '"');
+							$text = substr($text, 1, strlen($text)-2);
 							$text = str_replace('\"', '"', $text);
 							$text = str_replace("\\$", "$", $text);
 							$text = str_replace("\r\n", "\n", $text);
@@ -125,7 +125,7 @@ class csp_l10n_parser {
 							$text = str_replace("\\n", "\n", $text);
 						}
 						else{
-							$text = trim($text, "'");
+							$text = substr($text, 1, strlen($text)-2);
 							$text = str_replace("\\'", "'", $text);
 							$text = str_replace("\\$", "$", $text);
 							$text = str_replace("\r\n", "\n", $text);
@@ -288,6 +288,13 @@ class csp_l10n_parser {
 			
 	}
 	
+	function _ltd_validate($text)
+	{
+		$r = strip_tags($text);
+		if ($r != $text) return "{bug-detected}";
+		return $text;
+	}
+	
 	function _build_gettext($line, $func, $args, $argc, $is_dev_func, $bad_argc) {
 		$res = array(
 			'msgid' => '',
@@ -327,7 +334,7 @@ class csp_l10n_parser {
 				//[1] => textdomain (optional)
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0];
-				if (isset($args[1])) $res['LTD'] = trim($args[1]);
+				if (isset($args[1])) $res['LTD'] = $this->_ltd_validate(trim($args[1]));
 				elseif ($argc == 1) $res['LTD'] = $this->textdomain;
 			case '_e':
 				//see also esc_html_e
@@ -336,14 +343,14 @@ class csp_l10n_parser {
 				//[1] => textdomain (optional)
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0];
-				if (isset($args[1])) $res['LTD'] = trim($args[1]);
+				if (isset($args[1])) $res['LTD'] = $this->_ltd_validate(trim($args[1]));
 				elseif ($argc == 1) $res['LTD'] = $this->textdomain;
 			case '_c':
 				//[0] =>  phrase
 				//[1] => textdomain (optional)
 				$res['msgid'] = $args[0];
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
-				if (isset($args[1])) $res['LTD'] = trim($args[1]);
+				if (isset($args[1])) $res['LTD'] = $this->_ltd_validate(trim($args[1]));
 				elseif ($argc == 1) $res['LTD'] = $this->textdomain;
 				break;
 			case '_x': 		
@@ -356,7 +363,7 @@ class csp_l10n_parser {
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[1]."\04".$args[0];
-				if (isset($args[2])) $res['LTD'] = trim($args[2]);
+				if (isset($args[2])) $res['LTD'] = $this->_ltd_validate(trim($args[2]));
 				elseif ($argc == 2) $res['LTD'] = $this->textdomain;
 				break;
 			case '_ex': 		
@@ -367,7 +374,7 @@ class csp_l10n_parser {
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[1]."\04".$args[0];
-				if (isset($args[2])) $res['LTD'] = trim($args[2]);
+				if (isset($args[2])) $res['LTD'] = $this->_ltd_validate(trim($args[2]));
 				elseif ($argc == 2) $res['LTD'] = $this->textdomain;
 				break;
 			case '__ngettext':
@@ -379,7 +386,7 @@ class csp_l10n_parser {
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0]."\00".$args[1];
 				$res['P'] = true;
-				if (isset($args[3])) $res['LTD'] = trim($args[3]);
+				if (isset($args[3])) $res['LTD'] = $this->_ltd_validate(trim($args[3]));
 				elseif ($argc == 3) $res['LTD'] = $this->textdomain;
 				break;
 			case '_n':
@@ -391,7 +398,7 @@ class csp_l10n_parser {
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0]."\00".$args[1];
 				$res['P'] = true;
-				if (isset($args[3])) $res['LTD'] = trim($args[3]);
+				if (isset($args[3])) $res['LTD'] = $this->_ltd_validate(trim($args[3]));
 				elseif ($argc == 3) $res['LTD'] = $this->textdomain;
 				break;
 			case '_nc':
@@ -403,7 +410,7 @@ class csp_l10n_parser {
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0]."\00".$args[1];
 				$res['P'] = true;
-				if (isset($args[3])) $res['LTD'] = trim($args[3]);
+				if (isset($args[3])) $res['LTD'] = $this->_ltd_validate(trim($args[3]));
 				elseif ($argc == 3) $res['LTD'] = $this->textdomain;
 				break;
 			case '_nx':
@@ -418,7 +425,7 @@ class csp_l10n_parser {
 				if (in_array(3, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[3]."\04".$args[0]."\00".$args[1];
 				$res['P'] = true;
-				if (isset($args[4])) $res['LTD'] = trim($args[4]);
+				if (isset($args[4])) $res['LTD'] = html_entity_decode(strip_tags(trim($args[4])));
 				elseif ($argc == 4) $res['LTD'] = $this->textdomain;
 				break;
 			case '__ngettext_noop':
