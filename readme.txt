@@ -3,7 +3,7 @@ Contributors: codestyling
 Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, microsoft-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
 Tested up to: 3.5-RC1
-Stable tag: 1.99.26
+Stable tag: 1.99.27
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
