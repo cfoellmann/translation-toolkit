@@ -92,6 +92,7 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 * Bugfix: CDN verification returned an error object and caused a fatal error if external script can't be verified
 * Bugfix: german translation contains untranslated terms
 * Bugfix: compatibility improved and checked, still compatible with WordPress >= 2.5
+
 = Version 1.99.25 = 
 * Bugfix: trim of string sometimes broken like:  'Result: \'text\''
 * Bugfix: 'Domain Path' of plugins will be accepted if set and existing
@@ -106,7 +107,6 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 * Feature: misused translation functions mapped into artificial textdomain '{bug-detected}' and excluded from mo file generation
 * Feature: Scripting Guard supports now 'debug-bar', 'debug-bar-console', 'wp-native-dashboard'
 * Feature: Scripting Guard now monitors PHP script errors provoked by other plugins/themes during page generation
-
 
 = Version 1.99.24 =
 * Bugfix: at Multisite installations the global var $domain was accidentally overwritten by dealing with "same origin policy" and did break new blog creation
