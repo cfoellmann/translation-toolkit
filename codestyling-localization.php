@@ -61,6 +61,13 @@ function csp_split_url($url) {
   return array("$scheme$user$pass$host$port","$path$query$fragment"); 
 }
 
+if (!function_exists('get_site_url')) {
+	function get_site_url() { return get_option('site_url'); }
+}
+if (!function_exists('plugins_url')) {
+	function plugins_url($plugin) {  return WP_PLUGIN_URL . '/' . plugin_basename($plugin); }
+} 
+
 if (function_exists('add_action')) {
 	if ( !defined('WP_CONTENT_URL') )
 	    define('WP_CONTENT_URL', get_site_url() . '/wp-content');
@@ -2933,7 +2940,10 @@ function csp_po_admin_head() {
 		preg_match("/^codestyling\-localization\/codestyling\-localization\.php/", $_GET['page'])
 	) {
 		print '<link rel="stylesheet" href="'.get_site_url()."/wp-includes/js/thickbox/thickbox.css".'" type="text/css" media="screen"/>';
-		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/codestyling-localization.php?css=default'.'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/ui.all.css'.'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin.css'.'" type="text/css" media="screen"/>';
+		if(function_exists('is_rtl') && is_rtl())
+			print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin-rtl.css'.'" type="text/css" media="screen"/>';
 	}
 }
 
