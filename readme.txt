@@ -81,6 +81,11 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 
 == Changelog ==
 
+= Version 1.99.26 = 
+* Bugfix: WordPress version 3.5 starts removing prototype.js and scriptaculous but falls back to google CDN include which brokes JSON requests
+* Bugfix: CDN verification returned an error object and caused a fatal error if external script can't be verified
+* Bugfix: german translation contains untranslated terms
+* Bugfix: compatibility improved and checked, still compatible with WordPress >= 2.5
 = Version 1.99.25 = 
 * Bugfix: trim of string sometimes broken like:  'Result: \'text\''
 * Bugfix: 'Domain Path' of plugins will be accepted if set and existing

@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.25
+Version: 1.99.26
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -2388,6 +2388,7 @@ $csp_known_wordpress_externals = array(
 function csp_plugin_denied_by_guard($url)
 {
 	$valid = array(
+		'/codestyling-localization/',
 		'/wp-native-dashboard/',
 		'/debug-bar/',
 		'/debug-bar-console/'
@@ -2533,7 +2534,8 @@ function csp_self_script_protection_head() {
 						}else{
 							$dirty_theme[] = $url[1];
 						}
-					}elseif (stripos($url[1], get_site_url()) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+					}
+					elseif (stripos($url[1], get_site_url()) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
 						//external
 						$dirty_index[] = $i;			
 						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_head#$i";
@@ -2584,7 +2586,8 @@ function csp_self_script_protection_footer() {
 						}else{
 							$dirty_theme[] = $url[1];
 						}
-					}elseif (stripos($url[1], get_site_url()) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+					}
+					elseif (stripos($url[1], get_site_url()) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
 						//external
 						$dirty_index[] = $i;			
 						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_footer#$i";
@@ -2774,7 +2777,7 @@ function csp_handle_csp_self_protection_result() {
 				$token = $_POST['data']['externals']['dubious']['tokens'][$i];
 				$script = $_POST['data']['externals']['dubious']['scripts'][$i];
 				$res = wp_remote_head($script, array('sslverify' => false));
-				$style = (($res === false || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
+				$style = (($res === false || (is_object($res) && get_class($res) == 'WP_Error') || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
 				if(!empty($style)) $errors += 1; 
 		?>
 			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
@@ -2801,7 +2804,7 @@ function csp_handle_csp_self_protection_result() {
 				$token = $_POST['data']['externals']['cdn']['tokens'][$i];
 				$script = $_POST['data']['externals']['cdn']['scripts'][$i];
 				$res = wp_remote_head($script, array('sslverify' => false));
-				$style = (($res === false || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
+				$style = (($res === false || (is_object($res) && get_class($res) == 'WP_Error') || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
 				if(!empty($style)) $errors += 1; 
 		?>
 			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
@@ -2819,6 +2822,18 @@ function csp_handle_csp_self_protection_result() {
 <?php
 	exit();
 }
+function csp_redirect_prototype_js($src, $handle) {
+	$handles = array(
+		'prototype' => 'prototype',
+		'scriptaculous-root' => 'scriptaculous',
+		'scriptaculous-effects' => 'effects'
+	);
+	//load own older versions of the scripts that are working!
+	if (isset($handles[$handle])) {
+		return CSP_PO_BASE_URL.'/js/'.$handles[$handle].'.js';
+	}
+	return $src;
+}
 
 function csp_load_po_edit_admin_page(){
 
@@ -2827,10 +2842,11 @@ function csp_load_po_edit_admin_page(){
 	add_action('in_admin_footer', 'csp_start_protection', 0);
 	add_action('admin_head', 'csp_self_script_protection_head', 9999);
 	add_action('admin_print_footer_scripts', 'csp_self_script_protection_footer', 9999);
+	add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 2);
 
 	wp_enqueue_script( 'thickbox' );
-	wp_enqueue_script('prototype');
 	wp_enqueue_script('jquery-ui-dialog');
+	wp_enqueue_script('prototype');
 	wp_enqueue_script('scriptaculous-effects');
 	if (function_exists('wp_enqueue_style')) {
 		wp_enqueue_style( 'thickbox' );
