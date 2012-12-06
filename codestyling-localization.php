@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.27
+Version: 1.99.28
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -65,7 +65,9 @@ if (!function_exists('get_site_url')) {
 	function get_site_url() { return get_option('site_url'); }
 }
 if (!function_exists('plugins_url')) {
-	function plugins_url($plugin) {  return WP_PLUGIN_URL . '/' . plugin_basename($plugin); }
+	function plugins_url($plugin) {  
+		return WP_PLUGIN_URL . $plugin; 
+	}
 } 
 
 if (function_exists('add_action')) {
@@ -91,7 +93,7 @@ if (function_exists('add_action')) {
 	if( defined( 'MUPLUGINDIR' ) == false ) 
 		define( 'MUPLUGINDIR', 'wp-content/mu-plugins' ); // Relative to ABSPATH.  For back compat.
 
-	define("CSP_PO_PLUGINPATH", "/" . plugin_basename( dirname(__FILE__) ));
+	define("CSP_PO_PLUGINPATH", "/" . dirname(plugin_basename( __FILE__ )));
 
     define('CSP_PO_TEXTDOMAIN', 'codestyling-localization');
     define('CSP_PO_BASE_URL', plugins_url(CSP_PO_PLUGINPATH));
@@ -2317,44 +2319,52 @@ function csp_callback_help_selfprotection() {
 <?php
 }
 
-function csp_try_jquery_document_ready_hardening($script) {
-	$pattern = 'jQuery(document).ready(';
-	if ($pos = stripos($script,$pattern) !== false) {
-		$counter = 0;
-		$startofready = -1;
-		$endofready = -1;
-		for($i=$pos+strlen($pattern); $i < strlen($script); $i++) {
-			switch(substr($script, $i, 1)) {
-				case '{':
-					$counter++;
-					if ($counter == 1) {
-						$startofready = $i;
-					}
-					break;
-				case '}';
-					$counter--;
-					if ($counter == 0) {
-						$endofready = $i;
-						$i = strlen($script);
-					}
-					break;
-				default:
-					break;
+function csp_try_jquery_document_ready_hardening_pattern($content, $pattern) {
+	$pieces = explode($pattern, $content);
+	if (count($pieces) > 1) {
+		for ($loop=1; $loop<count($pieces); $loop++) {
+			$counter = 0;
+			$startofready = -1;
+			$endofready = -1;
+			$script  = $pieces[$loop];
+			for($i=0; $i < strlen($script); $i++) {
+				switch(substr($script, $i, 1)) {
+					case '{':
+						$counter++;
+						if ($counter == 1) {
+							$startofready = $i;
+						}
+						break;
+					case '}';
+						$counter--;
+						if ($counter == 0) {
+							$endofready = $i;
+							$i = strlen($script);
+						}
+						break;
+					default:
+						break;
+				}
 			}
-		}
-		if ($startofready != -1 && $endofready != -1) {
-			$sub = substr($script, $startofready+1, $endofready-$startofready-2);
-			$script = str_replace($sub, "try{".$sub."}catch(e){csp_self_protection.runtime.push(e.message);}" , $script);
+			if ($startofready != -1 && $endofready != -1) {
+				if ($script[$endofready+1] == ')') $endofready++;
+				$sub = substr($script, $startofready+1, $endofready-$startofready-2);
+				$pieces[$loop] = str_replace($sub, "\ntry{\n".$sub."\n}catch(e){csp_self_protection.runtime.push(e.message);}" , $script);
+			}			
 		}
 	}
-	return $script;
+	return implode($pattern, $pieces);
+}
+
+function csp_try_jquery_document_ready_hardening($content) {
+	$script = csp_try_jquery_document_ready_hardening_pattern($content, 'jQuery(document).ready(');
+	return csp_try_jquery_document_ready_hardening_pattern($script, 'jQuery(function()');	
 }
 
 $csp_traced_php_errors = array(
 	'suppress_errors' => false,
 	'old_handler' => null,
 	'messages' => array()
-	
 );
 
 $csp_external_scripts = array(
@@ -2474,14 +2484,15 @@ function csp_php_error_handler($errno, $errstr, $errfile, $errline) {
     }  
 	$csp_traced_php_errors['messages'][] = "$errname <strong>Error: [$errno] </strong> $errstr <strong>$errfile</strong> on line <strong>$errline</strong>";
 	if ($csp_traced_php_errors['old_handler'] != null && !$csp_traced_php_errors['suppress_errors']) {
-		call_user_func($csp_traced_php_errors['old_handler'], $errno, $errstr, $errfile, $errline);
+		return call_user_func($csp_traced_php_errors['old_handler'], $errno, $errstr, $errfile, $errline);
 	}
 	return $csp_traced_php_errors['suppress_errors'];
 }
 
 function csp_trace_php_errors() {
 	global $csp_traced_php_errors;
-	$csp_traced_php_errors['suppress_errors'] = (is_admin() && isset($_REQUEST['page']) && $_REQUEST['page'] == 'codestyling-localization/codestyling-localization.php');
+	
+	$csp_traced_php_errors['suppress_errors'] = (is_admin() && isset($_REQUEST['page']) && ($_REQUEST['page'] == 'codestyling-localization/codestyling-localization.php'));
 	if(defined('DOING_AJAX') && DOING_AJAX && isset($_POST['action'])) {
 		$actions = array(
 			'csp_po_dlg_new',
@@ -2504,8 +2515,10 @@ function csp_trace_php_errors() {
 			'csp_po_create_pot_indicator',
 			'csp_self_protection_result'
 		);
-		if (in_array($_POST['action'], $actions)) $csp_traced_php_errors['suppress_errors'] = true;
+		if (in_array($_POST['action'], $actions))
+			$csp_traced_php_errors['suppress_errors'] = true;
 	}
+	
 	if (function_exists('set_error_handler'))
 		$csp_traced_php_errors['old_handler'] = set_error_handler("csp_php_error_handler", E_ALL);
 }
@@ -2830,26 +2843,29 @@ function csp_handle_csp_self_protection_result() {
 	exit();
 }
 function csp_redirect_prototype_js($src, $handle) {
-	$handles = array(
-		'prototype' => 'prototype',
-		'scriptaculous-root' => 'scriptaculous',
-		'scriptaculous-effects' => 'effects'
-	);
-	//load own older versions of the scripts that are working!
-	if (isset($handles[$handle])) {
-		return CSP_PO_BASE_URL.'/js/'.$handles[$handle].'.js';
+	global $wp_version;
+	if (version_compare($wp_version, '3.5-alpha', '>=')) {
+		$handles = array(
+			'prototype' 			=> 'prototype',
+			'scriptaculous-root' 	=> 'wp-scriptaculous',
+			'scriptaculous-effects' => 'effects'
+		);
+		//load own older versions of the scripts that are working!
+		if (isset($handles[$handle])) {
+			return CSP_PO_BASE_URL.'/js/'.$handles[$handle].'.js';
+		}
 	}
 	return $src;
 }
 
 function csp_load_po_edit_admin_page(){
 
-	add_filter('print_scripts_array', 'csp_filter_print_scripts_array');
+	add_filter('print_scripts_array', 'csp_filter_print_scripts_array', 0);
 	add_action('admin_enqueue_scripts', 'csp_start_protection', 0);
 	add_action('in_admin_footer', 'csp_start_protection', 0);
 	add_action('admin_head', 'csp_self_script_protection_head', 9999);
 	add_action('admin_print_footer_scripts', 'csp_self_script_protection_footer', 9999);
-	add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 2);
+	add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 9999);
 
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_script('jquery-ui-dialog');

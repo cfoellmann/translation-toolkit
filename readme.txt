@@ -2,8 +2,8 @@
 Contributors: codestyling
 Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, microsoft-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
-Tested up to: 3.5-RC1
-Stable tag: 1.99.27
+Tested up to: 3.5-RC2
+Stable tag: 1.99.28
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
@@ -80,6 +80,11 @@ If you have a ready to publish translation of this plugin not pre-packaged yet, 
 You can use 2 translation API's with this plugin. Normally they are disabled at default installation. You will find inside the plugin main page a link that expands the required description how to work with API's.
 
 == Changelog ==
+
+= Version 1.99.28 =
+* Bugfix: function missing in very old WordPress versions covered
+* Bugfix: Scripting Guard now detects broken ready handler of injected javascripts
+* Bugfix: redirection of prototype/scriptaculous done only, if WP version >= 3.5-alpha
 
 = Version 1.99.27 = 
 * Bugfix: WordPress version 3.5 starts removing prototype.js and scriptaculous but falls back to google CDN include which brokes JSON requests
