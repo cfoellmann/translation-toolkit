@@ -2,8 +2,8 @@
 Contributors: codestyling
 Tags: gettext, language, translation, poedit, localization, plugin, wpmu, buddypress, bbpress, themes, translator, l10n, i18n, google-translate, microsoft-translate, compatibility, mo, po, po-mo, polyglot
 Requires at least: 2.5
-Tested up to: 3.4
-Stable tag: 1.99.24
+Tested up to: 3.5
+Stable tag: 1.99.29
 
 You can manage and edit all gettext translation files (*.po/*.mo) directly out of WordPress Admin Center without any need of an external editor.
 
@@ -81,8 +81,42 @@ You can use 2 translation API's with this plugin. Normally they are disabled at 
 
 == Changelog ==
 
-= Version 1.99.25 =
-* Feature: tracing PHP error messages as best as possible, STRICT currently not utilize, comming soon.
+= Version 1.99.29 = 
+* Bugfix: removed .htaccess file inside plugin folder
+* Bugfix: improved javascipt exception handling within jQuery initializer chains
+* Bugfix: updated re-introduced js libraries
+
+= Version 1.99.28 =
+* Bugfix: function missing in very old WordPress versions covered
+* Bugfix: Scripting Guard now detects broken ready handler of injected javascripts
+* Bugfix: redirection of prototype/scriptaculous done only, if WP version >= 3.5-alpha
+
+= Version 1.99.27 = 
+* Bugfix: WordPress version 3.5 starts removing prototype.js and scriptaculous but falls back to google CDN include which brokes JSON requests
+* Bugfix: CDN verification returned an error object and caused a fatal error if external script can't be verified
+* Bugfix: german translation contains untranslated terms
+* Bugfix: compatibility improved and checked, still compatible with WordPress >= 2.5
+
+= Version 1.99.26 = 
+* Bugfix: WordPress version 3.5 starts removing prototype.js and scriptaculous but falls back to google CDN include which brokes JSON requests
+* Bugfix: CDN verification returned an error object and caused a fatal error if external script can't be verified
+* Bugfix: german translation contains untranslated terms
+* Bugfix: compatibility improved and checked, still compatible with WordPress >= 2.5
+
+= Version 1.99.25 = 
+* Bugfix: trim of string sometimes broken like:  'Result: \'text\''
+* Bugfix: 'Domain Path' of plugins will be accepted if set and existing
+* Bugfix: uppercase letters used at folders or filenames did break the file handling
+* Bugfix: SSL fully supported, all scripts stripped accidentally
+* Bugfix: multisite support accidentally sometime broken
+* Bugfix: accidentally markup polution
+* Bugfix: theme detection for WP >= 3.3 was broken
+* Bugfix: statements of memory limits with 0MB indicates mostly misused translation functions at themes/plugins, handled now (e.g. target theme, single.php).
+* Bugfix: pofile sometimes created with wrong pluralization
+* Bugfix: mofile didn't got the correct pofile header and loads afterwards the wrong pluralization function
+* Feature: misused translation functions mapped into artificial textdomain '{bug-detected}' and excluded from mo file generation
+* Feature: Scripting Guard supports now 'debug-bar', 'debug-bar-console', 'wp-native-dashboard'
+* Feature: Scripting Guard now monitors PHP script errors provoked by other plugins/themes during page generation
 
 = Version 1.99.24 =
 * Bugfix: at Multisite installations the global var $domain was accidentally overwritten by dealing with "same origin policy" and did break new blog creation

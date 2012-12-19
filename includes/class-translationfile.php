@@ -350,7 +350,14 @@ class CspTranslationFile {
 		//set the plurals and multi textdomain support
 		//update the revision date
 		$stamp = date("Y-m-d H:i:sO");
-		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds");
+		//BUGFIX: language not possible if it's a template file
+		$po_lang = 'en';
+		if (preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $pofile, $hits)) {
+			$po_lang = $this->strings->_substr($hits[1],0,2);
+		}else{
+			$po_lang = $this->strings->_substr($_POST['language'],0,2);
+		}
+		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds", $po_lang);
 
 		//write header if last because it has no code ref anyway
 		if ($last === true) {
@@ -606,7 +613,9 @@ class CspTranslationFile {
 			($this->strings->_strlen(str_replace("\0", "", $entry['T'])) > 0)
 			&&
 			in_array($textdomain, $entry['LTD'])
-		);
+		)
+		||
+		(stripos($entry['T'], 'Plural-Forms') !== false);
 	}
 	
 	function is_illegal_empty_mofile($textdomain) {
