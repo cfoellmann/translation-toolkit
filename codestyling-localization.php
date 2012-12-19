@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.28
+Version: 1.99.29
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -46,6 +46,7 @@ Domain Path: /languages
 //Enable this only for debugging reasons. 
 //Attention: the strict logging may prevent WP from proper working because of many not handled issues.
 //error_reporting(E_ALL|E_STRICT);
+//@unlink(dirname(__FILE__).'/.htaccess');
 
 function csp_split_url($url) {
   $parsed_url = parse_url($url);
@@ -2357,7 +2358,7 @@ function csp_try_jquery_document_ready_hardening_pattern($content, $pattern) {
 }
 
 function csp_try_jquery_document_ready_hardening($content) {
-	$script = csp_try_jquery_document_ready_hardening_pattern($content, 'jQuery(document).ready(');
+	$script = csp_try_jquery_document_ready_hardening_pattern($content, '(document).ready(');
 	return csp_try_jquery_document_ready_hardening_pattern($script, 'jQuery(function()');	
 }
 
@@ -2402,13 +2403,18 @@ $csp_known_wordpress_externals = array(
 	'nav-menu', 'custom-background', 'media-gallery'
 );
 
+function csp_known_and_valid_cdn($url) {
+	return preg_match("/^https?:\/\/[^\.]*\.wp\.com/", $url);
+}
+
 function csp_plugin_denied_by_guard($url)
 {
 	$valid = array(
 		'/codestyling-localization/',
 		'/wp-native-dashboard/',
 		'/debug-bar/',
-		'/debug-bar-console/'
+		'/debug-bar-console/',
+		'/localization/'
 	);
 	foreach($valid as $slug)
 	{
@@ -2429,7 +2435,7 @@ function csp_filter_print_scripts_array($scripts) {
 				if (isset($wp_scripts->registered[$token]->src) && !empty($wp_scripts->registered[$token]->src)) {
 					if (preg_match('|^http|', $wp_scripts->registered[$token]->src)) {
 						if(!preg_match('|^'.str_replace('.','\.',get_site_url()).'|', $wp_scripts->registered[$token]->src)) {
-							if (in_array($token, $csp_known_wordpress_externals)) {
+							if (in_array($token, $csp_known_wordpress_externals) || csp_known_and_valid_cdn($wp_scripts->registered[$token]->src)) {
 								if (!in_array($token, $csp_external_scripts['cdn']['tokens'])) {
 									$csp_external_scripts['cdn']['tokens'][] = $token;
 									$csp_external_scripts['cdn']['scripts'][] = $wp_scripts->registered[$token]->src;
