@@ -84,6 +84,7 @@ class CspTranslationFile {
 			'Content-Type'					=> 'text/plain; charset=UTF-8',
 			'Content-Transfer-Encoding'		=> '8bit',
 			'Plural-Forms'					=> 'nplurals=2; plural=n != 1;',
+			'X-Generator'					=> 'CSL v1.x',
 			'X-Poedit-Language'				=> '',
 			'X-Poedit-Country'				=> '',
 			'X-Poedit-SourceCharset'		=> 'utf-8',
@@ -94,6 +95,15 @@ class CspTranslationFile {
 			'X-Textdomain-Support'			=> 'no'
 		);
 		$this->header_vars = array_keys($this->header);
+		$this->mo_header_vars = array(
+			'PO-Revision-Date',	
+			'MIME-Version',	
+			'Content-Type',	
+			'Content-Transfer-Encoding', 
+			'Plural-Forms', 
+			'X-Generator',
+			'Project-Id-Version'
+		);
 		array_splice($this->header_vars, array_search('X-Poedit-KeywordsList', $this->header_vars), 1 );
 		$this->plural_definitions				= array(
 			'nplurals=1; plural=0;' 																				=> array('hu', 'ja', 'ko', 'tr'),
@@ -126,17 +136,18 @@ class CspTranslationFile {
 		$this->reg_multi_line		= "/^(\".*\")/s";
 	}
 	
-	function _set_header_from_string($head, $lang='') {
+	function _set_header_from_string($head, $lang='', $mo_hdr_vars = false) {
 		if (!is_string($head)) return;
 		$hdr = explode("\n", $head);
+		$hdr_vars = $mo_hdr_vars ? $this->mo_header_vars : $this->header_vars;
 		foreach($hdr as $e) {
 			if ($this->strings->_strpos($e, ':') === false) continue;
 			list($key, $val) = explode(':', $e, 2);
 			$key = trim($key);$val = str_replace("\\","/", trim($val));
-			if (in_array($key, $this->header_vars)) {
+			if (in_array($key, $hdr_vars)) {
 				$this->header[$key] = $val;
 				//ensure qualified pluralization forms now
-				if ($key == 'Plural-Forms') {
+				if ($key == 'Plural-Forms' && !$mo_hdr_vars) {
 					$func = '';
 					foreach($this->plural_definitions as $f => $langs) {
 						if (in_array($lang, $langs)) $func = $f;
@@ -258,7 +269,7 @@ class CspTranslationFile {
 		$po_lang = $this->strings->_substr($hits[1],0,2);
 		$country = strtoupper($country);
 		$this->_set_header_from_string(
-			"Project-Id-Version: $proj_id\nPO-Revision-Date: $timestamp\nLast-Translator: $translator\nX-Poedit-Language: $language\nX-Poedit-Country: $country\nX-Poedit-Basepath: $rel\nPlural-Forms: \nX-Textdomain-Support: yes",
+			"Project-Id-Version: $proj_id\nPO-Revision-Date: $timestamp\nLast-Translator: $translator\nX-Poedit-Language: $language\nX-Poedit-Country: $country\nX-Poedit-Basepath: $rel\nPlural-Forms: \nX-Textdomain-Support: yes\n",
 			$po_lang
 		);
 		return true;
@@ -357,7 +368,7 @@ class CspTranslationFile {
 		}else{
 			$po_lang = $this->strings->_substr($_POST['language'],0,2);
 		}
-		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds", $po_lang);
+		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds\n", $po_lang);
 
 		//write header if last because it has no code ref anyway
 		if ($last === true) {
@@ -430,7 +441,7 @@ class CspTranslationFile {
 		//set the plurals and multi textdomain support
 		//update the revision date
 		$stamp = date("Y-m-d H:i:sO");
-		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds");
+		$this->_set_header_from_string("PO-Revision-Date: $stamp\nPlural-Forms: \nX-Textdomain-Support: $tds\n");
 
 		//write header if last because it has no code ref anyway
 		if ($last === true) {
@@ -626,6 +637,14 @@ class CspTranslationFile {
 		return ($entries == 0);
 	}
 	
+	function _reduce_header_for_mofile() {
+		if (isset($this->map[''])) {
+			$header = $this->map[''];
+			
+			$this->map[''] = $header;
+		}
+	}
+	
 	function write_mofile($mofile, $textdomain) {
 		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
 		if (isset($this->map["continents-cities\04Center"])) {
@@ -633,8 +652,19 @@ class CspTranslationFile {
 			unset($this->map["continents-cities\04Center"]);
 			$this->map["Center"] = $trans;
 		}
+		
+		//reduce the mofile header
+		$mohdr = $this->map['']['T'];
+		$mohdr_h = $this->header;
+		$this->header = array();
+		$this->_set_header_from_string($mohdr, '', true);
+		
 		$handle = @fopen($mofile, "wb");
-		if ($handle === false) return false;
+		if ($handle === false){
+			$this->header = $mohdr_h;
+			$this->_set_header_from_string($mohdr, '', false);
+			return false;
+		}
 		ksort($this->map, SORT_REGULAR);
 		//let's calculate none empty values	
 		$entries = 0;
@@ -667,6 +697,8 @@ class CspTranslationFile {
 		fwrite($handle,$org_table);
 		fwrite($handle,$trans_table);
 		fclose($handle);	
+		$this->header = $mohdr_h;
+		$this->_set_header_from_string($mohdr, '', false);
 		return true;
 	}
 	
@@ -677,6 +709,12 @@ class CspTranslationFile {
 			unset($this->map["continents-cities\04Center"]);
 			$this->map["Center"] = $trans;
 		}
+
+		//reduce the mofile header
+		$mohdr = $this->map['']['T'];
+		$mohdr_h = $this->header;
+		$this->header = array();
+		$this->_set_header_from_string($mohdr, '', true);
 		
 		$content = '';
 		
@@ -710,6 +748,8 @@ class CspTranslationFile {
 		}
 		$content = substr_replace($content, $org_table, 28, strlen($org_table));
 		$content = substr_replace($content, $trans_table, 28 + strlen($org_table), strlen($trans_table));
+		$this->header = $mohdr_h;
+		$this->_set_header_from_string($mohdr, '', false);
 		return $content;
 	}
 	
@@ -723,7 +763,7 @@ class CspTranslationFile {
 		//reset the references and textdomains
 		$func = array(&$this, '_reset_data');
 		array_walk($this->map, $func);
-		$this->_set_header_from_string("X-Textdomain-Support: yes");	
+		$this->_set_header_from_string("X-Textdomain-Support: yes\n");	
 	}
 	
 	function add_messages($r = false) {

@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.29
+Version: 1.99.30
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -47,6 +47,13 @@ Domain Path: /languages
 //Attention: the strict logging may prevent WP from proper working because of many not handled issues.
 //error_reporting(E_ALL|E_STRICT);
 //@unlink(dirname(__FILE__).'/.htaccess');
+
+if (!defined('E_RECOVERABLE_ERROR'))
+	define('E_RECOVERABLE_ERROR', 4096);
+if (!defined('E_DEPRECATED'))
+	define('E_DEPRECATED', 8192);
+if (!defined('E_USER_DEPRECATED '))
+	define('E_USER_DEPRECATED ', 16384);
 
 function csp_split_url($url) {
   $parsed_url = parse_url($url);
@@ -102,6 +109,7 @@ if (function_exists('add_action')) {
 	//Bugfix: ensure valid JSON requests at IDN locations!
 	//Attention: Google Chrome and Safari behave in different way (shared WebKit issue or all other are wrong?)!
 	list($csp_domain, $csp_target) = csp_split_url( ( function_exists("admin_url") ? rtrim(admin_url(), '/') : rtrim(get_site_url().'/wp-admin/', '/') ) );
+	define('CSP_SELF_DOMAIN', $csp_domain);
 	if (
 		stripos($_SERVER['HTTP_USER_AGENT'], 'chrome') !== false 
 		|| 
@@ -2107,7 +2115,7 @@ function csp_check_filesystem() {
 
 function csp_po_init_per_user_trans() {
 	//process per user settings
-	if (defined('TRANSLATION_API_PER_USER') && (TRANSLATION_API_PER_USER === true) && current_user_can('manage_options')) {
+	if (is_user_logged_in() && defined('TRANSLATION_API_PER_USER') && (TRANSLATION_API_PER_USER === true) && current_user_can('manage_options')) {
 		$myself = wp_get_current_user();
 		$func = function_exists('get_user_meta') ? 'get_user_meta' : 'get_usermeta';
 		$g = call_user_func($func, $myself->ID, 'csp-google-api-key', true);
@@ -2316,6 +2324,7 @@ function csp_callback_help_selfprotection() {
 	<li><a href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank">WP Native Dashboard</a> <small>(by codestyling)</small></li>
 	<li><a href="http://wordpress.org/extend/plugins/debug-bar/" target="_blank">Debug Bar</a> <small>(by wordpressdotorg)</small></li>
 	<li><a href="http://wordpress.org/extend/plugins/debug-bar-console/" target="_blank">Debug Bar Console</a> <small>(by koopersmith)</small></li>
+	<li><a href="http://wordpress.org/extend/plugins/wp-piwik/" target="_blank">WP-Piwik</a> <small>(by braekling)</small></li>
 </ul>
 <?php
 }
@@ -2414,7 +2423,8 @@ function csp_plugin_denied_by_guard($url)
 		'/wp-native-dashboard/',
 		'/debug-bar/',
 		'/debug-bar-console/',
-		'/localization/'
+		'/localization/',
+		'/wp-piwik/'
 	);
 	foreach($valid as $slug)
 	{
@@ -2434,7 +2444,7 @@ function csp_filter_print_scripts_array($scripts) {
 			if(isset($wp_scripts->registered[$token])) {
 				if (isset($wp_scripts->registered[$token]->src) && !empty($wp_scripts->registered[$token]->src)) {
 					if (preg_match('|^http|', $wp_scripts->registered[$token]->src)) {
-						if(!preg_match('|^'.str_replace('.','\.',get_site_url()).'|', $wp_scripts->registered[$token]->src)) {
+						if(!preg_match('|^'.str_replace('.','\.',CSP_SELF_DOMAIN).'|', $wp_scripts->registered[$token]->src)) {
 							if (in_array($token, $csp_known_wordpress_externals) || csp_known_and_valid_cdn($wp_scripts->registered[$token]->src)) {
 								if (!in_array($token, $csp_external_scripts['cdn']['tokens'])) {
 									$csp_external_scripts['cdn']['tokens'][] = $token;
@@ -2561,7 +2571,7 @@ function csp_self_script_protection_head() {
 							$dirty_theme[] = $url[1];
 						}
 					}
-					elseif (stripos($url[1], get_site_url()) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+					elseif (stripos($url[1], CSP_SELF_DOMAIN) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
 						//external
 						$dirty_index[] = $i;			
 						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_head#$i";
@@ -2613,7 +2623,7 @@ function csp_self_script_protection_footer() {
 							$dirty_theme[] = $url[1];
 						}
 					}
-					elseif (stripos($url[1], get_site_url()) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+					elseif (stripos($url[1], CSP_SELF_DOMAIN) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
 						//external
 						$dirty_index[] = $i;			
 						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_footer#$i";
@@ -3186,7 +3196,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 	if (isset($_GET['type']) && $_GET['type'] == 'compat') $_GET['type'] = '';
 	foreach($rows as $data) : 
 ?>
-<tr<?php if (preg_match("/^".__("activated",CSP_PO_TEXTDOMAIN)."/", $data['status'])) echo " class=\"csp-active\""; ?>>
+<tr<?php if (__("activated",CSP_PO_TEXTDOMAIN) == $data['status']) echo " class=\"csp-active\""; ?>>
 	<td align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/".$data['img_type'].".gif"; ?>" /><div><strong><?php echo $data['type-desc']; ?></strong></div></td>
 	<td>
 		<h3 class="csp-type-name"><?php echo $data['name']; ?><span style="font-weight:normal;">&nbsp;&nbsp;&copy;&nbsp;</span><sup><em><?php echo $data['author']; ?></em></sup></h3>
