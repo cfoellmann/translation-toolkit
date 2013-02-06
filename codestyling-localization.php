@@ -3,7 +3,7 @@
 Plugin Name: CodeStyling Localization
 Plugin URI: http://www.code-styling.de/english/development/wordpress-plugin-codestyling-localization-en
 Description: You can manage and edit all gettext translation files (*.po/*.mo) directly out of your WordPress Admin Center without any need of an external editor. It automatically detects the gettext ready components like <b>WordPress</b> itself or any <b>Plugin</b> / <b>Theme</b> supporting gettext, is able to scan the related source files and can assists you using <b>Google Translate API</b> or <b>Microsoft Translator API</b> during translation.This plugin supports <b>WordPress MU</b> and allows explicit <b>WPMU Plugin</b> translation too. It newly introduces ignore-case and regular expression search during translation. <b>BuddyPress</b> and <b>bbPress</b> as part of BuddyPress can be translated too. Produces transalation files are 100% compatible to <b>PoEdit</b>.
-Version: 1.99.25-beta
+Version: 1.99.30
 Author: Heiko Rabe
 Author URI: http://www.code-styling.de/english/
 Text Domain: codestyling-localization
@@ -46,6 +46,14 @@ Domain Path: /languages
 //Enable this only for debugging reasons. 
 //Attention: the strict logging may prevent WP from proper working because of many not handled issues.
 //error_reporting(E_ALL|E_STRICT);
+//@unlink(dirname(__FILE__).'/.htaccess');
+
+if (!defined('E_RECOVERABLE_ERROR'))
+	define('E_RECOVERABLE_ERROR', 4096);
+if (!defined('E_DEPRECATED'))
+	define('E_DEPRECATED', 8192);
+if (!defined('E_USER_DEPRECATED '))
+	define('E_USER_DEPRECATED ', 16384);
 
 function csp_split_url($url) {
   $parsed_url = parse_url($url);
@@ -61,9 +69,18 @@ function csp_split_url($url) {
   return array("$scheme$user$pass$host$port","$path$query$fragment"); 
 }
 
+if (!function_exists('get_site_url')) {
+	function get_site_url() { return get_option('site_url'); }
+}
+if (!function_exists('plugins_url')) {
+	function plugins_url($plugin) {  
+		return WP_PLUGIN_URL . $plugin; 
+	}
+} 
+
 if (function_exists('add_action')) {
 	if ( !defined('WP_CONTENT_URL') )
-	    define('WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
+	    define('WP_CONTENT_URL', get_site_url() . '/wp-content');
 	if ( !defined('WP_CONTENT_DIR') )
 	    define('WP_CONTENT_DIR', ABSPATH . 'wp-content');
 	if ( !defined('WP_PLUGIN_URL') ) 
@@ -84,14 +101,15 @@ if (function_exists('add_action')) {
 	if( defined( 'MUPLUGINDIR' ) == false ) 
 		define( 'MUPLUGINDIR', 'wp-content/mu-plugins' ); // Relative to ABSPATH.  For back compat.
 
-	define("CSP_PO_PLUGINPATH", "/" . plugin_basename( dirname(__FILE__) ));
+	define("CSP_PO_PLUGINPATH", "/" . dirname(plugin_basename( __FILE__ )));
 
     define('CSP_PO_TEXTDOMAIN', 'codestyling-localization');
-    define('CSP_PO_BASE_URL', WP_PLUGIN_URL . CSP_PO_PLUGINPATH);
+    define('CSP_PO_BASE_URL', plugins_url(CSP_PO_PLUGINPATH));
 		
 	//Bugfix: ensure valid JSON requests at IDN locations!
 	//Attention: Google Chrome and Safari behave in different way (shared WebKit issue or all other are wrong?)!
-	list($csp_domain, $csp_target) = csp_split_url( ( function_exists("admin_url") ? rtrim(admin_url(), '/') : rtrim(get_option('siteurl').'/wp-admin/', '/') ) );
+	list($csp_domain, $csp_target) = csp_split_url( ( function_exists("admin_url") ? rtrim(admin_url(), '/') : rtrim(get_site_url().'/wp-admin/', '/') ) );
+	define('CSP_SELF_DOMAIN', $csp_domain);
 	if (
 		stripos($_SERVER['HTTP_USER_AGENT'], 'chrome') !== false 
 		|| 
@@ -521,8 +539,10 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 		if ($data['is-simple']) { $tmp = array(); $files = lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
 		else { 	$tmp = array(); $files = rscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
 		$data['translation_template'] = csp_find_translation_template($files);
-		foreach($files as $filename) {
-			if ($data['is-simple']) {
+			
+		if ($data['is-simple']) { //simple plugin case
+			//1st - try to find the assumed one files
+			foreach($files as $filename) {
 				$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
 				preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
 				if (empty($hits[2]) === false) {				
@@ -532,9 +552,12 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 					);
 					$data['special_path'] = '';
 				}
-				else{
-					//try to re-construct from real file.
-					preg_match("/([a-z0-9\-_]+)-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
+			}
+			//2nd - try to re-construct, if nessessary, avoid multi textdomain issues
+			if(count($data['languages']) == 0) {
+				foreach($files as $filename) {
+					//bugfix: uppercase filenames supported
+					preg_match("/([A-Za-z0-9\-_]+)-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
 					if (empty($hits[2]) === false) {				
 						$data['filename'] = $hits[1];
 						$data['textdomain']['identifier'] = $hits[1];
@@ -548,19 +571,32 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 						$data['special_path'] = '';
 					}
 				}
-			}else{
+			}
+		}
+		else { //complex plugin case
+			//1st - try to find the assumed one files
+			foreach($files as $filename) {
 				$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
-				preg_match("/([\/a-z0-9\-_]*)\/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
+				//bugfix: uppercase folders supported
+				preg_match("/([\/A-Za-z0-9\-_]*)\/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
 				if (empty($hits[2]) === false) {
-					$data['languages'][$hits[2]][$hits[3]] = array(
-						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-						'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
-					);
+					//bugfix: only accept those mathing known textdomain
+					if ($data['textdomain']['identifier'] == $data['filename'])
+					{
+						$data['languages'][$hits[2]][$hits[3]] = array(
+							'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
+							'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+						);
+					}
 					$data['special_path'] = ltrim($hits[1], "/");
 				}
-				else{
+			}
+			//2nd - try to re-construct, if nessessary, avoid multi textdomain issues
+			if(count($data['languages']) == 0) {
+				foreach($files as $filename) {
 					//try to re-construct from real file.
-					preg_match("/([\/a-z0-9\-_]*)\/([\/a-z0-9\-_]+)-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
+					//bugfix: uppercase folders supported, additional uppercased filenames!
+					preg_match("/([\/A-Za-z0-9\-_]*)\/([\/A-Za-z0-9\-_]+)-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
 					if (empty($hits[3]) === false) {
 						$data['filename'] = $hits[2];
 						$data['textdomain']['identifier'] = $hits[2];
@@ -573,17 +609,24 @@ function csp_po_get_plugin_capabilities($plug, $values) {
 						);
 						$data['special_path'] = ltrim($hits[1], "/");
 					}
-				}
+				}			
 			}
 		}
 		if (!$data['is-simple'] && ($data['special_path'] == '') && (count($data['languages']) == 0)) {
 			$data['is-path-unclear'] = has_subdirs(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/');
 			if ($data['is-path-unclear'] && (count($files) > 0)) {
 				$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $files[0]);
-				preg_match("/^\/([\/a-z0-9\-_]*)\//", $file, $hits);
+				//bugfix: uppercase folders supported
+				preg_match("/^\/([\/A-Za-z0-9\-_]*)\//", $file, $hits);
 				$data['is-path-unclear'] = false;
 				if (empty($hits[1]) === false) { $data['special_path'] = $hits[1]; }
 			}
+		}
+		//supporting the plugins suggestion for language path
+		if ($data['is-path-unclear'] && isset($values['DomainPath']) && is_dir(dirname(WP_PLUGIN_DIR.'/'.$plug).'/'.trim($values['DomainPath'], "\\/")) )
+		{
+			$data['is-path-unclear'] = false;
+			$data['special_path'] = trim($values['DomainPath'], "\\/");		
 		}
 
 		//DEBUG:  $data['php-path-string']  will contain real path part like: "false,'codestyling-localization'" | "'wp-content/plugins/' . NGGFOLDER . '/lang'" | "GENGO_LANGUAGES_DIR" | "$moFile"
@@ -683,16 +726,18 @@ function csp_po_get_theme_capabilities($theme, $values, $active) {
 	$data = array();
 	$data['dev-hints'] = null;
 	$data['deny_scanning'] = false;
-		
+
 	//let's first check the whether we have a child or base theme
 	if(is_object($values) && get_class($values) == 'WP_Theme') {
 		//WORDPRESS Version 3.4 changes theme handling!
-		$v = array_values($values['Template Files']);
-		$firstfile = array_shift($v);
-		$data['base_path'] = str_replace("\\","/", WP_CONTENT_DIR.str_replace('wp-content', '', dirname($firstfile)).'/');		
-		if (file_exists($firstfile)){
-			$data['base_path'] = dirname(str_replace("\\","/",$firstfile)).'/';
-		}
+		$theme_root = trailingslashit(str_replace("\\","/", get_theme_root()));
+		$firstfile = array_values($values['Template Files']);
+		$firstfile = array_shift($firstfile);
+		$firstfile = str_replace("\\","/", $firstfile);
+		$firstfile = str_replace($theme_root, '', $firstfile);
+		$firstfile = explode('/',$firstfile);
+		$firstfile = reset($firstfile);
+		$data['base_path'] = $theme_root.$firstfile.'/';
 	}else{
 		$data['base_path'] = str_replace("\\","/", WP_CONTENT_DIR.str_replace('wp-content', '', dirname($values['Template Files'][0])).'/');
 		if (file_exists($values['Template Files'][0])){
@@ -1970,7 +2015,6 @@ function csp_po_ajax_handle_create_language_path() {
 	$path = strip_tags($_POST['path']);
 	
 	$pofile = new CspFileSystem_TranslationFile();
-	$pofile->create_directory($path);
 	
 	if (!$pofile->create_directory($path)) {
 		header('Status: 404 Not Found');
@@ -2071,7 +2115,7 @@ function csp_check_filesystem() {
 
 function csp_po_init_per_user_trans() {
 	//process per user settings
-	if (defined('TRANSLATION_API_PER_USER') && (TRANSLATION_API_PER_USER === true) && current_user_can('manage_options')) {
+	if (is_user_logged_in() && defined('TRANSLATION_API_PER_USER') && (TRANSLATION_API_PER_USER === true) && current_user_can('manage_options')) {
 		$myself = wp_get_current_user();
 		$func = function_exists('get_user_meta') ? 'get_user_meta' : 'get_usermeta';
 		$g = call_user_func($func, $myself->ID, 'csp-google-api-key', true);
@@ -2273,48 +2317,64 @@ function csp_callback_help_selfprotection() {
 <p>
 	<?php _e('You may have written a Plugin or Theme that requires scripts at all pages but play nicely at backend pages. In those cases please send me an email with your repository link. I will check this Plugin or Theme and exclude it from trace, if the test will show, that it is working well.', CSP_PO_TEXTDOMAIN); ?>
 </p>
-
+<p>
+	<?php _e('Plugins currently supported by Scripting Guard:', CSP_PO_TEXTDOMAIN); ?>
+</p>
+<ul>
+	<li><a href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank">WP Native Dashboard</a> <small>(by codestyling)</small></li>
+	<li><a href="http://wordpress.org/extend/plugins/debug-bar/" target="_blank">Debug Bar</a> <small>(by wordpressdotorg)</small></li>
+	<li><a href="http://wordpress.org/extend/plugins/debug-bar-console/" target="_blank">Debug Bar Console</a> <small>(by koopersmith)</small></li>
+	<li><a href="http://wordpress.org/extend/plugins/wp-piwik/" target="_blank">WP-Piwik</a> <small>(by braekling)</small></li>
+</ul>
 <?php
 }
 
-function csp_try_jquery_document_ready_hardening($script) {
-	$pattern = 'jQuery(document).ready(';
-	if ($pos = stripos($script,$pattern) !== false) {
-		$counter = 0;
-		$startofready = -1;
-		$endofready = -1;
-		for($i=$pos+strlen($pattern); $i < strlen($script); $i++) {
-			switch(substr($script, $i, 1)) {
-				case '{':
-					$counter++;
-					if ($counter == 1) {
-						$startofready = $i;
-					}
-					break;
-				case '}';
-					$counter--;
-					if ($counter == 0) {
-						$endofready = $i;
-						$i = strlen($script);
-					}
-					break;
-				default:
-					break;
+function csp_try_jquery_document_ready_hardening_pattern($content, $pattern) {
+	$pieces = explode($pattern, $content);
+	if (count($pieces) > 1) {
+		for ($loop=1; $loop<count($pieces); $loop++) {
+			$counter = 0;
+			$startofready = -1;
+			$endofready = -1;
+			$script  = $pieces[$loop];
+			for($i=0; $i < strlen($script); $i++) {
+				switch(substr($script, $i, 1)) {
+					case '{':
+						$counter++;
+						if ($counter == 1) {
+							$startofready = $i;
+						}
+						break;
+					case '}';
+						$counter--;
+						if ($counter == 0) {
+							$endofready = $i;
+							$i = strlen($script);
+						}
+						break;
+					default:
+						break;
+				}
 			}
-		}
-		if ($startofready != -1 && $endofready != -1) {
-			$sub = substr($script, $startofready+1, $endofready-$startofready-2);
-			$script = str_replace($sub, "try{".$sub."}catch(e){csp_self_protection.runtime.push(e.message);}" , $script);
+			if ($startofready != -1 && $endofready != -1) {
+				if ($script[$endofready+1] == ')') $endofready++;
+				$sub = substr($script, $startofready+1, $endofready-$startofready-2);
+				$pieces[$loop] = str_replace($sub, "\ntry{\n".$sub."\n}catch(e){csp_self_protection.runtime.push(e.message);}" , $script);
+			}			
 		}
 	}
-	return $script;
+	return implode($pattern, $pieces);
+}
+
+function csp_try_jquery_document_ready_hardening($content) {
+	$script = csp_try_jquery_document_ready_hardening_pattern($content, '(document).ready(');
+	return csp_try_jquery_document_ready_hardening_pattern($script, 'jQuery(function()');	
 }
 
 $csp_traced_php_errors = array(
 	'suppress_errors' => false,
 	'old_handler' => null,
 	'messages' => array()
-	
 );
 
 $csp_external_scripts = array(
@@ -2352,17 +2412,40 @@ $csp_known_wordpress_externals = array(
 	'nav-menu', 'custom-background', 'media-gallery'
 );
 
+function csp_known_and_valid_cdn($url) {
+	return preg_match("/^https?:\/\/[^\.]*\.wp\.com/", $url);
+}
+
+function csp_plugin_denied_by_guard($url)
+{
+	$valid = array(
+		'/codestyling-localization/',
+		'/wp-native-dashboard/',
+		'/debug-bar/',
+		'/debug-bar-console/',
+		'/localization/',
+		'/wp-piwik/'
+	);
+	foreach($valid as $slug)
+	{
+		if(stripos($url, $slug) !== false)
+		{
+			 return false;
+		}
+	}
+	return true;
+}
+
 function csp_filter_print_scripts_array($scripts) {
 	//detect CDN script redirecting
 	global $wp_scripts, $csp_external_scripts, $csp_known_wordpress_externals;
-	//var_dump($wp_scripts);
 	if (is_object($wp_scripts)) {
 		foreach($scripts as $token) {
 			if(isset($wp_scripts->registered[$token])) {
 				if (isset($wp_scripts->registered[$token]->src) && !empty($wp_scripts->registered[$token]->src)) {
 					if (preg_match('|^http|', $wp_scripts->registered[$token]->src)) {
-						if(!preg_match('|^'.str_replace('.','\.',get_option('siteurl')).'|', $wp_scripts->registered[$token]->src)) {
-							if (in_array($token, $csp_known_wordpress_externals)) {
+						if(!preg_match('|^'.str_replace('.','\.',CSP_SELF_DOMAIN).'|', $wp_scripts->registered[$token]->src)) {
+							if (in_array($token, $csp_known_wordpress_externals) || csp_known_and_valid_cdn($wp_scripts->registered[$token]->src)) {
 								if (!in_array($token, $csp_external_scripts['cdn']['tokens'])) {
 									$csp_external_scripts['cdn']['tokens'][] = $token;
 									$csp_external_scripts['cdn']['scripts'][] = $wp_scripts->registered[$token]->src;
@@ -2417,14 +2500,15 @@ function csp_php_error_handler($errno, $errstr, $errfile, $errline) {
     }  
 	$csp_traced_php_errors['messages'][] = "$errname <strong>Error: [$errno] </strong> $errstr <strong>$errfile</strong> on line <strong>$errline</strong>";
 	if ($csp_traced_php_errors['old_handler'] != null && !$csp_traced_php_errors['suppress_errors']) {
-		call_user_func($csp_traced_php_errors['old_handler'], $errno, $errstr, $errfile, $errline);
+		return call_user_func($csp_traced_php_errors['old_handler'], $errno, $errstr, $errfile, $errline);
 	}
 	return $csp_traced_php_errors['suppress_errors'];
 }
 
 function csp_trace_php_errors() {
 	global $csp_traced_php_errors;
-	$csp_traced_php_errors['suppress_errors'] = (is_admin() && isset($_REQUEST['page']) && $_REQUEST['page'] == 'codestyling-localization/codestyling-localization.php');
+	
+	$csp_traced_php_errors['suppress_errors'] = (is_admin() && isset($_REQUEST['page']) && ($_REQUEST['page'] == 'codestyling-localization/codestyling-localization.php'));
 	if(defined('DOING_AJAX') && DOING_AJAX && isset($_POST['action'])) {
 		$actions = array(
 			'csp_po_dlg_new',
@@ -2447,8 +2531,10 @@ function csp_trace_php_errors() {
 			'csp_po_create_pot_indicator',
 			'csp_self_protection_result'
 		);
-		if (in_array($_POST['action'], $actions)) $csp_traced_php_errors['suppress_errors'] = true;
+		if (in_array($_POST['action'], $actions))
+			$csp_traced_php_errors['suppress_errors'] = true;
 	}
+	
 	if (function_exists('set_error_handler'))
 		$csp_traced_php_errors['old_handler'] = set_error_handler("csp_php_error_handler", E_ALL);
 }
@@ -2475,16 +2561,17 @@ function csp_self_script_protection_head() {
 				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
 				if (isset($url[1]) && !empty($url[1])){
 					global $csp_external_scripts;				
-					if(stripos($url[1], WP_CONTENT_URL) !== false  && stripos($url[1], '/wp-native-dashboard/') === false) {
+					if(	stripos($url[1], content_url()) !== false && csp_plugin_denied_by_guard($url[1]) ) {
 						//internal scripts
 						$dirty_scripts[] = $url[1];
 						$dirty_index[] = $i;
-						if (stripos($url[1], WP_PLUGIN_URL) !== false) {
+						if (stripos($url[1], plugins_url()) !== false || stripos($url[1], content_url().'/mu-plugins') !== false) {
 							$dirty_plugins[] = $url[1];
 						}else{
 							$dirty_theme[] = $url[1];
 						}
-					}elseif (stripos($url[1], get_option('siteurl')) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+					}
+					elseif (stripos($url[1], CSP_SELF_DOMAIN) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
 						//external
 						$dirty_index[] = $i;			
 						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_head#$i";
@@ -2526,16 +2613,17 @@ function csp_self_script_protection_footer() {
 				preg_match("/src=[\"']([^\"^']*\.js|[^\"^']*\.php)(\?[^\"^']*[\"']|[\"'])/", $scripts[0][$i], $url);
 				if (isset($url[1]) && !empty($url[1])){
 					global $csp_external_scripts;				
-					if(stripos($url[1], WP_CONTENT_URL) !== false && stripos($url[1], '/wp-native-dashboard/') === false) {
+					if(stripos($url[1], content_url()) !== false && csp_plugin_denied_by_guard($url[1])) {
 						//internal scripts
 						$dirty_scripts[] = $url[1];
 						$dirty_index[] = $i;
-						if (stripos($url[1], WP_PLUGIN_URL) !== false || stripos($url[1], WPMU_PLUGIN_URL) !== false) {
+						if (stripos($url[1], plugins_url()) !== false || stripos($url[1], content_url().'/mu-plugins') !== false) {
 							$dirty_plugins[] = $url[1];
 						}else{
 							$dirty_theme[] = $url[1];
 						}
-					}elseif (stripos($url[1], get_option('siteurl')) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
+					}
+					elseif (stripos($url[1], CSP_SELF_DOMAIN) === false && !in_array($url[1], $csp_external_scripts['cdn']['scripts'])) {
 						//external
 						$dirty_index[] = $i;			
 						$csp_external_scripts['dubious']['tokens'][] = "hook:admin_footer#$i";
@@ -2555,9 +2643,9 @@ function csp_self_script_protection_footer() {
 		}
 	}
 	//4th - define our protection
-	echo '<script type="text/javascript">csp_self_protection.dirty_theme.concat('.json_encode($dirty_theme).");</script>\n";
-	echo '<script type="text/javascript">csp_self_protection.dirty_plugins.concat('.json_encode($dirty_plugins).");</script>\n";
-	$media_upload = ((defined('CSL_MEDIA_UPLOAD_STRIPPED') && CSL_MEDIA_UPLOAD_STRIPPED === true) ? ( function_exists("admin_url") ? admin_url('js/media-upload.js') : get_option('siteurl').'/wp-admin/js/media-upload.js' ) : '');
+	echo '<script type="text/javascript">csp_self_protection.dirty_theme = csp_self_protection.dirty_theme.concat('.json_encode($dirty_theme).");</script>\n";
+	echo '<script type="text/javascript">csp_self_protection.dirty_plugins = csp_self_protection.dirty_plugins.concat('.json_encode($dirty_plugins).");</script>\n";
+	$media_upload = ((defined('CSL_MEDIA_UPLOAD_STRIPPED') && CSL_MEDIA_UPLOAD_STRIPPED === true) ? ( function_exists("admin_url") ? admin_url('js/media-upload.js') : get_site_url().'/wp-admin/js/media-upload.js' ) : '');
 	if (!empty($media_upload))
 		echo '<script type="text/javascript">csp_self_protection.dirty_enqueues = ["'.$media_upload."\"];</script>\n";
 	else
@@ -2725,7 +2813,7 @@ function csp_handle_csp_self_protection_result() {
 				$token = $_POST['data']['externals']['dubious']['tokens'][$i];
 				$script = $_POST['data']['externals']['dubious']['scripts'][$i];
 				$res = wp_remote_head($script, array('sslverify' => false));
-				$style = (($res === false || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
+				$style = (($res === false || (is_object($res) && get_class($res) == 'WP_Error') || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
 				if(!empty($style)) $errors += 1; 
 		?>
 			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
@@ -2752,7 +2840,7 @@ function csp_handle_csp_self_protection_result() {
 				$token = $_POST['data']['externals']['cdn']['tokens'][$i];
 				$script = $_POST['data']['externals']['cdn']['scripts'][$i];
 				$res = wp_remote_head($script, array('sslverify' => false));
-				$style = (($res === false || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
+				$style = (($res === false || (is_object($res) && get_class($res) == 'WP_Error') || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
 				if(!empty($style)) $errors += 1; 
 		?>
 			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
@@ -2770,18 +2858,34 @@ function csp_handle_csp_self_protection_result() {
 <?php
 	exit();
 }
+function csp_redirect_prototype_js($src, $handle) {
+	global $wp_version;
+	if (version_compare($wp_version, '3.5-alpha', '>=')) {
+		$handles = array(
+			'prototype' 			=> 'prototype',
+			'scriptaculous-root' 	=> 'wp-scriptaculous',
+			'scriptaculous-effects' => 'effects'
+		);
+		//load own older versions of the scripts that are working!
+		if (isset($handles[$handle])) {
+			return CSP_PO_BASE_URL.'/js/'.$handles[$handle].'.js';
+		}
+	}
+	return $src;
+}
 
 function csp_load_po_edit_admin_page(){
 
-	add_filter('print_scripts_array', 'csp_filter_print_scripts_array');
+	add_filter('print_scripts_array', 'csp_filter_print_scripts_array', 0);
 	add_action('admin_enqueue_scripts', 'csp_start_protection', 0);
 	add_action('in_admin_footer', 'csp_start_protection', 0);
 	add_action('admin_head', 'csp_self_script_protection_head', 9999);
 	add_action('admin_print_footer_scripts', 'csp_self_script_protection_footer', 9999);
+	add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 9999);
 
 	wp_enqueue_script( 'thickbox' );
-	wp_enqueue_script('prototype');
 	wp_enqueue_script('jquery-ui-dialog');
+	wp_enqueue_script('prototype');
 	wp_enqueue_script('scriptaculous-effects');
 	if (function_exists('wp_enqueue_style')) {
 		wp_enqueue_style( 'thickbox' );
@@ -2789,7 +2893,6 @@ function csp_load_po_edit_admin_page(){
 		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/css/plugin.css');
 		if(function_exists('is_rtl') && is_rtl())
 			wp_enqueue_style('codestyling-localization-rtl', CSP_PO_BASE_URL.'/css/plugin-rtl.css');
-//		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/codestyling-localization.php?css=default&amp;dir='.((function_exists('is_rtl') && is_rtl()) ? 'rtl' : 'ltr'));
 	}
 	
 	//new help system
@@ -2868,8 +2971,11 @@ function csp_po_admin_head() {
 		&& 
 		preg_match("/^codestyling\-localization\/codestyling\-localization\.php/", $_GET['page'])
 	) {
-		print '<link rel="stylesheet" href="'.get_option('siteurl')."/wp-includes/js/thickbox/thickbox.css".'" type="text/css" media="screen"/>';
-		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/codestyling-localization.php?css=default'.'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.get_site_url()."/wp-includes/js/thickbox/thickbox.css".'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/ui.all.css'.'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin.css'.'" type="text/css" media="screen"/>';
+		if(function_exists('is_rtl') && is_rtl())
+			print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin-rtl.css'.'" type="text/css" media="screen"/>';
 	}
 }
 
@@ -3090,7 +3196,7 @@ define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here');
 	if (isset($_GET['type']) && $_GET['type'] == 'compat') $_GET['type'] = '';
 	foreach($rows as $data) : 
 ?>
-<tr<?php if (preg_match("/^".__("activated",CSP_PO_TEXTDOMAIN)."/", $data['status'])) echo " class=\"csp-active\""; ?>>
+<tr<?php if (__("activated",CSP_PO_TEXTDOMAIN) == $data['status']) echo " class=\"csp-active\""; ?>>
 	<td align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/".$data['img_type'].".gif"; ?>" /><div><strong><?php echo $data['type-desc']; ?></strong></div></td>
 	<td>
 		<h3 class="csp-type-name"><?php echo $data['name']; ?><span style="font-weight:normal;">&nbsp;&nbsp;&copy;&nbsp;</span><sup><em><?php echo $data['author']; ?></em></sup></h3>
@@ -4057,7 +4163,7 @@ function csp_init_editor(actual_domain, actual_type) {
 	tdmixed = new Array();
 	for (i=0; i<csp_textdomains.size(); i++) {
 		tderror = tderror && (csp_textdomains[i] != actual_domain);
-		if (csp_textdomains[i] != 'default' && csp_textdomains[i] != actual_domain) tdmixed.push(csp_textdomains[i]);
+		if (csp_textdomains[i] != 'default' && csp_textdomains[i] != actual_domain && csp_textdomains[i] != '{bug-detected}') tdmixed.push(csp_textdomains[i]);
 		opt_list += '<option value="'+csp_textdomains[i]+'"'+(csp_textdomains[i] == actual_domain ? ' selected="selected"' : '')+'>'+(csp_textdomains[i].empty() ? 'default' : csp_textdomains[i])+'</option>';
 	}
 	initial_domain = $('csp-mo-textdomain-val').update(opt_list).value;
@@ -4137,7 +4243,7 @@ function csp_change_textdomain_view(textdomain) {
 	$$("a.csp-filter").each(function(e) { e.removeClassName('current')});
 	$('csp-filter-all').addClassName('current');
 	hide = false;
-	if (textdomain == '{php-code}') { hide = true; }
+	if (textdomain == '{php-code}' || textdomain == '{bug-detected}') { hide = true; }
 	else if(textdomain == 'default') {
 		hide = true;
 		//special bbPress on BuddyPress test because of default domain too
