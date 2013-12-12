@@ -46,6 +46,30 @@ class TranslationToolkit_Admin {
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		
+		global $tt_tabs;
+		
+		// NEEDS a helper function for input of new tabs and output of tabs on specific pages
+		$tt_tabs['translation-toolkit'] = array(
+			'all' => array(
+				'label' => __( 'All Translations', 'translation-toolkit' ),
+			),
+			'wordpress' => array(
+				'label' => __( 'WordPress', 'translation-toolkit' ),
+			),
+			'plugins-mu' => array(
+				'label' => __( 'MU Plugins', 'translation-toolkit' ),
+			),
+			'plugins' => array(
+				'label' => __( 'Plugins', 'translation-toolkit' ),
+			),
+			'themes' => array(
+				'label' => __( 'Themes', 'translation-toolkit' ),
+			),
+			'compat' => array(
+				'label' => __( 'Compatibility', 'translation-toolkit' ),
+			),
+		);
+		
 	} // END __construct()
 	
 	/**
@@ -84,23 +108,18 @@ class TranslationToolkit_Admin {
 	
 	function load_assets() {
 
-//		add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 9999);
-
 		wp_enqueue_script( 'thickbox' );
-		wp_enqueue_script('jquery-ui-dialog' );
-		wp_enqueue_script('prototype' );
-		wp_enqueue_script('scriptaculous-effects' );
+		wp_enqueue_script( 'jquery-ui-dialog' );
+		wp_enqueue_script( 'prototype' );
+		wp_enqueue_script( 'scriptaculous-effects' );
 
 		wp_enqueue_style( 'thickbox' );
-		wp_enqueue_style('codestyling-localization-ui', CSP_PO_BASE_URL.'/css/ui.all.css' );
-		wp_enqueue_style('codestyling-localization', CSP_PO_BASE_URL.'/css/plugin.css' );
+		wp_enqueue_style( 'codestyling-localization-ui', CSP_PO_BASE_URL.'/css/ui.all.css' );
+		wp_enqueue_style( 'codestyling-localization', CSP_PO_BASE_URL.'/css/plugin.css' );
 
-		if ( function_exists('is_rtl') && is_rtl() ) {
+		if ( is_rtl() ) {
 			wp_enqueue_style('codestyling-localization-rtl', CSP_PO_BASE_URL.'/css/plugin-rtl.css' );
 		}
-
-		//new help system
-		global $wp_version;
 
 		$screen = get_current_screen();
 		//$request = unserialize(csp_fetch_remote_content('http://api.wordpress.org/plugins/info/1.0/codestyling-localization'));
@@ -146,7 +165,7 @@ class TranslationToolkit_Admin {
 				'callback' => array( 'TranslationToolkit_Help', 'helptab_translationformat' ),
 			)
 		);
-		if (CSL_FILESYSTEM_DIRECT !== true) {
+		if ( CSL_FILESYSTEM_DIRECT !== true ) {
 			$screen->add_help_tab(
 				array(
 					'title' => __( 'File Permissions', CSP_PO_TEXTDOMAIN ),
@@ -166,308 +185,290 @@ class TranslationToolkit_Admin {
 	} // END load_assets()
 	
 	function main_page() {
-		csp_po_check_security();
+		TranslationToolkit_Helpers::check_security();
 		$mo_list_counter = 0;
-		global $csp_l10n_sys_locales, $wp_version;
-		$csp_wp_main_page = (version_compare($wp_version, '2.7 ', '>=') ? "tools" : "edit");
+		global $csp_l10n_sys_locales, $tt_tabs;
 	?>
 	<div id="csp-wrap-main" class="wrap">
-	<div class="icon32" id="icon-tools"><br/></div>
-	<h2><?php _e('Manage Language Files', CSP_PO_TEXTDOMAIN); ?></h2>
-	<?php if (CSL_FILESYSTEM_DIRECT !== true) : ?>
-		<div>
-		<p class="warning"><strong><?php _e('File Permission Problem:',CSP_PO_TEXTDOMAIN);?></strong> <?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', CSP_PO_TEXTDOMAIN); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="filepermissions"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
-		</div>
-	<?php endif; ?>
-	<p>
-		<input id= "enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>> <label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label> <img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading-small.gif"?>" />
-		<?php if (version_compare($wp_version, '3.3', '<')) : ?>
-		<br /><small><?php _e('If your Installation is running under low remaining memory conditions, you will face the memory limit error during scan process or opening catalog content. If you hitting your limit, you can enable this special mode. This will try to perform the actions in a slightly different way but that will lead to a considerably slower response times but nevertheless gives no warranty, that it will solve your memory related problems at all cases.', CSP_PO_TEXTDOMAIN); ?></small>
-		<?php else : ?>
-		&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
-		<?php endif; ?>
-	</p>
-	<ul class="subsubsub">
-	<li>
-		<a<?php if(!isset($_GET['type'])) echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php"><?php  _e('All Translations', CSP_PO_TEXTDOMAIN); ?>
-		</a> | </li>
-	<li>
-		<a<?php if(isset($_GET['type']) && $_GET['type'] == 'wordpress') echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php&amp;type=wordpress"><?php _e('WordPress', CSP_PO_TEXTDOMAIN); ?>
-		</a> | </li>
-	<?php if (csp_is_multisite()) { ?>
-	<li>
-		<a<?php if(isset($_GET['type']) && $_GET['type'] == 'plugins_mu') echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php&amp;type=plugins_mu"><?php _e('μ Plugins', CSP_PO_TEXTDOMAIN); ?>
-		</a> | </li>
-	<?php } ?>
-	<li>
-		<a<?php if(isset($_GET['type']) && $_GET['type'] == 'plugins') echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php&amp;type=plugins"><?php _e('Plugins', CSP_PO_TEXTDOMAIN); ?>
-		</a> | </li>
-	<li>
-		<a<?php if(isset($_GET['type']) && $_GET['type'] == 'themes') echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php&amp;type=themes"><?php _e('Themes', CSP_PO_TEXTDOMAIN); ?>
-		</a> | </li>
-	<li>
-		<a<?php if(isset($_GET['type']) && $_GET['type'] == 'compat') echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php&amp;type=compat"><?php _e('Compatibility', CSP_PO_TEXTDOMAIN); ?>
-		</a> | </li>
-	<li>
-		<a<?php if(isset($_GET['type']) && $_GET['type'] == 'security') echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php&amp;type=security"><?php _e('Security Risk', CSP_PO_TEXTDOMAIN); ?>
-		</a></li>
-	</ul>
-	<table class="widefat clear" style="cursor:default;" cellspacing="0">
-	<thead>
-	  <tr>
-		<th scope="col"><?php _e('Type',CSP_PO_TEXTDOMAIN); ?></th>
-		<th scope="col"><?php _e('Description',CSP_PO_TEXTDOMAIN); ?></th>
-		<th scope="col"><?php _e('Languages',CSP_PO_TEXTDOMAIN); ?></th>
-	  </tr>
-	</thead>
-	<tbody class="list" id="the-gettext-list">
-	<?php 
-		$rows = csp_po_collect_by_type(isset($_GET['type']) ? $_GET['type'] : '' ); 
-		if (isset($_GET['type']) && $_GET['type'] == 'compat') $_GET['type'] = '';
-		foreach($rows as $data) : 
-	?>
-	<tr<?php if (__("activated",CSP_PO_TEXTDOMAIN) == $data['status']) echo " class=\"csp-active\""; ?>>
-		<td align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/".$data['img_type'].".gif"; ?>" /><div><strong><?php echo $data['type-desc']; ?></strong></div></td>
-		<td>
-			<h3 class="csp-type-name"><?php echo $data['name']; ?><span style="font-weight:normal;">&nbsp;&nbsp;&copy;&nbsp;</span><sup><em><?php echo $data['author']; ?></em></sup></h3>
-			<table class="csp-type-info" border="0" width="100%">
-				<tr>
-					<td width="140px"><strong><?php _e('Textdomain',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value"><?php echo $data['textdomain']['identifier']; ?><?php if ($data['textdomain']['is_const']) echo " (".__( 'defined by constant',CSP_PO_TEXTDOMAIN).")"; ?></td>
-				</tr>
-				<tr>
-					<td><strong><?php _e('Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value"><?php echo $data['version']; ?></td>
-				</tr>
-				<tr>
-					<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value csp-info-status"><?php echo $data['status']; ?></td>
-				</tr>
-				<tr>
-					<td colspan="2" class="csp-desc-value"><small><?php echo call_user_func('__', $data['description'], $data['textdomain']['identifier']);?></small></td>
-				</tr>
-				<?php if (isset($data['dev-hints'])) : ?>
-				<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-				<tr>
-					<td><strong style="color: #f00;"><?php _e('Compatibility',CSP_PO_TEXTDOMAIN); ?>:</strong>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
-					<td class="csp-info-value"><?php echo $data['dev-hints'];?></td>
-				</tr>
-				<?php endif; ?>
-				<?php if (isset($data['dev-security'])) : ?>
-				<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-				<tr>
-					<td><strong style="color: #f00;"><?php _e('Security Risk',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value"><?php echo $data['dev-security'];?></td>
-				</tr>
-				<?php endif; ?>
-				<?php  if ($data['type'] == 'wordpress-xxx') : ?>
-				<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-				<tr>
-					<td><strong style="color: #f00;"><?php _e('Memory Warning',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value"><?php _e('Since WordPress 3.x version it may require at least <strong>58MB</strong> PHP memory_limit! The reason is still unclear but it doesn\'t freeze anymore. Instead a error message will be shown and the scanning process aborts while reaching your limits.',CSP_PO_TEXTDOMAIN); ?></td>
-				<tr>
-				<?php endif; ?>
-				<?php if ($data['is-path-unclear']) : ?>
-				<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-				<tr>
-					<td><strong style="color: #f00;"><?php _e('Language Folder',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-					<td class="csp-info-value"><?php _e('The translation file folder is ambiguous, please select by clicking the appropriated language file folder or ask the Author about!',CSP_PO_TEXTDOMAIN); ?></td>
-				<tr>
-				<?php endif; ?>
-			</table>
-			<?php if (isset($data['child-plugins'])) { foreach($data['child-plugins'] as $child) { ?>
-			<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
-				<h3 class="csp-type-name"><?php echo $child['name']; ?> <small><em><?php _e('by',CSP_PO_TEXTDOMAIN); ?> <?php echo $child['author']; ?></em></small></h3>
-				<table class="csp-type-info" border="0">
-					<tr>
-						<td><strong><?php _e('Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-						<td width="100%" class="csp-info-value"><?php echo $child['version']; ?></td>
-					</tr>
-					<tr>
-						<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-						<td class="csp-info-value csp-info-status"><?php echo $child['status']; ?></td>
-					</tr>
-					<tr>
-						<td colspan="2" class="csp-desc-value"><small><?php echo call_user_func('__', $child['description'], $data['textdomain']['identifier']);?></small></td>
-					</tr>
-				</table>
+		<h2><?php _e( 'Manage Language Files', CSP_PO_TEXTDOMAIN ); ?></h2>
+		<?php if (CSL_FILESYSTEM_DIRECT !== true) : ?>
+			<div>
+			<p class="warning"><strong><?php _e('File Permission Problem:',CSP_PO_TEXTDOMAIN);?></strong> <?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', CSP_PO_TEXTDOMAIN); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="filepermissions"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 			</div>
-			<?php } } ?>
-		</td>
-		<td class="component-details">
-			<?php  if ($data['type'] == 'wordpress' && $data['is_US_Version'] ) {?>
-				<div style="color:#f00;"><?php _e("The original US version doesn't contain the language directory.",CSP_PO_TEXTDOMAIN); ?></div>
-				<br/>
-				<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo str_replace("\\", '/', WP_CONTENT_DIR)."/languages" ?>' );"><?php _e('try to create the WordPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
-				<br/>
-				<div>
-					<?php _e('or create the missing directory using FTP Access as:',CSP_PO_TEXTDOMAIN); ?>
-					<br/><br/>
-					<?php echo str_replace("\\", '/', WP_CONTENT_DIR)."/"; ?><strong style="color:#f00;">languages</strong>			
-				</div>
-			<?php } elseif($data['is-path-unclear']) { ?>
-				<strong style="border-bottom: 1px solid #ccc;"><?php _e('Available Directories:',CSP_PO_TEXTDOMAIN) ?></strong><br/><br/>
-				<?php 
-					$tmp = array(); 
-					$dirs = rscanpath($data['base_path'], $tmp);
-					$dir = $data['base_path'];
-					echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.$data['base_file'].'xx_XX.pot\' );">'. str_replace(str_replace("\\","/",WP_PLUGIN_DIR), '', $dir)."</a><br/>";
-					foreach($dirs as $dir) { 
-						echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.'/'.$data['base_file'].'xx_XX.pot\' );">'. str_replace(str_replace("\\","/",WP_PLUGIN_DIR), '', $dir)."</a><br/>";
-					} 
-				?>
-			<?php } elseif($data['name'] == 'bbPress' && isset($data['is_US_Version']) && $data['is_US_Version']) { ?>	
-				<div style="color:#f00;"><?php _e("The original bbPress component doesn't contain a language directory.",CSP_PO_TEXTDOMAIN); ?></div>
-				<br/>
-				<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo $data['base_path']."my-languages"; ?>' );"><?php _e('try to create the bbPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
-				<br/>
-				<div>
-					<?php _e('or create the missing directory using FTP Access as:',CSP_PO_TEXTDOMAIN); ?>
-					<br/><br/>
-					<?php echo $data['base_path']; ?><strong style="color:#f00;">my-languages</strong>			
-				</div>			
-			<?php	} else { ?>
-			<table width="100%" cellspacing="0" class="mo-list" id="mo-list-<?php echo ++$mo_list_counter; ?>" summary="<?php echo $data['textdomain']['identifier'].'|'.$data['type'].'|'.$data['name'].' v'.$data['version']; ?>">
-				<tr class="mo-list-head">
-					<td colspan="4" nowrap="nowrap">
-						<img alt="GNU GetText" class="alignleft" src="<?php echo CSP_PO_BASE_URL; ?>/images/gettext.gif" style="display:none;" />
-						<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile button" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", CSP_PO_TEXTDOMAIN); ?></a>
-						<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
-						&nbsp;<a class="clickable mofile button" onclick="csp_merge_maintheme_languages(this,'<?php echo $data['theme-template']; ?>','<?php echo $data['theme-self']; ?>','<?php echo $data['base_path']; if(!empty($data['special_path'])) echo $data['special_path'].'/' ?>','<?php echo $data['textdomain']['identifier']; ?>','mo-list-<?php echo $mo_list_counter; ?>' );"><?php _e("Sync Files with Main Theme", CSP_PO_TEXTDOMAIN); ?></a>
-						<a rel="workonchildthemes" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" href="javascript:void(0);" class="question-help" align="left"><img src="http://wp34.de/wp-content/plugins/codestyling-localization/images/question.gif"></a>
-						<?php endif; ?>
-					</td>
-					<td colspan="1" nowrap="nowrap" class="csp-ta-right"><?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',count($data['languages']),CSP_PO_TEXTDOMAIN ), count($data['languages'])); ?></td>
-				</tr>
-				<tr class="mo-list-desc">
-					<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/google.png"; ?>" /></td>
-					<td nowrap="nowrap" width="16px" align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/bing.gif"; ?>" /></td>
-					<td nowrap="nowrap" align="left" class="lang-info-desc"><?php _e('Language',CSP_PO_TEXTDOMAIN);?></td>
-					<td nowrap="nowrap" align="center"><?php _e('Permissions',CSP_PO_TEXTDOMAIN);?></td>
-					<td nowrap="nowrap" align="center"><?php _e('Actions',CSP_PO_TEXTDOMAIN);?></td>
-				</tr>
-				<?php 
-					foreach($data['languages'] as $lang => $gtf) : 
-						$country_www = isset($csp_l10n_sys_locales[$lang]) ? $csp_l10n_sys_locales[$lang]['country-www'] : 'unknown';
-						$lang_native = isset($csp_l10n_sys_locales[$lang]) ? $csp_l10n_sys_locales[$lang]['lang-native'] : '<em>locale: </em>'.$lang;
-				?>
-				<?php if ($data['textdomain']['identifier'] == 'woocommerce' && $lang == 'de_DE') : ?>
-				<!-- special case woocommerce german: start -->
-				<?php $copy_base_file = $data['base_file']; $data['base_file'] = 'languages/informal/woocommerce-'; ?>
-				<tr class="mo-file" lang="<?php echo $lang; ?>">
-					<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['google-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
-					<td nowrap="nowrap" width="16px"align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['microsoft-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
-					<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(informal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
-					<td nowrap="nowrap" align="center">
-						<div style="width:44px">
-							<?php if (array_key_exists('po', $gtf)) {
-								echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
-							} else { ?>
-							<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
-							<?php } ?>
-							<?php if (array_key_exists('mo', $gtf)) {
-								echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
-							} else { ?>
-							<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
-							<?php } ?>
-						</div>
-					</td>
-					<td nowrap="nowrap" style="padding-right: 5px;">
-						<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
-						<span>&nbsp;</span>
-						<?php if (!$data['deny_scanning']) : ?>
-						<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
-						<span>&nbsp;</span>
-						<?php else: ?>
-						<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
-						<span>&nbsp;</span>
-						<?php endif; ?>
-						<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
-					</td>
-				</tr>
-				<?php $data['base_file'] = 'languages/formal/woocommerce-'; ?>
-				<tr class="mo-file" lang="<?php echo $lang; ?>">
-					<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['google-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
-					<td nowrap="nowrap" width="16px" align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['microsoft-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
-					<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(formal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
-					<td nowrap="nowrap" align="center">
-						<div style="width:44px">
-							<?php if (array_key_exists('po', $gtf)) {
-								echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
-							} else { ?>
-							<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
-							<?php } ?>
-							<?php if (array_key_exists('mo', $gtf)) {
-								echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
-							} else { ?>
-							<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
-							<?php } ?>
-						</div>
-					</td>
-					<td nowrap="nowrap" style="padding-right: 5px;">
-						<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
-						<span>&nbsp;</span>
-						<?php if (!$data['deny_scanning']) : ?>
-						<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
-						<span>&nbsp;</span>
-						<?php else: ?>
-						<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
-						<span>&nbsp;</span>
-						<?php endif; ?>
-						<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
-					</td>
-				</tr>
-				<?php $data['base_file'] =  $copy_base_file;?>
-				<tr class="mo-file" lang="<?php echo $lang; ?>">
-					<td colspan="2" class="lang-info-api">&nbsp;</td>
-					<td width="100%" colspan="3" class="lang-info-desc"><small><strong style="color:#f00;"><?php _e('Warning',CSP_PO_TEXTDOMAIN); ?>: </strong><?php _e('German translations are currently supported by a temporary workaround only, because they will be handled completely uncommon beside WordPress standards!',CSP_PO_TEXTDOMAIN); ?></small></td>
-				</tr>
-				<!-- special case woocommerce german: end -->
-				<?php else : ?>
-				<tr class="mo-file" lang="<?php echo $lang; ?>">
-					<td nowrap="nowrap" width="16px" align="center"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['google-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
-					<td nowrap="nowrap" width="16px" align="center" class="lang-info-api"><img src="<?php echo CSP_PO_BASE_URL."/images/".(isset($csp_l10n_sys_locales[$lang]) && !empty($csp_l10n_sys_locales[$lang]['microsoft-api']) ? 'yes' : 'no').'.png'; ?>" /></td>
-					<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native; ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
-					<td nowrap="nowrap" align="center">
-						<div style="width:44px">
-							<?php if (array_key_exists('po', $gtf)) {
-								echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
-							} else { ?>
-							<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
-							<?php } ?>
-							<?php if (array_key_exists('mo', $gtf)) {
-								echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
-							} else { ?>
-							<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
-							<?php } ?>
-						</div>
-					</td>
-					<td nowrap="nowrap" style="padding-right: 5px;">
-						<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
-						<span>&nbsp;</span>
-						<?php if (!$data['deny_scanning']) : ?>
-							<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
-								<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."','".$data['theme-template']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
-							<?php else: ?>
-								<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."',''"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+		<?php endif; ?>
+		<p>
+			<input id="enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>>
+			<label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label>
+			<img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading-small.gif"?>" />
+			&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
+		</p>
+		<h3 class="nav-tab-wrapper">
+			<?php
+			foreach ( $tt_tabs['translation-toolkit'] as $id => $tab ) {
+				$class = ( $id == $_GET['tab'] ) ? ' nav-tab-active' : '';
+				echo '<a href="' . add_query_arg( array( 'page' => 'translation-toolkit', 'tab' => $id  ), admin_url( apply_filters( 'tt_page_parent', 'tools.php' ) ) ) . '" class="nav-tab' . $class . '">' . esc_html( $tab['label'] ) . '</a>';
+			}
+			?>
+		</h3><!-- .nav-tab-wrapper -->
+
+		<table class="widefat clear" style="cursor:default;" cellspacing="0">
+			<thead>
+			  <tr>
+				<th scope="col"><?php _e( 'Type', CSP_PO_TEXTDOMAIN ); ?></th>
+				<th scope="col"><?php _e( 'Description', CSP_PO_TEXTDOMAIN ); ?></th>
+				<th scope="col"><?php _e( 'Languages', CSP_PO_TEXTDOMAIN ); ?></th>
+			  </tr>
+			</thead>
+			<tbody class="list" id="the-gettext-list">
+			<?php
+				
+				if ( isset( $_GET['tab'] ) ) {
+					$tab = $_GET['tab']; 
+				} else { // if ( !isset( $_GET['tab'] ) || 'all' == $_GET['tab'] )
+					$tab = '';
+				}
+				$rows = TranslationToolkit_Helpers::get_packages( $tab );
+				
+//				if ( isset($_GET['tab'] ) && $_GET['tab'] == 'compat' ) {
+//					$_GET['tab'] = '';
+//				}
+				
+				foreach( $rows as $data ) : 
+			?>
+				<tr<?php if ( __("activated",CSP_PO_TEXTDOMAIN) == $data['status'] ) echo " class=\"csp-active\""; ?>>
+					<td align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/".$data['img_type'].".gif"; ?>" /><div><strong><?php echo $data['type-desc']; ?></strong></div></td>
+					<td>
+						<h3 class="csp-type-name"><?php echo $data['name']; ?><span style="font-weight:normal;">&nbsp;&nbsp;&copy;&nbsp;</span><sup><em><?php echo $data['author']; ?></em></sup></h3>
+						<table class="csp-type-info" border="0" width="100%">
+							<tr>
+								<td width="140px"><strong><?php _e('Textdomain',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td class="csp-info-value"><?php echo $data['textdomain']['identifier']; ?><?php if ($data['textdomain']['is_const']) echo " (".__( 'defined by constant',CSP_PO_TEXTDOMAIN).")"; ?></td>
+							</tr>
+							<tr>
+								<td><strong><?php _e('Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td class="csp-info-value"><?php echo $data['version']; ?></td>
+							</tr>
+							<tr>
+								<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td class="csp-info-value csp-info-status"><?php echo $data['status']; ?></td>
+							</tr>
+							<tr>
+								<td colspan="2" class="csp-desc-value"><small><?php echo call_user_func('__', $data['description'], $data['textdomain']['identifier']);?></small></td>
+							</tr>
+							<?php if (isset($data['dev-hints'])) : ?>
+							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+							<tr>
+								<td><strong style="color: #f00;"><?php _e('Compatibility',CSP_PO_TEXTDOMAIN); ?>:</strong>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
+								<td class="csp-info-value"><?php echo $data['dev-hints'];?></td>
+							</tr>
 							<?php endif; ?>
-						<span>&nbsp;</span>
-						<?php else: ?>
-						<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
-						<span>&nbsp;</span>
-						<?php endif; ?>
-						<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+							<?php if (isset($data['dev-security'])) : ?>
+							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+							<tr>
+								<td><strong style="color: #f00;"><?php _e('Security Risk',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td class="csp-info-value"><?php echo $data['dev-security'];?></td>
+							</tr>
+							<?php endif; ?>
+							<?php  if ($data['type'] == 'wordpress-xxx') : ?>
+							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+							<tr>
+								<td><strong style="color: #f00;"><?php _e('Memory Warning',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td class="csp-info-value"><?php _e('Since WordPress 3.x version it may require at least <strong>58MB</strong> PHP memory_limit! The reason is still unclear but it doesn\'t freeze anymore. Instead a error message will be shown and the scanning process aborts while reaching your limits.',CSP_PO_TEXTDOMAIN); ?></td>
+							<tr>
+							<?php endif; ?>
+							<?php if ($data['is-path-unclear']) : ?>
+							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+							<tr>
+								<td><strong style="color: #f00;"><?php _e('Language Folder',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td class="csp-info-value"><?php _e('The translation file folder is ambiguous, please select by clicking the appropriated language file folder or ask the Author about!',CSP_PO_TEXTDOMAIN); ?></td>
+							<tr>
+							<?php endif; ?>
+						</table>
+						<?php if (isset($data['child-plugins'])) { foreach($data['child-plugins'] as $child) { ?>
+						<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+							<h3 class="csp-type-name"><?php echo $child['name']; ?> <small><em><?php _e('by',CSP_PO_TEXTDOMAIN); ?> <?php echo $child['author']; ?></em></small></h3>
+							<table class="csp-type-info" border="0">
+								<tr>
+									<td><strong><?php _e('Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+									<td width="100%" class="csp-info-value"><?php echo $child['version']; ?></td>
+								</tr>
+								<tr>
+									<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+									<td class="csp-info-value csp-info-status"><?php echo $child['status']; ?></td>
+								</tr>
+								<tr>
+									<td colspan="2" class="csp-desc-value"><small><?php echo call_user_func('__', $child['description'], $data['textdomain']['identifier']);?></small></td>
+								</tr>
+							</table>
+						</div>
+						<?php } } ?>
+					</td>
+					<td class="component-details">
+						<?php if ( $data['type'] == 'wordpress' && $data['is_US_Version'] ) {?>
+							<div style="color:#f00;"><?php _e("The original US version doesn't contain the language directory.",CSP_PO_TEXTDOMAIN); ?></div>
+							<br/>
+							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo str_replace("\\", '/', WP_CONTENT_DIR)."/languages" ?>' );"><?php _e('try to create the WordPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
+							<br/>
+							<div>
+								<?php _e('or create the missing directory using FTP Access as:',CSP_PO_TEXTDOMAIN); ?>
+								<br/><br/>
+								<?php echo str_replace("\\", '/', WP_CONTENT_DIR)."/"; ?><strong style="color:#f00;">languages</strong>			
+							</div>
+						<?php } elseif($data['is-path-unclear']) { ?>
+							<strong style="border-bottom: 1px solid #ccc;"><?php _e('Available Directories:',CSP_PO_TEXTDOMAIN) ?></strong><br/><br/>
+							<?php 
+								$tmp = array(); 
+								$dirs = rscanpath($data['base_path'], $tmp);
+								$dir = $data['base_path'];
+								echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.$data['base_file'].'xx_XX.pot\' );">'. str_replace(str_replace("\\","/",WP_PLUGIN_DIR), '', $dir)."</a><br/>";
+								foreach($dirs as $dir) { 
+									echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.'/'.$data['base_file'].'xx_XX.pot\' );">'. str_replace(str_replace("\\","/",WP_PLUGIN_DIR), '', $dir)."</a><br/>";
+								} 
+							?>
+						<?php } elseif($data['name'] == 'bbPress' && isset($data['is_US_Version']) && $data['is_US_Version']) { ?>	
+							<div style="color:#f00;"><?php _e("The original bbPress component doesn't contain a language directory.",CSP_PO_TEXTDOMAIN); ?></div>
+							<br/>
+							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo $data['base_path']."my-languages"; ?>' );"><?php _e('try to create the bbPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
+							<br/>
+							<div>
+								<?php _e('or create the missing directory using FTP Access as:',CSP_PO_TEXTDOMAIN); ?>
+								<br/><br/>
+								<?php echo $data['base_path']; ?><strong style="color:#f00;">my-languages</strong>			
+							</div>			
+						<?php	} else { ?>
+						<table width="100%" cellspacing="0" class="mo-list" id="mo-list-<?php echo ++$mo_list_counter; ?>" summary="<?php echo $data['textdomain']['identifier'].'|'.$data['type'].'|'.$data['name'].' v'.$data['version']; ?>">
+							<tr class="mo-list-head">
+								<td colspan="4" nowrap="nowrap">
+									<img alt="GNU GetText" class="alignleft" src="<?php echo CSP_PO_BASE_URL; ?>/images/gettext.gif" style="display:none;" />
+									<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile button" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", CSP_PO_TEXTDOMAIN); ?></a>
+									<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
+									&nbsp;<a class="clickable mofile button" onclick="csp_merge_maintheme_languages(this,'<?php echo $data['theme-template']; ?>','<?php echo $data['theme-self']; ?>','<?php echo $data['base_path']; if(!empty($data['special_path'])) echo $data['special_path'].'/' ?>','<?php echo $data['textdomain']['identifier']; ?>','mo-list-<?php echo $mo_list_counter; ?>' );"><?php _e("Sync Files with Main Theme", CSP_PO_TEXTDOMAIN); ?></a>
+									<a rel="workonchildthemes" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" href="javascript:void(0);" class="question-help" align="left"><img src="http://wp34.de/wp-content/plugins/codestyling-localization/images/question.gif"></a>
+									<?php endif; ?>
+								</td>
+								<td colspan="1" nowrap="nowrap" class="csp-ta-right"><?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',count($data['languages']),CSP_PO_TEXTDOMAIN ), count($data['languages'])); ?></td>
+							</tr>
+							<tr class="mo-list-desc">
+								<td nowrap="nowrap" align="left" class="lang-info-desc"><?php _e('Language',CSP_PO_TEXTDOMAIN);?></td>
+								<td nowrap="nowrap" align="center"><?php _e('Permissions',CSP_PO_TEXTDOMAIN);?></td>
+								<td nowrap="nowrap" align="center"><?php _e('Actions',CSP_PO_TEXTDOMAIN);?></td>
+							</tr>
+							<?php 
+								foreach($data['languages'] as $lang => $gtf) : 
+									$country_www = isset($csp_l10n_sys_locales[$lang]) ? $csp_l10n_sys_locales[$lang]['country-www'] : 'unknown';
+									$lang_native = isset($csp_l10n_sys_locales[$lang]) ? $csp_l10n_sys_locales[$lang]['lang-native'] : '<em>locale: </em>'.$lang;
+							?>
+							<?php if ($data['textdomain']['identifier'] == 'woocommerce' && $lang == 'de_DE') : ?>
+							<!-- special case woocommerce german: start -->
+							<?php $copy_base_file = $data['base_file']; $data['base_file'] = 'languages/informal/woocommerce-'; ?>
+							<tr class="mo-file" lang="<?php echo $lang; ?>">
+								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(informal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+								<td nowrap="nowrap" align="center">
+									<div style="width:44px">
+										<?php if (array_key_exists('po', $gtf)) {
+											echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
+										} else { ?>
+										<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<?php } ?>
+										<?php if (array_key_exists('mo', $gtf)) {
+											echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
+										} else { ?>
+										<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<?php } ?>
+									</div>
+								</td>
+								<td nowrap="nowrap" style="padding-right: 5px;">
+									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+									<span>&nbsp;</span>
+									<?php if (!$data['deny_scanning']) : ?>
+									<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+									<span>&nbsp;</span>
+									<?php else: ?>
+									<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+									<span>&nbsp;</span>
+									<?php endif; ?>
+									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+								</td>
+							</tr>
+							<?php $data['base_file'] = 'languages/formal/woocommerce-'; ?>
+							<tr class="mo-file" lang="<?php echo $lang; ?>">
+								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(formal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+								<td nowrap="nowrap" align="center">
+									<div style="width:44px">
+										<?php if (array_key_exists('po', $gtf)) {
+											echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
+										} else { ?>
+										<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<?php } ?>
+										<?php if (array_key_exists('mo', $gtf)) {
+											echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
+										} else { ?>
+										<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<?php } ?>
+									</div>
+								</td>
+								<td nowrap="nowrap" style="padding-right: 5px;">
+									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+									<span>&nbsp;</span>
+									<?php if (!$data['deny_scanning']) : ?>
+									<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+									<span>&nbsp;</span>
+									<?php else: ?>
+									<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+									<span>&nbsp;</span>
+									<?php endif; ?>
+									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+								</td>
+							</tr>
+							<?php $data['base_file'] =  $copy_base_file;?>
+							<tr class="mo-file" lang="<?php echo $lang; ?>">
+								<td colspan="2" class="lang-info-api">&nbsp;</td>
+								<td width="100%" colspan="3" class="lang-info-desc"><small><strong style="color:#f00;"><?php _e('Warning',CSP_PO_TEXTDOMAIN); ?>: </strong><?php _e('German translations are currently supported by a temporary workaround only, because they will be handled completely uncommon beside WordPress standards!',CSP_PO_TEXTDOMAIN); ?></small></td>
+							</tr>
+							<!-- special case woocommerce german: end -->
+							<?php else : ?>
+							<tr class="mo-file" lang="<?php echo $lang; ?>">
+								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native; ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+								<td nowrap="nowrap" align="center">
+									<div style="width:44px">
+										<?php if (array_key_exists('po', $gtf)) {
+											echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
+										} else { ?>
+										<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<?php } ?>
+										<?php if (array_key_exists('mo', $gtf)) {
+											echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
+										} else { ?>
+										<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<?php } ?>
+									</div>
+								</td>
+								<td nowrap="nowrap" style="padding-right: 5px;">
+									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+									<span>&nbsp;</span>
+									<?php if (!$data['deny_scanning']) : ?>
+										<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
+											<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."','".$data['theme-template']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+										<?php else: ?>
+											<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."',''"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+										<?php endif; ?>
+									<span>&nbsp;</span>
+									<?php else: ?>
+									<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+									<span>&nbsp;</span>
+									<?php endif; ?>
+									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+								</td>
+							</tr>
+							<?php endif; ?>
+							<?php endforeach; ?>		
+						</table>
+						<?php } ?>
 					</td>
 				</tr>
-				<?php endif; ?>
-				<?php endforeach; ?>		
-			</table>
-			<?php } ?>
-		</td>
-	</tr>
-	<?php endforeach; ?>
-	</tbody>
-	</table>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
 	</div><!-- csp-wrap-main closed -->
 	<div id="csp-wrap-editor" class="wrap" style="display:none">
 		<div class="icon32" id="icon-tools"><br/></div>
@@ -476,16 +477,6 @@ class TranslationToolkit_Admin {
 			<div class="po-header-toggle"><span><b><?php _e('Project-Id-Version:',CSP_PO_TEXTDOMAIN); ?></b></span> <span id="prj-id-ver">---</span> | <strong><?php _e('File:', CSP_PO_TEXTDOMAIN); ?></strong> <a onclick="csp_toggle_header(this,'po-hdr' );"><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></a></div>
 		</div>
 		<div class="action-bar">
-			<?php if (version_compare($wp_version, '3.3', '<')) : ?>
-			<p>
-				<small>
-				<?php _e('<b>Hint:</b> The extended feature for textdomain separation shows at dropdown box <i>Textdomain</i> the pre-selected primary textdomain.',CSP_PO_TEXTDOMAIN); ?><br/>
-				<?php _e('All other additional contained textdomains occur at the source but will not be used, if not explicitely supported by this component!',CSP_PO_TEXTDOMAIN); ?><br/>
-				<?php _e('Please contact the author, if some of the non primary textdomain based phrases will not show up translated at the required position!',CSP_PO_TEXTDOMAIN); ?><br/>
-				<?php _e('The Textdomain <i><b>default</b></i> always stands for the WordPress main language file, this could be either intentionally or accidentally!',CSP_PO_TEXTDOMAIN); ?><br/>
-				</small>
-			</p>
-			<?php endif; ?>
 			<p id="textdomain-error" class="hidden"><small><?php 
 				_e('<strong>Error</strong>: The actual loaded translation content does not match the textdomain:',CSP_PO_TEXTDOMAIN); 
 				echo '&nbsp;<span></span><br/>';
@@ -2215,16 +2206,12 @@ class TranslationToolkit_Admin {
 			csp_chuck_size = (jQuery(e.target).is(':checked') ? 1 : 20);
 		});
 		
-		<?php global $wp_version; if (version_compare($wp_version, '3.3', '<')) : ?>
-		jQuery('.question-help').hide();
-		<?php else : ?>
 		jQuery('.question-help').live('click', function(event) {
 			event.preventDefault();
 			window.scrollTo(0,0);
 			jQuery('#tab-link-'+jQuery(this).attr('rel')+' a').trigger('click' );
 			if (!jQuery('#contextual-help-link').hasClass('screen-meta-active')) jQuery('#contextual-help-link').trigger('click' );
 		});
-		<?php endif; ?>
 	});
 
 	/* TODO: implement context sensitive help 

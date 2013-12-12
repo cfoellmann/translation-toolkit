@@ -108,3 +108,30 @@ if (!function_exists('scandir')) {
 		return $files;
 	}
 }
+
+function csp_is_multisite() {
+	return (
+		isset($GLOBALS['wpmu_version'])
+		||
+		(function_exists('is_multisite') && is_multisite())
+		||
+		(function_exists('wp_get_mu_plugins') && count(wp_get_mu_plugins()) > 0)
+	);
+}
+
+// add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 9999);
+function csp_redirect_prototype_js($src, $handle) {
+	global $wp_version;
+	if (version_compare($wp_version, '3.5-alpha', '>=')) {
+		$handles = array(
+			'prototype' 			=> 'prototype',
+			'scriptaculous-root' 	=> 'wp-scriptaculous',
+			'scriptaculous-effects' => 'effects'
+		);
+		//load own older versions of the scripts that are working!
+		if (isset($handles[$handle])) {
+			return CSP_PO_BASE_URL.'/js/'.$handles[$handle].'.js';
+		}
+	}
+	return $src;
+}

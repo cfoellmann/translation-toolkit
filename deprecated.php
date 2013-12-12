@@ -15,23 +15,6 @@ if ( ! function_exists( 'add_filter' ) ) {
 /**
  * HELPERS
  */
-
-function csp_po_check_security() {
-	if ( !is_user_logged_in() || !current_user_can( 'manage_options' ) ) {
-		wp_die( __( 'You do not have permission to manage translation files.', CSP_PO_TEXTDOMAIN ) );
-	}
-}
-
-function csp_is_multisite() {
-	return (
-		isset($GLOBALS['wpmu_version'])
-		||
-		(function_exists('is_multisite') && is_multisite())
-		||
-		(function_exists('wp_get_mu_plugins') && count(wp_get_mu_plugins()) > 0)
-	);
-}
-
 function csp_split_url($url) {
 	$parsed_url = parse_url($url);
 	$scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
@@ -46,12 +29,16 @@ function csp_split_url($url) {
 	return array("$scheme$user$pass$host$port","$path$query$fragment"); 
 }
 
-function has_subdirs($base='') {
-  if (!is_dir($base) || !is_readable($base)) return $false;
-  $array = array_diff(scandir($base), array('.', '..'));
-  foreach($array as $value) : 
-    if (is_dir($base.$value)) return true; 
-  endforeach;
+function has_subdirs( $base='' ) {
+  if ( !is_dir($base) || !is_readable($base) ) {
+	  return $false;
+  }
+  $array = array_diff( scandir( $base ), array( '.', '..' ) );
+  foreach( $array as $value ) { 
+    if ( is_dir( $base . $value ) ) {
+		return true;
+	}
+  };
   return false;
 }
 
@@ -132,20 +119,3 @@ function csp_po_admin_head() {
 			print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin-rtl.css'.'" type="text/css" media="screen"/>';
 	}
 }
-
-function csp_redirect_prototype_js($src, $handle) {
-	global $wp_version;
-	if (version_compare($wp_version, '3.5-alpha', '>=')) {
-		$handles = array(
-			'prototype' 			=> 'prototype',
-			'scriptaculous-root' 	=> 'wp-scriptaculous',
-			'scriptaculous-effects' => 'effects'
-		);
-		//load own older versions of the scripts that are working!
-		if (isset($handles[$handle])) {
-			return CSP_PO_BASE_URL.'/js/'.$handles[$handle].'.js';
-		}
-	}
-	return $src;
-}
-
