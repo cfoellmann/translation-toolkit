@@ -1,5 +1,4 @@
 /* general usage */
-
 .clickable {
     cursor: pointer
 }
@@ -324,7 +323,7 @@ td.lang-info-desc {
 #textdomain-error {
     background-color: #ffebe8;
     padding: 5px;
-    border: solid 1px #666;
+	border: solid 1px #666;
 }
 
 #textdomain-warning,
