@@ -203,8 +203,8 @@ function csp_po_ajax_handle_translate_by_google() {
 	$replace = array('\"', '"', "\n", "\r", "\\t", "\\$", "\0", "'", "\\");
 	$msgid = str_replace( $search, $replace, $msgid );
 	add_filter('https_ssl_verify', '__return_false' );
-	//OLD: $res = csp_fetch_remote_content("http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&format=html&q=".urlencode($msgid)."&langpair=en%7C".$_POST['destlang']);
-	$res = csp_fetch_remote_content("https://www.googleapis.com/language/translate/v2?key=".(defined('GOOGLE_TRANSLATE_KEY') ? GOOGLE_TRANSLATE_KEY : '')."&source=en&target=".$_POST['destlang']."&q=".urlencode($msgid));
+	//OLD: $res = wp_remote_fopen("http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&format=html&q=".urlencode($msgid)."&langpair=en%7C".$_POST['destlang']);
+	$res = cwp_remote_fopen("https://www.googleapis.com/language/translate/v2?key=".(defined('GOOGLE_TRANSLATE_KEY') ? GOOGLE_TRANSLATE_KEY : '')."&source=en&target=".$_POST['destlang']."&q=".urlencode($msgid));
 	if ($res) {
 		header('Content-Type: application/json' );
 		echo $res;

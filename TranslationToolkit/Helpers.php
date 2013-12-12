@@ -70,6 +70,21 @@ class TranslationToolkit_Helpers {
 			define( "CSL_FILESYSTEM_DIRECT", true );
 		}
 	} // END check_filesystem()
+	
+	/**
+	 * @TODO
+	 *
+	 * @since 1.0.0
+	 */
+	static function find_translation_template( &$files ) {
+		$result = null;
+		foreach( $files as $tt ) {
+			if ( preg_match( '/\.pot$/', $tt ) ) {
+				$result = $tt;
+			}
+		}
+		return $result;
+	} // END find_translation_template()
 
 	
 	/**
@@ -238,7 +253,7 @@ class TranslationToolkit_Helpers {
 		
 		if ( !$data['is_US_Version'] ) {
 			$files = rscandir( str_replace( "\\","/", WP_LANG_DIR ).'/', "/(.\mo|\.po|\.pot)$/", $tmp);
-			$data['translation_template'] = csp_find_translation_template($files);
+			$data['translation_template'] = self::find_translation_template( $files );
 			
 			foreach( $files as $filename ) {
 				$file = str_replace( str_replace( "\\" , "/", WP_LANG_DIR ) . '/', '', $filename );
@@ -294,7 +309,7 @@ class TranslationToolkit_Helpers {
 		$data['languages'] = array();
 		$tmp = array(); 
 		$files = lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
-		$data['translation_template'] = csp_find_translation_template($files);
+		$data['translation_template'] = self::find_translation_template( $files );
 		foreach($files as $filename) {
 			$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
 			preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);		
@@ -343,7 +358,7 @@ class TranslationToolkit_Helpers {
 		if (!$data['is_US_Version']) {	
 			$tmp = array(); 	
 			$files = lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-forums/bbpress/my-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
-			$data['translation_template'] = csp_find_translation_template($files);
+			$data['translation_template'] = self::find_translation_template($files);
 			foreach($files as $filename) {
 				$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
 				preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);		
@@ -477,7 +492,7 @@ class TranslationToolkit_Helpers {
 		if($data['gettext_ready']){
 			if ($data['is-simple']) { $tmp = array(); $files = lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
 			else { 	$tmp = array(); $files = rscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
-			$data['translation_template'] = csp_find_translation_template($files);
+			$data['translation_template'] = self::find_translation_template($files);
 
 			if ($data['is-simple']) { //simple plugin case
 				//1st - try to find the assumed one files
@@ -651,7 +666,7 @@ class TranslationToolkit_Helpers {
 		$data['languages'] = array();
 		if($data['gettext_ready']){
 			$tmp = array(); $files = lscandir(str_replace("\\","/",dirname(WPMU_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); 		
-			$data['translation_template'] = csp_find_translation_template($files);
+			$data['translation_template'] = self::find_translation_template( $files );
 			foreach($files as $filename) {
 				$file = str_replace(str_replace("\\","/",WPMU_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
 				preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);		
@@ -752,7 +767,7 @@ class TranslationToolkit_Helpers {
 				$dn = $data["base_path"];
 				$tmp = array();
 				$lng_files = rscandir($dn, "/(\.mo|\.po|\.pot)$/", $tmp);
-				$data['translation_template'] = csp_find_translation_template($lng_files);
+				$data['translation_template'] = self::find_translation_template($lng_files);
 				$sub_dirs = array();
 				$naming_convention_error = false;
 				foreach($lng_files as $filename) {

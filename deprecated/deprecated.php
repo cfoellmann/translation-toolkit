@@ -135,3 +135,23 @@ function csp_redirect_prototype_js($src, $handle) {
 	}
 	return $src;
 }
+
+if ( function_exists( 'add_action' ) ) {
+	if ( is_admin() && !defined( 'DOING_AJAX' ) ) {
+		add_action('admin_head', 'csp_po_admin_head' );
+		require_once('includes/locale-definitions.php' );
+	}
+}
+
+function csp_po_admin_head() {
+	if (!function_exists('wp_enqueue_style') 
+		&& 
+		preg_match("/^codestyling\-localization\/codestyling\-localization\.php/", $_GET['page'])
+	) {
+		print '<link rel="stylesheet" href="'.get_site_url()."/wp-includes/js/thickbox/thickbox.css".'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/ui.all.css'.'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin.css'.'" type="text/css" media="screen"/>';
+		if(function_exists('is_rtl') && is_rtl())
+			print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin-rtl.css'.'" type="text/css" media="screen"/>';
+	}
+}

@@ -1596,16 +1596,16 @@ class TranslationToolkit_Admin {
 
 	function csp_search_regexp(elem) {
 		$(elem).blur();
-		$('csp-dialog-caption').update("<?php _e('Extended Expression Search','translation-toolkit'); ?>");
+		$('csp-dialog-caption').update("<?php _e( 'Extended Expression Search', 'translation-toolkit' ); ?>");
 		$("csp-dialog-body").update(
-			"<div><strong><?php _e('Expression:','translation-toolkit'); ?></strong></div>"+
+			"<div><strong><?php _e( 'Expression:','translation-toolkit' ); ?></strong></div>"+
 			"<input type=\"text\" id=\"csp-dialog-expression\" style=\"width:98%;font-size:11px;line-height:normal;\" value=\"\"\>"+		
-			"<div style=\"margin-top:10px; color:#888;\"><strong><?php _e('Examples: <small>Please refer to official Perl regular expression descriptions</small>','translation-toolkit'); ?></strong></div>"+
+			"<div style=\"margin-top:10px; color:#888;\"><strong><?php _e( 'Examples: <small>Please refer to official Perl regular expression descriptions</small>', 'translation-toolkit' ); ?></strong></div>"+
 			'<div style="height: 215px; overflow:scroll;">'+
-			<?php require('../includes/js-help-perlreg.php' ); // @TODO ?>
+			<?php require( 'js-help-perlreg.php' ); // @TODO ?>
 			'</div>'+
 			"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
-			"<input class=\"button\" type=\"submit\" onclick=\"return csp_exec_expression('"+elem+"' );\" value=\"  <?php echo _e('Search', 'translation-toolkit'); ?>  \"/>"+
+			"<input class=\"button\" type=\"submit\" onclick=\"return csp_exec_expression('"+elem+"' );\" value=\"  <?php echo _e( 'Search', 'translation-toolkit' ); ?>  \"/>"+
 			"</p>"
 		).setStyle({'padding' : '10px'});		
 		tb_show(null,"#TB_inline?height=385&width=600&inlineId=csp-dialog-container&modal=true",false);	

@@ -213,6 +213,7 @@ function csp_self_script_protection_head() {
 	echo $content;
 }
 
+add_action('wp_ajax_csp_self_protection_result', 'csp_handle_csp_self_protection_result' );
 function csp_handle_csp_self_protection_result() {
 	csp_po_check_security();
 	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );	

@@ -12,6 +12,56 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//	constant definition
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//Enable this only for debugging reasons. 
+//Attention: the strict logging may prevent WP from proper working because of many not handled issues.
+//error_reporting(E_ALL|E_STRICT);
+//@unlink(dirname(__FILE__).'/.htaccess' );
+
+//if (!defined('E_RECOVERABLE_ERROR'))
+//	define('E_RECOVERABLE_ERROR', 4096);
+//if (!defined('E_DEPRECATED'))
+//	define('E_DEPRECATED', 8192);
+//if (!defined('E_USER_DEPRECATED '))
+//	define('E_USER_DEPRECATED ', 16384);
+
+define("CSP_PO_PLUGINPATH", "/" . dirname(plugin_basename( __FILE__ )));
+
+define('CSP_PO_BASE_URL', plugins_url( CSP_PO_PLUGINPATH ));
+
+//Bugfix: ensure valid JSON requests at IDN locations!
+//Attention: Google Chrome and Safari behave in different way (shared WebKit issue or all other are wrong?)!
+list($csp_domain, $csp_target) = csp_split_url( rtrim( admin_url(), '/' ) );
+
+define('CSP_SELF_DOMAIN', $csp_domain);
+
+if ( stripos($_SERVER['HTTP_USER_AGENT'], 'chrome') !== false || stripos($_SERVER['HTTP_USER_AGENT'], 'safari') !== false ) {
+	define('CSP_PO_ADMIN_URL', strtolower( $csp_domain ) . $csp_target );
+} else {
+	if ( !class_exists('idna_convert') )
+		require_once('includes/idna_convert.class.php' );
+	$idn = new idna_convert();
+	define('CSP_PO_ADMIN_URL', $idn->decode(strtolower($csp_domain), 'utf8').$csp_target);
+}
+
+
+// @TODO Implement differently
+//if ( function_exists( 'csp_po_install_plugin' ) ) {
+//	//rewrite and extend the error messages displayed at failed activation
+//	//fall trough, if it's a real code bug forcing the activation error to get the appropriated message instead
+//	if ( isset($_GET['action']) && isset($_GET['plugin']) && ($_GET['action'] == 'error_scrape') && ($_GET['plugin'] == plugin_basename(__FILE__) ) ) {
+//		if ( !function_exists('token_get_all') ) {
+//			echo "<table>";
+//			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__('required', 'translation-toolkit')."</td><td> | ".__('actual', 'translation-toolkit')."</td></tr>";			
+//			echo "<tr style=\"font-size: 12px;\"><td>PHP Tokenizer Module:</td><td align=\"center\"><strong>active</strong></td><td align=\"center\"><span style=\"color:#f00;\">not installed</span></td></tr>";			
+//			echo "</table>";
+//		}
+//	}
+//}
+
 /**
  * HELPERS
  */
@@ -106,16 +156,3 @@ function file_permissions($filename) {
 /**
  * ADMIN
  */
-
-function csp_po_admin_head() {
-	if (!function_exists('wp_enqueue_style') 
-		&& 
-		preg_match("/^codestyling\-localization\/codestyling\-localization\.php/", $_GET['page'])
-	) {
-		print '<link rel="stylesheet" href="'.get_site_url()."/wp-includes/js/thickbox/thickbox.css".'" type="text/css" media="screen"/>';
-		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/ui.all.css'.'" type="text/css" media="screen"/>';
-		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin.css'.'" type="text/css" media="screen"/>';
-		if(function_exists('is_rtl') && is_rtl())
-			print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin-rtl.css'.'" type="text/css" media="screen"/>';
-	}
-}
