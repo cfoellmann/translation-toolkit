@@ -73,12 +73,13 @@ class TranslationToolkit_Ajax {
 	function dlg_new() {
 		TranslationToolkit_Helpers::check_security();
 		
-		require_once('includes/locale-definitions.php' );
+		$login_label = TranslationToolkit_Locale::login_label();
+		$sys_locales = TranslationToolkit_Locale::sys_locales();
 		?>
 		<table class="widefat" cellspacing="2px">
 			<tr>
-				<td nowrap="nowrap"><strong><?php _e('Project-Id-Version','translation-toolkit'); ?>:</strong></td>
-				<td><?php echo strip_tags(rawurldecode($_POST['name'])); ?><input type="hidden" id="csp-dialog-name" value="<?php echo strip_tags(rawurldecode($_POST['name'])); ?>" /></td>
+				<td nowrap="nowrap"><strong><?php _e( 'Project-Id-Version', 'translation-toolkit' ); ?>:</strong></td>
+				<td><?php echo strip_tags( rawurldecode( $_POST['name'] ) ); ?><input type="hidden" id="csp-dialog-name" value="<?php echo strip_tags( rawurldecode( $_POST['name'] ) ); ?>" /></td>
 			</tr>
 			<tr>
 				<td><strong><?php _e('Creation-Date','translation-toolkit'); ?>:</strong></td>
@@ -89,7 +90,7 @@ class TranslationToolkit_Ajax {
 				<td><input style="width:330px;" type="text" id="csp-dialog-translator" value="<?php $myself = wp_get_current_user(); echo "$myself->user_nicename &lt;$myself->user_email&gt;"; ?>" /></td>
 			</tr>
 			<tr>
-				<td valign="top"><strong><?php echo $csp_l10n_login_label[substr(get_locale(),0,2)]?>:</strong></td>
+				<td valign="top"><strong><?php echo $login_label[ substr( get_locale(), 0, 2 ) ]?>:</strong></td>
 				<td>
 					<div style="width:332px;height:300px; overflow:scroll;border:solid 1px #54585B;overflow-x:hidden;">
 						<?php $existing = explode('|', ltrim($_POST['existing'],'|')); if(strlen($existing[0]) == 0) $existing=array(); ?>
@@ -104,15 +105,22 @@ class TranslationToolkit_Ajax {
 						<input type="hidden" id="csp-dialog-denyscan" value="<?php echo ($_POST['denyscan'] ? "true" : "false"); ?>" />					
 						<table style="font-family:monospace;">
 						<?php
-							$total = array_keys($csp_l10n_sys_locales);
-							foreach($total as $key) {
-								if (in_array($key, $existing)) continue;
-								$values = $csp_l10n_sys_locales[$key];
-								if (get_locale() == $key) { $selected = '" selected="selected'; } else { $selected=""; };
+							$total = array_keys( $sys_locales );
+							foreach( $total as $key ) {
+								if ( in_array( $key, $existing ) ) {
+									continue;
+								}
+								$values = $sys_locales[ $key ];
+								
+								if ( get_locale() == $key ) {
+									$selected = '" selected="selected';
+								} else {
+									$selected="";
+								};
 								?>
 								<tr>
 									<td><input type="radio" name="mo-locale" value="<?php echo $key; ?><?php echo $selected; ?>" onclick="$('submit_language').enable();$('csp-dialog-language').value = this.value;" /></td>
-									<td><img alt="" title="locale: <?php echo $key ?>" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$csp_l10n_sys_locales[$key]['country-www'].".gif\""; ?>" /></td>
+									<td><img alt="" title="locale: <?php echo $key ?>" src="<?php echo CSP_PO_BASE_URL."/images/flags/" . $sys_locales[ $key ]['country-www'].".gif\""; ?>" /></td>
 									<td><?php echo $key; ?></td>
 									<td style="padding-left: 5px;border-left: 1px solid #aaa;"><?php echo $values['lang-native']."<br />"; ?></td>
 								</tr>
@@ -124,7 +132,9 @@ class TranslationToolkit_Ajax {
 				</td>
 			</tr>
 		</table>
-		<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" disabled="disabled" value="<?php _e('create po-file','translation-toolkit'); ?>" onclick="return csp_create_new_pofile(this,<?php echo "'".strip_tags($_POST['type'])."'"; ?>);"/></div>
+		<div style="text-align:center; padding-top: 10px">
+			<input class="button" id="submit_language" type="submit" disabled="disabled" value="<?php _e('create po-file','translation-toolkit'); ?>" onclick="return csp_create_new_pofile(this,<?php echo "'".strip_tags($_POST['type'])."'"; ?>);"/>
+		</div>
 	<?php
 	exit();
 	}
@@ -136,14 +146,20 @@ class TranslationToolkit_Ajax {
 	 */
 	function dlg_delete() {
 		TranslationToolkit_Helpers::check_security();
+
+		$sys_locales = TranslationToolkit_Locale::sys_locales();
+		$lang = isset( $sys_locales[$_POST['language']] ) ? $sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
+		?>
+		<p style="text-align:center;">
+			<?php echo sprintf( __( 'You are about to delete <strong>%s</strong> from "<strong>%s</strong>" permanently.<br/>Are you sure you wish to delete these files?', 'translation-toolkit'), $lang, strip_tags( rawurldecode( $_POST['name'] ) ) ); ?>
+		</p>
+		<div style="text-align:center; padding-top: 10px">
+			<input class="button" id="submit_language" type="submit" value="<?php _e('delete files','translation-toolkit'); ?>" onclick="csp_destroy_files(this,'<?php echo str_replace("'", "\\'", strip_tags(rawurldecode($_POST['name'])))."','".strip_tags($_POST['row'])."','".strip_tags($_POST['path'])."','".strip_tags($_POST['subpath'])."','".strip_tags($_POST['language'])."','".strip_tags($_POST['numlangs']);?>' );" />
+		</div>
+		<?php
 		
-		require_once('includes/locale-definitions.php' );
-		$lang = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
-	?>
-		<p style="text-align:center;"><?php echo sprintf(__('You are about to delete <strong>%s</strong> from "<strong>%s</strong>" permanently.<br/>Are you sure you wish to delete these files?', 'translation-toolkit'), $lang, strip_tags(rawurldecode($_POST['name']))); ?></p>
-		<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" value="<?php _e('delete files','translation-toolkit'); ?>" onclick="csp_destroy_files(this,'<?php echo str_replace("'", "\\'", strip_tags(rawurldecode($_POST['name'])))."','".strip_tags($_POST['row'])."','".strip_tags($_POST['path'])."','".strip_tags($_POST['subpath'])."','".strip_tags($_POST['language'])."','".strip_tags($_POST['numlangs']);?>' );" /></div>
-	<?php
 		exit();
+		
 	}
 	
 	/**
@@ -154,10 +170,11 @@ class TranslationToolkit_Ajax {
 	function dlg_rescan() {
 		TranslationToolkit_Helpers::check_security();
 		
-		require_once('includes/locale-definitions.php' );	
-		global $wp_version;
-		if ($_POST['type'] == 'wordpress') {	
-			$abs_root = rtrim(str_replace('\\', '/', ABSPATH), '/' );
+		$login_label = TranslationToolkit_Locale::login_label();
+		$sys_locales = TranslationToolkit_Locale::sys_locales();	
+		
+		if ( $_POST['type'] == 'wordpress' ) {	
+			$abs_root = rtrim( str_replace( '\\', '/', ABSPATH ), '/' );
 			$excludes = array();
 			$files = array(
 				$abs_root.'/wp-activate.php',
@@ -181,20 +198,14 @@ class TranslationToolkit_Ajax {
 				$abs_root.'/wp-signup.php',
 				$abs_root.'/wp-trackback.php',
 				$abs_root.'/xmlrpc.php',
-				str_replace("\\", "/", WP_PLUGIN_DIR).'/akismet/akismet.php'
+				str_replace( "\\", "/", WP_PLUGIN_DIR ) . '/akismet/akismet.php'
 			);
 			rscandir_php($abs_root.'/wp-admin/', $excludes, $files);
 			rscandir_php($abs_root.'/wp-includes/', $excludes, $files);
 			//do not longer rescan old themes prior hosted the the main localization file starting from WP 3.0!
-			if (version_compare($wp_version, '3', '<')) {
-				rscandir_php(str_replace("\\","/",WP_CONTENT_DIR)."/themes/default/", $excludes, $files);
-				rscandir_php(str_replace("\\","/",WP_CONTENT_DIR)."/themes/classic/", $excludes, $files);
-			}	
-		}
-		elseif ($_POST['type'] == 'plugins_mu') {
-			$files[] = strip_tags($_POST['simplefilename']);
-		}
-		elseif ($_POST['textdomain'] == 'buddypress') {
+		} elseif ( $_POST['type'] == 'plugins_mu' ) {
+			$files[] = strip_tags( $_POST['simplefilename'] );
+		} elseif ( $_POST['textdomain'] == 'buddypress' ) {
 			$files = array();
 			$excludes = array(strip_tags($_POST['path']).'bp-forums/bbpress' );
 			rscandir_php(strip_tags($_POST['path']), $excludes, $files);
@@ -208,8 +219,8 @@ class TranslationToolkit_Ajax {
 				rscandir_php(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['themetemplate']).'/',$excludes, $files);
 			}
 		}
-		$country_www = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['country-www'] : 'unknown';
-		$lang_native = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
+		$country_www = isset($sys_locales[$_POST['language']]) ? $sys_locales[$_POST['language']]['country-www'] : 'unknown';
+		$lang_native = isset($sys_locales[$_POST['language']]) ? $sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
 		$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).".po";
 	?>	
 		<input id="csp-dialog-source-file-json" type="hidden" value="{ <?php 
@@ -248,21 +259,13 @@ class TranslationToolkit_Ajax {
 			<tr>
 		</table>
 		<div style="text-align:center; padding-top: 10px"><input class="button" id="csp-dialog-rescan" type="submit" value="<?php _e('scan now','translation-toolkit'); ?>" onclick="csp_scan_source_files(this);"/><span id="csp-dialog-scan-info" style="display:none"><?php _e('Please standby, files presently being scanned ...','translation-toolkit'); ?></span></div>
-	<?php
-		exit();
-	}
+		<?php
 	
-	/**
-	 * @TODO
-	 *
-	 * @since 1.0.0
-	 */
-	function csp_po_convert_js_input_for_source($str) {
-		$search = array('\\\\\"','\\\\n', '\\\\t', '\\\\$','\\0', "\\'", '\\\\' );
-		$replace = array('"', "\n", "\\t", "\\$", "\0", "'", "\\");
-		$str = str_replace( $search, $replace, $str );
-		return $str;
-	}
+		exit();
+		
+	} // END dlg_rescan()
+	
+
 	
 	/**
 	 * @TODO
@@ -279,7 +282,7 @@ class TranslationToolkit_Ajax {
 		fclose($handle);
 
 		$msgid = $_POST['msgid'];
-		$msgid = csp_po_convert_js_input_for_source($msgid);	
+		$msgid = TranslationToolkit_Helpers::convert_js_input_for_source( $msgid );	
 		if (strlen($msgid) > 0) {
 			if (strpos($msgid, "\00") > 0)
 				$msgid = explode("\00", $msgid);
@@ -319,7 +322,7 @@ class TranslationToolkit_Ajax {
 	<?php	
 		$open = 0;
 		$closed = 0;
-		foreach($content as $line) {
+		foreach( $content as $line ) {
 			$c++;
 			$style = $c % 2 == 1 ? "#fff" : "#eee";
 
@@ -438,7 +441,7 @@ class TranslationToolkit_Ajax {
 	</html>
 	<?php
 		exit();
-	}
+	} // END dlg_show_source()
 	
 	/**
 	 * @TODO
@@ -448,29 +451,31 @@ class TranslationToolkit_Ajax {
 	function merge_from_maintheme() {
 		TranslationToolkit_Helpers::check_security();
 		
-		require_once('includes/locale-definitions.php' );
-		require_once('class-filesystem-translationfile.php' );
+		$plurals = TranslationToolkit_Locale::plurals();
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' ); // @TODO
 
 		//source|dest|basepath|textdomain|molist
 		$tmp = array();
 		$files = rscandir(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['source']).'/', "/(\.po|\.mo)$/", $tmp);
-		foreach($files as $file) {
+		foreach( $files as $file ) {
 			$pofile = new CspFileSystem_TranslationFile();
 			$target = strip_tags($_POST['basepath']).basename($file);
 			if(preg_match('/\.mo/', $file)) {
-				$pofile->read_mofile($file, $csp_l10n_plurals, false, strip_tags($_POST['textdomain']));
-				$pofile->write_mofile($target, strip_tags($_POST['textdomain']));
+				$pofile->read_mofile( $file, $plurals, false, strip_tags( $_POST['textdomain'] ) );
+				$pofile->write_mofile( $target, strip_tags( $_POST['textdomain'] ) );
 			}else{
 				$pofile->read_pofile($file);
-				if (file_exists($target)) {
+				if ( file_exists( $target ) ) {
 					//merge it now
-					$pofile->read_pofile($target);
+					$pofile->read_pofile( $target );
 				}
-				$pofile->write_pofile($target, true, strip_tags($_POST['textdomain']));
+				$pofile->write_pofile( $target, true, strip_tags( $_POST['textdomain'] ) );
 			}
 		}
+		
 		exit();
-	}
+		
+	} // END merge_from_maintheme()
 	
 	/**
 	 * @TODO
@@ -479,9 +484,11 @@ class TranslationToolkit_Ajax {
 	 */
 	function create() {
 		TranslationToolkit_Helpers::check_security();
+
+		$sys_locales = TranslationToolkit_Locale::sys_locales();
+		$plurals = TranslationToolkit_Locale::plurals();
 		
-		require_once('includes/locale-definitions.php' );
-		require_once('class-filesystem-translationfile.php' );
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
 
 		$pofile = new CspFileSystem_TranslationFile();
 		$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
@@ -491,9 +498,9 @@ class TranslationToolkit_Ajax {
 			strip_tags($_POST['name']), 
 			strip_tags($_POST['timestamp']), 
 			$_POST['translator'], 
-			$csp_l10n_plurals[substr($_POST['language'],0,2)], 
-			$csp_l10n_sys_locales[$_POST['language']]['lang'], 
-			$csp_l10n_sys_locales[$_POST['language']]['country']
+			$_plurals[substr($_POST['language'],0,2)], 
+			$sys_locales[$_POST['language']]['lang'], 
+			$sys_locales[$_POST['language']]['country']
 		);
 		if(!$pofile->write_pofile($filename)) {
 			header('Status: 404 Not Found' );
@@ -510,15 +517,15 @@ class TranslationToolkit_Ajax {
 			path: '<?php echo strip_tags($_POST['path']); ?>',
 			subpath: '<?php echo strip_tags($_POST['subpath']); ?>',
 			language: '<?php echo strip_tags($_POST['language']); ?>',
-			lang_native: '<?php echo $csp_l10n_sys_locales[strip_tags($_POST['language'])]['lang-native']; ?>',
-			image: '<?php echo CSP_PO_BASE_URL."/images/flags/".$csp_l10n_sys_locales[strip_tags($_POST['language'])]['country-www'].".gif";?>',
+			lang_native: '<?php echo $sys_locales[strip_tags($_POST['language'])]['lang-native']; ?>',
+			image: '<?php echo CSP_PO_BASE_URL."/images/flags/".$sys_locales[strip_tags($_POST['language'])]['country-www'].".gif";?>',
 			type: '<?php echo strip_tags($_POST['type']); ?>',
 			simplefilename: '<?php echo strip_tags($_POST['simplefilename']); ?>',
 			transtemplate: '<?php echo strip_tags($_POST['transtemplate']); ?>',
 			permissions: '<?php echo date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename); ?>',
 			denyscan: <?php echo strip_tags($_POST['denyscan']); ?>,
-			google: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['google-api'] ? 'yes' : 'no'; ?>",
-			microsoft: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['microsoft-api'] ? 'yes' : 'no'; ?>"
+			google: "<?php echo $sys_locales[$_POST['language']]['google-api'] ? 'yes' : 'no'; ?>",
+			microsoft: "<?php echo $sys_locales[$_POST['language']]['microsoft-api'] ? 'yes' : 'no'; ?>"
 	}
 	<?php		
 		}
@@ -533,11 +540,12 @@ class TranslationToolkit_Ajax {
 	function destroy() {
 		TranslationToolkit_Helpers::check_security();
 		
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
+		
 		$pofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
 		$mofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.mo';
 		$error = false;
 
-		require_once('class-filesystem-translationfile.php' );
 		$transfile = new CspFileSystem_TranslationFile();
 
 		$transfile->destroy_pofile($pofile);
@@ -590,16 +598,17 @@ class TranslationToolkit_Ajax {
 		TranslationToolkit_Helpers::check_security();
 
 		$low_mem_scanning = (bool)get_option('codestyling-localization.low-memory', false);
+		$plurals = TranslationToolkit_Locale::plurals();
 
-		require_once('class-filesystem-translationfile.php' );
-		require_once('includes/locale-definitions.php' );
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
+
 		$textdomain = $_POST['textdomain'];
 		//TODO: give the domain into translation file as default domain
 		$pofile = new CspFileSystem_TranslationFile($_POST['type']);
 		//BUGFIX: 1.90 - may be, we have only the mo but no po, so we dump it out as base po file first
 		if (!file_exists($_POST['pofile'])) {
 			//try implicite convert first and reopen as po second
-			if($pofile->read_mofile(substr($_POST['pofile'],0,-2)."mo", $csp_l10n_plurals, false, $textdomain)) {
+			if($pofile->read_mofile(substr($_POST['pofile'],0,-2)."mo", $plurals, false, $textdomain)) {
 				$pofile->write_pofile($_POST['pofile'],false,false, ($_POST['type'] == 'wordpress' ? 'no' : 'yes'));
 			}
 			//check, if we have to reverse all the other *.mo's too
@@ -607,18 +616,18 @@ class TranslationToolkit_Ajax {
 				$root_po = basename($_POST['pofile']);
 				$root_mo = substr($root_po,0,-2)."mo";
 				$part = str_replace($root_po, '', $_POST['pofile']);
-				if($pofile->read_mofile($part.'continents-cities-'.$root_mo, $csp_l10n_plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
+				if($pofile->read_mofile($part.'continents-cities-'.$root_mo, $plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
 					$pofile->write_pofile($part.'continents-cities-'.$root_po,false,false,'no' );
 				}
-				if($pofile->read_mofile($part.'ms-'.$root_mo, $csp_l10n_plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
+				if($pofile->read_mofile($part.'ms-'.$root_mo, $plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
 					$pofile->write_pofile($part.'ms-'.$root_po,false,false,'no' );
 				}
 				global $wp_version;			
 				if (version_compare($wp_version, '3.4-alpha', ">=")) {
-					if($pofile->read_mofile($part.'admin-'.$root_mo, $csp_l10n_plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
+					if($pofile->read_mofile($part.'admin-'.$root_mo, $plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
 						$pofile->write_pofile($part.'admin-'.$root_po,false,false,'no' );
 					}
-					if($pofile->read_mofile($part.'admin-network-'.$root_mo, $csp_l10n_plurals, $part.'admin-network-'.$root_mo, $_POST['textdomain'])) {
+					if($pofile->read_mofile($part.'admin-network-'.$root_mo, $plurals, $part.'admin-network-'.$root_mo, $_POST['textdomain'])) {
 						$pofile->write_pofile($part.'admin-network-'.$root_po,false,false,'no' );
 					}
 				}
@@ -633,12 +642,12 @@ class TranslationToolkit_Ajax {
 					$root = basename($_POST['pofile']);
 					$part = str_replace($root, '', $_POST['pofile']);
 					//load existing files for backward compatibility if existing
-					$pofile->read_pofile($part.'continents-cities-'.$root, $csp_l10n_plurals, $part.'continents-cities-'.$root);
-					$pofile->read_pofile($part.'ms-'.$root, $csp_l10n_plurals, $part.'ms-'.$root);
+					$pofile->read_pofile($part.'continents-cities-'.$root, $plurals, $part.'continents-cities-'.$root);
+					$pofile->read_pofile($part.'ms-'.$root, $plurals, $part.'ms-'.$root);
 					global $wp_version;			
 					if (version_compare($wp_version, '3.4-alpha', ">=")) {
-						$pofile->read_pofile($part.'admin-'.$root, $csp_l10n_plurals, $part.'admin-'.$root);
-						$pofile->read_pofile($part.'admin-network-'.$root, $csp_l10n_plurals, $part.'admin-network-'.$root);
+						$pofile->read_pofile($part.'admin-'.$root, $plurals, $part.'admin-'.$root);
+						$pofile->read_pofile($part.'admin-network-'.$root, $plurals, $part.'admin-network-'.$root);
 					}
 					//again read it to get the right header overwritten last
 					$pofile->read_pofile($_POST['pofile']);
@@ -698,7 +707,7 @@ class TranslationToolkit_Ajax {
 		$filename = strip_tags($_POST['file']);
 		$error = false;
 
-		require_once('class-filesystem-translationfile.php' );
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
 		$transfile = new CspFileSystem_TranslationFile();
 
 		$transfile->change_permission($filename);
@@ -716,13 +725,15 @@ class TranslationToolkit_Ajax {
 	function launch_editor() {
 		TranslationToolkit_Helpers::check_security();
 		
-//		require_once('includes/locale-definitions.php' );
-	//	require_once('includes/class-translationfile.php' );
-		require_once('class-filesystem-translationfile.php' );
-		$f = new CspFileSystem_TranslationFile($_POST['type']);
-		if (!file_exists($_POST['basepath'].$_POST['file'])) {
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-translationfile.php' );
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
+
+		$plurals = TranslationToolkit_Locale::plurals();
+		$f = new CspFileSystem_TranslationFile( $_POST['type'] );
+		
+		if ( !file_exists( $_POST['basepath'] . $_POST['file'] ) ) {
 			//try implicite convert first
-			if($f->read_mofile(substr($_POST['basepath'].$_POST['file'],0,-2)."mo", $csp_l10n_plurals, $_POST['file'], $_POST['textdomain'])) {
+			if($f->read_mofile(substr($_POST['basepath'].$_POST['file'],0,-2)."mo", $plurals, $_POST['file'], $_POST['textdomain'])) {
 				$f->write_pofile($_POST['basepath'].$_POST['file'],false,false,'no' );
 			}
 			//check, if we have to reverse all the other *.mo's too
@@ -730,51 +741,54 @@ class TranslationToolkit_Ajax {
 				$root_po = basename($_POST['file']);
 				$root_mo = substr($root_po,0,-2)."mo";
 				$part = str_replace($root_po, '', $_POST['file']);
-				if($f->read_mofile($_POST['basepath'].$part.'continents-cities-'.$root_mo, $csp_l10n_plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
+				if($f->read_mofile($_POST['basepath'].$part.'continents-cities-'.$root_mo, $plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
 					$f->write_pofile($_POST['basepath'].$part.'continents-cities-'.$root_po,false,false,'no' );
 				}
-				if($f->read_mofile($_POST['basepath'].$part.'ms-'.$root_mo, $csp_l10n_plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
+				if($f->read_mofile($_POST['basepath'].$part.'ms-'.$root_mo, $plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
 					$f->write_pofile($_POST['basepath'].$part.'ms-'.$root_po,false,false,'no' );
 				}
 				global $wp_version;			
 				if (version_compare($wp_version, '3.4-alpha', ">=")) {
-					if($f->read_mofile($_POST['basepath'].$part.'admin-'.$root_mo, $csp_l10n_plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
+					if($f->read_mofile($_POST['basepath'].$part.'admin-'.$root_mo, $plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
 						$f->write_pofile($_POST['basepath'].$part.'admin-'.$root_po,false,false,'no' );
 					}
-					if($f->read_mofile($_POST['basepath'].$part.'admin-network-'.$root_mo, $csp_l10n_plurals, $part.'admin-network-'.$root_mo, $_POST['textdomain'])) {
+					if($f->read_mofile($_POST['basepath'].$part.'admin-network-'.$root_mo, $plurals, $part.'admin-network-'.$root_mo, $_POST['textdomain'])) {
 						$f->write_pofile($_POST['basepath'].$part.'admin-network-'.$root_po,false,false,'no' );
 					}
 				}
 			}
 		}
 		$f = new CspFileSystem_TranslationFile($_POST['type']);
-		$f->read_pofile($_POST['basepath'].$_POST['file'], $csp_l10n_plurals, $_POST['file']);
+		$f->read_pofile($_POST['basepath'].$_POST['file'], $plurals, $_POST['file']);
 		if (!$f->supports_textdomain_extension() && $_POST['type'] == 'wordpress'){
 			//try to merge up first all splitted translations.
 			$root = basename($_POST['file']);
 			$part = str_replace($root, '', $_POST['file']);
 			//load existing files for backward compatibility if existing
-			$f->read_pofile($_POST['basepath'].$part.'continents-cities-'.$root, $csp_l10n_plurals, $part.'continents-cities-'.$root);
-			$f->read_pofile($_POST['basepath'].$part.'ms-'.$root, $csp_l10n_plurals, $part.'ms-'.$root);
+			$f->read_pofile($_POST['basepath'].$part.'continents-cities-'.$root, $plurals, $part.'continents-cities-'.$root);
+			$f->read_pofile($_POST['basepath'].$part.'ms-'.$root, $plurals, $part.'ms-'.$root);
 			global $wp_version;			
 			if (version_compare($wp_version, '3.4-alpha', ">=")) {
-				$f->read_pofile($_POST['basepath'].$part.'admin-'.$root, $csp_l10n_plurals, $part.'admin-'.$root);
-				$f->read_pofile($_POST['basepath'].$part.'admin-network-'.$root, $csp_l10n_plurals, $part.'admin-network-'.$root);
+				$f->read_pofile($_POST['basepath'].$part.'admin-'.$root, $plurals, $part.'admin-'.$root);
+				$f->read_pofile($_POST['basepath'].$part.'admin-network-'.$root, $plurals, $part.'admin-network-'.$root);
 			}
 			//again read it to get the right header overwritten last
-			$f->read_pofile($_POST['basepath'].$_POST['file'], $csp_l10n_plurals, $_POST['file']);
+			$f->read_pofile($_POST['basepath'].$_POST['file'], $plurals, $_POST['file']);
 			//overwrite with full imploded sparse file contents now
 			$f->write_pofile($_POST['basepath'].$_POST['file'],false,false,'no' );
 		}
-	//	if ($f->supports_textdomain_extension() || $_POST['type'] == 'wordpress'){
-	//		if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
-	//		$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales, csp_get_translate_api_type());
-	//	}else {
-	//		header('Status: 404 Not Found' );
-	//		header('HTTP/1.1 404 Not Found' );
-	//		_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",'translation-toolkit');
-	//		?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="translationformat"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><?php
-	//	}
+		/**
+		if ($f->supports_textdomain_extension() || $_POST['type'] == 'wordpress'){
+			if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
+			$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales, csp_get_translate_api_type());
+		}else {
+			header('Status: 404 Not Found' );
+			header('HTTP/1.1 404 Not Found' );
+			_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",'translation-toolkit');
+			?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="translationformat"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><?php
+		}
+		 * 
+		 */
 		exit();
 	}
 	
@@ -785,10 +799,11 @@ class TranslationToolkit_Ajax {
 	 */
 	function save_catalog_entry() {
 		TranslationToolkit_Helpers::check_security();
+
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
 		
-	//	require_once('includes/class-translationfile.php' );
-		require_once('class-filesystem-translationfile.php' );
 		$f = new CspFileSystem_TranslationFile();
+		
 		//opera bugfix: replace embedded \1 with \0 because Opera can't send embeded 0
 		$_POST['msgid'] = str_replace("\1", "\0", $_POST['msgid']);
 		$_POST['msgstr'] = str_replace("\1", "\0", $_POST['msgstr']);
@@ -822,15 +837,17 @@ class TranslationToolkit_Ajax {
 	function generate_mo_file(){
 		TranslationToolkit_Helpers::check_security();
 		
-	//	require_once('includes/class-translationfile.php' );
-		require_once('class-filesystem-translationfile.php' );
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-translationfile.php' );
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
+		
 		$pofile = (string)$_POST['pofile'];
 		$textdomain = (string)$_POST['textdomain'];
 		$f = new CspFileSystem_TranslationFile();
-		if (!$f->read_pofile($pofile)) {
+		
+		if ( !$f->read_pofile( $pofile ) ) {
 			header('Status: 404 Not Found' );
 			header('HTTP/1.1 404 Not Found' );
-			echo sprintf(__("You do not have the permission to read the file '%s'.", 'translation-toolkit'), $pofile);
+			echo sprintf( __("You do not have the permission to read the file '%s'.", 'translation-toolkit' ), $pofile );
 			exit();
 		}
 		//lets detected, what we are about to be writing:
@@ -846,7 +863,7 @@ class TranslationToolkit_Ajax {
 			if ($textdomain != 'default') {
 				$mo	= $parts['dirname'].'/'.$textdomain.'-'.$parts['basename'];
 			}
-		}elseif(preg_match("|^".$pl_dir."|", $mo)|| preg_match("|^".$plm_dir."|", $mo)) {
+		} elseif ( preg_match( "|^" . $pl_dir . "|", $mo )|| preg_match( "|^" . $plm_dir . "|", $mo ) ) {
 			//we are a normal or wpmu plugin
 			if ((strpos($parts['basename'], $textdomain) === false) && ($textdomain != 'default')) {
 				preg_match("/([a-z][a-z]_[A-Z][A-Z]\.mo)$/", $parts['basename'], $h);
@@ -856,7 +873,7 @@ class TranslationToolkit_Ajax {
 					$mo	= $parts['dirname'].'/'.$h[1];
 				}
 			}
-		}else{
+		} else {
 			//we are a theme plugin, could be tested but skipped for now.
 		}
 
@@ -890,24 +907,21 @@ class TranslationToolkit_Ajax {
 	 */
 	function create_language_path() {
 		TranslationToolkit_Helpers::check_security();
-		
-		require_once('includes/locale-definitions.php' );
-		require_once('class-filesystem-translationfile.php' );
 
-		$path = strip_tags($_POST['path']);
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
 
+		$path = strip_tags( $_POST['path'] );
 		$pofile = new CspFileSystem_TranslationFile();
 
-		if (!$pofile->create_directory($path)) {
-			header('Status: 404 Not Found' );
-			header('HTTP/1.1 404 Not Found' );
-			_e("You do not have the permission to create a new Language File Path.<br/>Please create the appropriated path using your FTP access.", 'translation-toolkit');
-		}
-		else{
-				header('Status: 200 ok' );
-				header('HTTP/1.1 200 ok' );
-				header('Content-Length: 1' );	
-				print 0;
+		if ( !$pofile->create_directory( $path ) ) {
+			header( 'Status: 404 Not Found' );
+			header( 'HTTP/1.1 404 Not Found' );
+			_e( "You do not have the permission to create a new Language File Path.<br/>Please create the appropriated path using your FTP access.", 'translation-toolkit' );
+		} else {
+			header( 'Status: 200 ok' );
+			header( 'HTTP/1.1 200 ok' );
+			header( 'Content-Length: 1' );	
+			print 0;
 		}
 		exit();
 	}
@@ -920,32 +934,34 @@ class TranslationToolkit_Ajax {
 	function create_pot_indicator() {
 		TranslationToolkit_Helpers::check_security();
 		
-		require_once('includes/locale-definitions.php' );
-		require_once('class-filesystem-translationfile.php' );
-
-		$locale = 'en_US';
-
+		require_once( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/class-filesystem-translationfile.php' );
+		
+		$sys_locales = TranslationToolkit_Locale::sys_locales();
+		$plurals = TranslationToolkit_Locale::plurals();
 		$pofile = new CspFileSystem_TranslationFile();
 		$filename = strip_tags($_POST['potfile']);
+		$locale = 'en_US';
+		
 		$pofile->new_pofile(
 			$filename, 
 			'/',
 			'PlaceHolder', 
 			date("Y-m-d H:iO"), 
 			'none', 
-			$csp_l10n_plurals[substr($locale,0,2)], 
-			$csp_l10n_sys_locales[$locale]['lang'], 
-			$csp_l10n_sys_locales[$locale]['country']
+			$plurals[substr($locale,0,2)], 
+			$sys_locales[$locale]['lang'], 
+			$sys_locales[$locale]['country']
 		);
-		if(!$pofile->write_pofile($filename)) {
-			header('Status: 404 Not Found' );
-			header('HTTP/1.1 404 Not Found' );
-			echo sprintf(__("You do not have the permission to create the file '%s'.", 'translation-toolkit'), $filename);
+		
+		if( !$pofile->write_pofile( $filename ) ) {
+			header( 'Status: 404 Not Found' );
+			header( 'HTTP/1.1 404 Not Found' );
+			echo sprintf( __( "You do not have the permission to create the file '%s'.", 'translation-toolkit' ), $filename );
 		}
 		else{	
-			header('Status: 200 ok' );
-			header('HTTP/1.1 200 ok' );
-			header('Content-Length: 1' );	
+			header( 'Status: 200 ok' );
+			header( 'HTTP/1.1 200 ok' );
+			header( 'Content-Length: 1' );	
 			print 0;
 		}
 	/*	

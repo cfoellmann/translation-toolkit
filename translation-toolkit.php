@@ -42,7 +42,6 @@ if ( ! function_exists( 'add_filter' ) ) {
 
 // temporary includes
 require_once( dirname(__FILE__) . '/deprecated.php' );
-require_once( 'includes/locale-definitions.php' );
 
 /** Register autoloader */
 spl_autoload_register( 'TranslationToolkit::autoload' );
@@ -106,7 +105,7 @@ class TranslationToolkit {
 			
 			$translationtoolkit_admin = new TranslationToolkit_Admin;
 			$translationtoolkit_ajax = new TranslationToolkit_Ajax;
-			
+
 		}
 
 	} // END init()

@@ -85,7 +85,18 @@ class TranslationToolkit_Helpers {
 		}
 		return $result;
 	} // END find_translation_template()
-
+	
+	/**
+	 * @TODO
+	 *
+	 * @since 1.0.0
+	 */
+	static function convert_js_input_for_source( $str ) {
+		$search = array( '\\\\\"', '\\\\n', '\\\\t', '\\\\$', '\\0', "\\'", '\\\\' );
+		$replace = array( '"', "\n", "\\t", "\\$", "\0", "'", "\\" );
+		$str = str_replace( $search, $replace, $str );
+		return $str;
+	}
 	
 	/**
 	 * @TODO

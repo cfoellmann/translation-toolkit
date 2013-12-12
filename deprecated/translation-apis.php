@@ -29,6 +29,68 @@ exit();
 				}
 		});	
 	});
+	
+	function csp_translate_google(elem, source, dest) {
+		$(elem).blur();
+		$(elem).down().show();
+		//resulting V1 API: {"responseData": {"translatedText":"Kann nicht öffnen zu schreiben!"}, "responseDetails": null, "responseStatus": 200}
+		//resulting V2 API: { "data": { "translations" : [ { "translatedText": "Hallo Welt" } ] } }
+		//TODO: can't handle google errors by own error dialog, because Thickbox is not multi instance ready (modal over modal) !!!
+		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+			{
+				parameters: {
+					action: 'csp_po_translate_by_google',
+					msgid: $(source).value,
+					destlang: csp_destlang
+				},
+				onSuccess: function(transport) {
+					if (transport.responseJSON) {
+						if (!transport.responseJSON.error) {
+							//V1: $(dest).value = transport.responseJSON.responseData.translatedText;
+							//V2:
+							$(dest).value = transport.responseJSON.data.translations[0].translatedText;
+						}else{
+							//V1: alert(transport.responseJSON.responseDetails);
+							//V2:
+							alert(transport.responseJSON.error.errors[0].reason);
+						}
+					}else{
+						alert(transport.responseText);
+					}
+					$(elem).down().hide();
+				},
+				onFailure: function(transport) {
+					$(elem).down().hide();
+					if (transport.responseJSON && transport.responseJSON.error)
+						alert(transport.responseJSON.error.errors[0].reason); 
+					else
+						alert(transport.responseText);
+				}
+			}
+		);
+	}
+
+	function csp_translate_microsoft(elem, source, dest) {
+		$(elem).blur();
+		$(elem).down().show();
+		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+			{
+				parameters: {
+					action: 'csp_po_translate_by_microsoft',
+					msgid: $(source).value,
+					destlang: csp_destlang
+				},
+				onSuccess: function(transport) {
+					$(dest).value = transport.responseText;
+					$(elem).down().hide();
+				},
+				onFailure: function(transport) {
+					$(elem).down().hide();
+					alert(transport.responseText); 
+				}
+			}
+		);
+	}
 /* ]]> */
 </script>
 

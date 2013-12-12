@@ -570,7 +570,7 @@ class TranslationToolkit_Admin {
 			</tbody>
 		</table>	
 		<div class="tablenav">
-			<a class="alignright button" href="javascript:void(0);" onclick="window.scrollTo(0,0);" style="margin:3px 0 0 30px;"><?php _e('scroll to top', 'translation-toolkit'); ?></a>
+			<a class="alignleft button" href="javascript:void(0);" onclick="window.scrollTo(0,0);"><?php _e( 'scroll to top', 'translation-toolkit' ); ?></a>
 			<div id="catalog-pages-bottom" class="tablenav-pages">
 				<a href="#" class="prev page-numbers"><?php _e('&laquo; Previous', 'translation-toolkit'); ?></a>
 				<a href="#" class="page-numbers">1</a>
@@ -659,7 +659,7 @@ class TranslationToolkit_Admin {
 			csp_ajax_params.file = file;
 		}
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {		
@@ -706,7 +706,7 @@ class TranslationToolkit_Admin {
 	function csp_add_language(elem, type, name, row, path, subpath, existing, type, simplefilename, transtemplate, textdomain, denyscan) {
 		elem = $(elem);
 		elem.blur();
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: {
 					action: 'csp_po_dlg_new',
@@ -752,7 +752,7 @@ class TranslationToolkit_Admin {
 			csp_ajax_params.textdomain = textdomain;
 			csp_ajax_params.molist = molist;
 		}
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -825,7 +825,7 @@ class TranslationToolkit_Admin {
 			csp_ajax_params.denyscan = $('csp-dialog-denyscan').value
 		}
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {	
@@ -910,7 +910,7 @@ class TranslationToolkit_Admin {
 	function csp_remove_language(elem, name, row, path, subpath, language) {
 		elem = $(elem);
 		elem.blur();
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: {
 					action: 'csp_po_dlg_delete',
@@ -953,7 +953,7 @@ class TranslationToolkit_Admin {
 			csp_ajax_params.language = language;
 			csp_ajax_params.numlangs = numlangs;
 		}
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -1016,7 +1016,7 @@ class TranslationToolkit_Admin {
 		var a = elem.up('table').summary.split('|' );
 		actual_domain = a[0];
 		$('prj-id-ver').update(a[2]);
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: {
 					action: 'csp_po_dlg_rescan',
@@ -1088,7 +1088,7 @@ class TranslationToolkit_Admin {
 			csp_ajax_params.php = csp_php_source_json.files.join("|");
 		}
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -1322,7 +1322,7 @@ class TranslationToolkit_Admin {
 			//old jquery is unable to do that in WP 2.5
 			try{ window.location.hash = jQuery(elem).closest('table').attr('id' ); } catch(e) {} 
 		}		
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -1602,7 +1602,7 @@ class TranslationToolkit_Admin {
 			"<input type=\"text\" id=\"csp-dialog-expression\" style=\"width:98%;font-size:11px;line-height:normal;\" value=\"\"\>"+		
 			"<div style=\"margin-top:10px; color:#888;\"><strong><?php _e( 'Examples: <small>Please refer to official Perl regular expression descriptions</small>', 'translation-toolkit' ); ?></strong></div>"+
 			'<div style="height: 215px; overflow:scroll;">'+
-			<?php require( 'js-help-perlreg.php' ); // @TODO ?>
+			<?php require( plugin_dir_path( TranslationToolkit::get_file() ) . 'includes/js-help-perlreg.php' ); ?>
 			'</div>'+
 			"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
 			"<input class=\"button\" type=\"submit\" onclick=\"return csp_exec_expression('"+elem+"' );\" value=\"  <?php echo _e( 'Search', 'translation-toolkit' ); ?>  \"/>"+
@@ -1610,68 +1610,6 @@ class TranslationToolkit_Admin {
 		).setStyle({'padding' : '10px'});		
 		tb_show(null,"#TB_inline?height=385&width=600&inlineId=csp-dialog-container&modal=true",false);	
 		$("csp-dialog-expression").focus();
-	}
-
-	function csp_translate_google(elem, source, dest) {
-		$(elem).blur();
-		$(elem).down().show();
-		//resulting V1 API: {"responseData": {"translatedText":"Kann nicht öffnen zu schreiben!"}, "responseDetails": null, "responseStatus": 200}
-		//resulting V2 API: { "data": { "translations" : [ { "translatedText": "Hallo Welt" } ] } }
-		//TODO: can't handle google errors by own error dialog, because Thickbox is not multi instance ready (modal over modal) !!!
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
-			{
-				parameters: {
-					action: 'csp_po_translate_by_google',
-					msgid: $(source).value,
-					destlang: csp_destlang
-				},
-				onSuccess: function(transport) {
-					if (transport.responseJSON) {
-						if (!transport.responseJSON.error) {
-							//V1: $(dest).value = transport.responseJSON.responseData.translatedText;
-							//V2:
-							$(dest).value = transport.responseJSON.data.translations[0].translatedText;
-						}else{
-							//V1: alert(transport.responseJSON.responseDetails);
-							//V2:
-							alert(transport.responseJSON.error.errors[0].reason);
-						}
-					}else{
-						alert(transport.responseText);
-					}
-					$(elem).down().hide();
-				},
-				onFailure: function(transport) {
-					$(elem).down().hide();
-					if (transport.responseJSON && transport.responseJSON.error)
-						alert(transport.responseJSON.error.errors[0].reason); 
-					else
-						alert(transport.responseText);
-				}
-			}
-		);
-	}
-
-	function csp_translate_microsoft(elem, source, dest) {
-		$(elem).blur();
-		$(elem).down().show();
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
-			{
-				parameters: {
-					action: 'csp_po_translate_by_microsoft',
-					msgid: $(source).value,
-					destlang: csp_destlang
-				},
-				onSuccess: function(transport) {
-					$(dest).value = transport.responseText;
-					$(elem).down().hide();
-				},
-				onFailure: function(transport) {
-					$(elem).down().hide();
-					alert(transport.responseText); 
-				}
-			}
-		);
 	}
 
 	function csp_translate_none(elem, source, dest) {
@@ -1726,7 +1664,7 @@ class TranslationToolkit_Admin {
 		csp_ajax_params.msgstr = msgstr;
 		csp_ajax_params.msgidx = idx;
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -1843,7 +1781,7 @@ class TranslationToolkit_Admin {
 		csp_ajax_params.msgstr = msgstr;
 		csp_ajax_params.msgidx = msg_idx;
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -1985,7 +1923,7 @@ class TranslationToolkit_Admin {
 		if (Object.isArray(msgid)) {
 			msgid = msgid.join(glue);
 		}
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: {
 					action: 'csp_po_dlg_show_source',
@@ -2024,7 +1962,7 @@ class TranslationToolkit_Admin {
 		csp_ajax_params.pofile = csp_path + csp_file;
 		csp_ajax_params.textdomain = $('csp-mo-textdomain-val').value;
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -2087,7 +2025,7 @@ class TranslationToolkit_Admin {
 			csp_ajax_params.path = path;
 		}
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -2144,7 +2082,7 @@ class TranslationToolkit_Admin {
 			csp_ajax_params.potfile = potfile;
 		}
 
-		new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+		new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 			{  
 				parameters: csp_ajax_params,
 				onSuccess: function(transport) {
@@ -2190,7 +2128,7 @@ class TranslationToolkit_Admin {
 		jQuery('#enable_low_memory_mode').click(function(e) {
 			jQuery('#enable_low_memory_mode_indicator').toggle();
 			mode = jQuery(e.target).is(':checked' );
-			new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', 
+			new Ajax.Request('<?php echo get_admin_url( null, '/admin-ajax.php' ); ?>', 
 				{  
 					parameters: {
 						action: 'csp_po_change_low_memory_mode',
