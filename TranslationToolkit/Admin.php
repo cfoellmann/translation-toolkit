@@ -212,25 +212,6 @@ class TranslationToolkit_Admin {
 		<a<?php if(isset($_GET['type']) && $_GET['type'] == 'security') echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php&amp;type=security"><?php _e('Security Risk', CSP_PO_TEXTDOMAIN); ?>
 		</a></li>
 	</ul>
-	<div style="float:<?php if (function_exists('is_rtl') && is_rtl()) echo 'left'; else echo 'right'; ?>;">
-	<small><em><?php _e('You like it?', CSP_PO_TEXTDOMAIN); ?></em></small>
-	<form style="float:right;" method="post" action="https://www.paypal.com/cgi-bin/webscr">
-	<input type="hidden" value="" name="amount">
-	<input type="hidden" value="_xclick" name="cmd">
-	<input type="hidden" value="donate@code-styling.de" name="business">
-	<input type="hidden" value="Donation www.code-styling.de - Plugin: Codestyling Localization" name="item_name">
-	<input type="hidden" value="1" name="no_shipping">
-	<input type="hidden" value="http://www.code-styling.de/" name="return">
-	<input type="hidden" value="http://www.code-styling.de/" name="cancel_return">
-	<input type="hidden" value="USD" name="currency_code">
-	<input type="hidden" value="0" name="tax">
-	<input type="hidden" value="PP-DonationsBF" name="bn">
-	<?php $valid_loc_for_button = array('en_US', 'de_DE', 'it_IT', 'fr_FR', 'es_ES', 'zh_TW', 'zh_CN', 'he_IL', 'nl_NL' ); ?>
-	<?php $loc = get_locale(); if(!in_array($loc, $valid_loc_for_button)) { if ($loc == 'de_DE' || $loc == 'de') { $loc = 'de_DE'; } else { $loc = 'en_US'; } } ?>
-	<input border="0" type="image" alt="Make payments with PayPal - it's fast, free and secure!" name="submit" src="https://www.paypal.com/<?php echo $loc ?>/i/btn/btn_donate_SM.gif">
-	</form>
-	<br/>
-	</div>
 	<table class="widefat clear" style="cursor:default;" cellspacing="0">
 	<thead>
 	  <tr>
