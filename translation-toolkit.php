@@ -228,7 +228,6 @@ if (function_exists('add_action')) {
 
 	define("CSP_PO_PLUGINPATH", "/" . dirname(plugin_basename( __FILE__ )));
 
-    define('CSP_PO_TEXTDOMAIN', 'codestyling-localization' );
     define('CSP_PO_BASE_URL', plugins_url(CSP_PO_PLUGINPATH));
 		
 	//Bugfix: ensure valid JSON requests at IDN locations!
@@ -271,9 +270,9 @@ if (function_exists('csp_po_install_plugin')) {
 			||
 			!function_exists('token_get_all')
 		) {
-			load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+			load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 			echo "<table>";
-			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__('required', CSP_PO_TEXTDOMAIN)."</td><td> | ".__('actual', CSP_PO_TEXTDOMAIN)."</td></tr>";			
+			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__('required', 'translation-toolkit')."</td><td> | ".__('actual', 'translation-toolkit')."</td></tr>";			
 			if (!version_compare($wp_version, CSP_PO_MIN_REQUIRED_WP_VERSION, '>=')) {
 				echo "<tr style=\"font-size: 12px;\"><td>WordPress Blog Version:</td><td align=\"center\"> &gt;= <strong>".CSP_PO_MIN_REQUIRED_WP_VERSION."</strong></td><td align=\"center\"><span style=\"color:#f00;\">".$wp_version."</span></td></tr>";
 			}
@@ -374,20 +373,20 @@ function csp_po_filter_screen_meta_screen($screen) {
 
 function csp_po_ajax_handle_dlg_new() {
 	TranslationToolkit_Helpers::check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );
 ?>
 	<table class="widefat" cellspacing="2px">
 		<tr>
-			<td nowrap="nowrap"><strong><?php _e('Project-Id-Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+			<td nowrap="nowrap"><strong><?php _e('Project-Id-Version','translation-toolkit'); ?>:</strong></td>
 			<td><?php echo strip_tags(rawurldecode($_POST['name'])); ?><input type="hidden" id="csp-dialog-name" value="<?php echo strip_tags(rawurldecode($_POST['name'])); ?>" /></td>
 		</tr>
 		<tr>
-			<td><strong><?php _e('Creation-Date',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+			<td><strong><?php _e('Creation-Date','translation-toolkit'); ?>:</strong></td>
 			<td><?php echo date("Y-m-d H:iO"); ?><input type="hidden" id="csp-dialog-timestamp" value="<?php echo date("Y-m-d H:iO"); ?>" /></td>
 		</tr>
 		<tr>
-			<td style="vertical-align:middle;"><strong><?php _e('Last-Translator',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+			<td style="vertical-align:middle;"><strong><?php _e('Last-Translator','translation-toolkit'); ?>:</strong></td>
 			<td><input style="width:330px;" type="text" id="csp-dialog-translator" value="<?php $myself = wp_get_current_user(); echo "$myself->user_nicename &lt;$myself->user_email&gt;"; ?>" /></td>
 		</tr>
 		<tr>
@@ -426,26 +425,26 @@ function csp_po_ajax_handle_dlg_new() {
 			</td>
 		</tr>
 	</table>
-	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" disabled="disabled" value="<?php _e('create po-file',CSP_PO_TEXTDOMAIN); ?>" onclick="return csp_create_new_pofile(this,<?php echo "'".strip_tags($_POST['type'])."'"; ?>);"/></div>
+	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" disabled="disabled" value="<?php _e('create po-file','translation-toolkit'); ?>" onclick="return csp_create_new_pofile(this,<?php echo "'".strip_tags($_POST['type'])."'"; ?>);"/></div>
 <?php
 exit();
 }
 
 function csp_po_ajax_handle_dlg_delete() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );
 	$lang = isset($csp_l10n_sys_locales[$_POST['language']]) ? $csp_l10n_sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
 ?>
-	<p style="text-align:center;"><?php echo sprintf(__('You are about to delete <strong>%s</strong> from "<strong>%s</strong>" permanently.<br/>Are you sure you wish to delete these files?', CSP_PO_TEXTDOMAIN), $lang, strip_tags(rawurldecode($_POST['name']))); ?></p>
-	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" value="<?php _e('delete files',CSP_PO_TEXTDOMAIN); ?>" onclick="csp_destroy_files(this,'<?php echo str_replace("'", "\\'", strip_tags(rawurldecode($_POST['name'])))."','".strip_tags($_POST['row'])."','".strip_tags($_POST['path'])."','".strip_tags($_POST['subpath'])."','".strip_tags($_POST['language'])."','".strip_tags($_POST['numlangs']);?>' );" /></div>
+	<p style="text-align:center;"><?php echo sprintf(__('You are about to delete <strong>%s</strong> from "<strong>%s</strong>" permanently.<br/>Are you sure you wish to delete these files?', 'translation-toolkit'), $lang, strip_tags(rawurldecode($_POST['name']))); ?></p>
+	<div style="text-align:center; padding-top: 10px"><input class="button" id="submit_language" type="submit" value="<?php _e('delete files','translation-toolkit'); ?>" onclick="csp_destroy_files(this,'<?php echo str_replace("'", "\\'", strip_tags(rawurldecode($_POST['name'])))."','".strip_tags($_POST['row'])."','".strip_tags($_POST['path'])."','".strip_tags($_POST['subpath'])."','".strip_tags($_POST['language'])."','".strip_tags($_POST['numlangs']);?>' );" /></div>
 <?php
 	exit();
 }
 
 function csp_po_ajax_handle_dlg_rescan() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );	
 	global $wp_version;
 	if ($_POST['type'] == 'wordpress') {	
@@ -517,21 +516,21 @@ function csp_po_ajax_handle_dlg_rescan() {
 	?>}" />
 	<table class="widefat" cellspacing="2px">
 		<tr>
-			<td nowrap="nowrap"><strong><?php _e('Project-Id-Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+			<td nowrap="nowrap"><strong><?php _e('Project-Id-Version','translation-toolkit'); ?>:</strong></td>
 			<td colspan="2"><?php echo strip_tags(rawurldecode($_POST['name'])); ?><input type="hidden" name="name" value="<?php echo strip_tags(rawurldecode($_POST['name'])); ?>" /></td>
 		</tr>
 		<tr>
-			<td nowrap="nowrap"><strong><?php _e('Language Target',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+			<td nowrap="nowrap"><strong><?php _e('Language Target','translation-toolkit'); ?>:</strong></td>
 			<td><img alt="" title="locale: <?php echo strip_tags($_POST['language']); ?>" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif\""; ?>" /></td>			
 			<td><?php echo $lang_native; ?></td>
 		</tr>	
 		<tr>
-			<td nowrap="nowrap"><strong><?php _e('Affected Total Files',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+			<td nowrap="nowrap"><strong><?php _e('Affected Total Files','translation-toolkit'); ?>:</strong></td>
 			<td nowrap="nowrap" align="right"><?php echo count($files); ?></td>
 			<td><em><?php echo "/".str_replace(str_replace("\\",'/',ABSPATH), '', strip_tags($_POST['path'])); ?></em></td>
 		</tr>
 		<tr>
-			<td nowrap="nowrap" valign="top"><strong><?php _e('Scanning Progress',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+			<td nowrap="nowrap" valign="top"><strong><?php _e('Scanning Progress','translation-toolkit'); ?>:</strong></td>
 			<td id="csp-dialog-progressvalue" nowrap="nowrap" valign="top" align="right">0</td>
 			<td>
 				<div style="height:13px;width:290px;border:solid 1px #333;"><div id="csp-dialog-progressbar" style="height: 13px;width:0%; background-color:#0073D9"></div></div>
@@ -539,7 +538,7 @@ function csp_po_ajax_handle_dlg_rescan() {
 			</td>
 		<tr>
 	</table>
-	<div style="text-align:center; padding-top: 10px"><input class="button" id="csp-dialog-rescan" type="submit" value="<?php _e('scan now',CSP_PO_TEXTDOMAIN); ?>" onclick="csp_scan_source_files(this);"/><span id="csp-dialog-scan-info" style="display:none"><?php _e('Please standby, files presently being scanned ...',CSP_PO_TEXTDOMAIN); ?></span></div>
+	<div style="text-align:center; padding-top: 10px"><input class="button" id="csp-dialog-rescan" type="submit" value="<?php _e('scan now','translation-toolkit'); ?>" onclick="csp_scan_source_files(this);"/><span id="csp-dialog-scan-info" style="display:none"><?php _e('Please standby, files presently being scanned ...','translation-toolkit'); ?></span></div>
 <?php
 	exit();
 }
@@ -553,7 +552,7 @@ function csp_po_convert_js_input_for_source($str) {
 
 function csp_po_ajax_handle_dlg_show_source() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	list($file, $match_line) = explode(':', $_POST['file']);
 	$l = filesize(strip_tags($_POST['path']).$file);
 	$handle = fopen(strip_tags($_POST['path']).$file,'rb' );
@@ -724,7 +723,7 @@ Event.domReady = {
 
 function csp_po_ajax_handle_merge_from_maintheme() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );
 	require_once('includes/class-filesystem-translationfile.php' );
 	
@@ -751,7 +750,7 @@ function csp_po_ajax_handle_merge_from_maintheme() {
 
 function csp_po_ajax_handle_create() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );
 	require_once('includes/class-filesystem-translationfile.php' );
 	
@@ -770,7 +769,7 @@ function csp_po_ajax_handle_create() {
 	if(!$pofile->write_pofile($filename)) {
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		echo sprintf(__("You do not have the permission to create the file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
+		echo sprintf(__("You do not have the permission to create the file '%s'.", 'translation-toolkit'), $filename);
 	}
 	else{	
 		header('Content-Type: application/json' );
@@ -778,7 +777,7 @@ function csp_po_ajax_handle_create() {
 {
 		name: '<?php echo strip_tags(rawurldecode($_POST['name'])); ?>',
 		row : '<?php echo strip_tags($_POST['row']); ?>',
-		head: '<?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',(int)$_POST['numlangs'],CSP_PO_TEXTDOMAIN), $_POST['numlangs']); ?>',
+		head: '<?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',(int)$_POST['numlangs'],'translation-toolkit'), $_POST['numlangs']); ?>',
 		path: '<?php echo strip_tags($_POST['path']); ?>',
 		subpath: '<?php echo strip_tags($_POST['subpath']); ?>',
 		language: '<?php echo strip_tags($_POST['language']); ?>',
@@ -787,7 +786,7 @@ function csp_po_ajax_handle_create() {
 		type: '<?php echo strip_tags($_POST['type']); ?>',
 		simplefilename: '<?php echo strip_tags($_POST['simplefilename']); ?>',
 		transtemplate: '<?php echo strip_tags($_POST['transtemplate']); ?>',
-		permissions: '<?php echo date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename); ?>',
+		permissions: '<?php echo date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename); ?>',
 		denyscan: <?php echo strip_tags($_POST['denyscan']); ?>,
 		google: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['google-api'] ? 'yes' : 'no'; ?>",
 		microsoft: "<?php echo $csp_l10n_sys_locales[$_POST['language']]['microsoft-api'] ? 'yes' : 'no'; ?>"
@@ -799,7 +798,7 @@ function csp_po_ajax_handle_create() {
 
 function csp_po_ajax_handle_destroy() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	$pofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
 	$mofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.mo';
 	$error = false;
@@ -815,7 +814,7 @@ function csp_po_ajax_handle_destroy() {
 ?>
 {
 	row : '<?php echo strip_tags($_POST['row']); ?>',
-	head: '<?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',$num,CSP_PO_TEXTDOMAIN), $num); ?>',
+	head: '<?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',$num,'translation-toolkit'), $num); ?>',
 	language: '<?php echo strip_tags($_POST['language']); ?>'
 }
 <?php	
@@ -922,25 +921,25 @@ function csp_po_ajax_handle_scan_source_file() {
 		if ($last) { $pofile->parsing_finalize($textdomain, strip_tags(rawurldecode($_POST['name']))); }
 		if ($pofile->write_pofile($_POST['pofile'], $last)) {
 			header('Content-Type: application/json' );
-			echo '{ title: "'.date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($_POST['pofile']))." ".file_permissions($_POST['pofile']).'" }';
+			echo '{ title: "'.date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($_POST['pofile']))." ".file_permissions($_POST['pofile']).'" }';
 		}
 		else{
 			header('Status: 404 Not Found' );
 			header('HTTP/1.1 404 Not Found' );
-			echo sprintf(__("You do not have the permission to write to the file '%s'.", CSP_PO_TEXTDOMAIN), $_POST['pofile']);
+			echo sprintf(__("You do not have the permission to write to the file '%s'.", 'translation-toolkit'), $_POST['pofile']);
 		}
 	}
 	else{
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		echo sprintf(__("You do not have the permission to read the file '%s'.", CSP_PO_TEXTDOMAIN), $_POST['pofile']);
+		echo sprintf(__("You do not have the permission to read the file '%s'.", 'translation-toolkit'), $_POST['pofile']);
 	}
 	exit();
 }
 
 function csp_po_ajax_handle_change_permission() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	$filename = strip_tags($_POST['file']);
 	$error = false;
 	
@@ -950,13 +949,13 @@ function csp_po_ajax_handle_change_permission() {
 	$transfile->change_permission($filename);
 
 	header('Content-Type: application/json' );
-	echo '{ title: "'.date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename).'" }';
+	echo '{ title: "'.date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename).'" }';
 	exit();
 }
 
 function csp_po_ajax_handle_launch_editor() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );
 //	require_once('includes/class-translationfile.php' );
 	require_once('includes/class-filesystem-translationfile.php' );
@@ -1013,15 +1012,15 @@ function csp_po_ajax_handle_launch_editor() {
 //	}else {
 //		header('Status: 404 Not Found' );
 //		header('HTTP/1.1 404 Not Found' );
-//		_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",CSP_PO_TEXTDOMAIN);
-//		?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="translationformat"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><?php
+//		_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",'translation-toolkit');
+//		?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="translationformat"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><?php
 //	}
 	exit();
 }
 
 function csp_po_ajax_handle_save_catalog_entry() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 //	require_once('includes/class-translationfile.php' );
 	require_once('includes/class-filesystem-translationfile.php' );
 	$f = new CspFileSystem_TranslationFile();
@@ -1032,7 +1031,7 @@ function csp_po_ajax_handle_save_catalog_entry() {
 		if (!$f->update_entry($_POST['msgid'], $_POST['msgstr'])) {
 			header('Status: 404 Not Found' );
 			header('HTTP/1.1 404 Not Found' );
-			echo sprintf(__("You do not have the permission to write to the file '%s'.", CSP_PO_TEXTDOMAIN), $_POST['file']);
+			echo sprintf(__("You do not have the permission to write to the file '%s'.", 'translation-toolkit'), $_POST['file']);
 		}
 		else{
 			$f->write_pofile($_POST['path'].$_POST['file']);
@@ -1045,14 +1044,14 @@ function csp_po_ajax_handle_save_catalog_entry() {
 	else{
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		echo sprintf(__("You do not have the permission to read the file '%s'.", CSP_PO_TEXTDOMAIN), $_POST['file']);
+		echo sprintf(__("You do not have the permission to read the file '%s'.", 'translation-toolkit'), $_POST['file']);
 	}
 	exit();
 }
 
 function csp_po_ajax_handle_generate_mo_file(){
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 //	require_once('includes/class-translationfile.php' );
 	require_once('includes/class-filesystem-translationfile.php' );
 	$pofile = (string)$_POST['pofile'];
@@ -1061,7 +1060,7 @@ function csp_po_ajax_handle_generate_mo_file(){
 	if (!$f->read_pofile($pofile)) {
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		echo sprintf(__("You do not have the permission to read the file '%s'.", CSP_PO_TEXTDOMAIN), $pofile);
+		echo sprintf(__("You do not have the permission to read the file '%s'.", 'translation-toolkit'), $pofile);
 		exit();
 	}
 	//lets detected, what we are about to be writing:
@@ -1094,21 +1093,21 @@ function csp_po_ajax_handle_generate_mo_file(){
 	if ($f->is_illegal_empty_mofile($textdomain)) {
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		_e("You are trying to create an empty mo-file without any translations. This is not possible, please translate at least one entry.", CSP_PO_TEXTDOMAIN);
+		_e("You are trying to create an empty mo-file without any translations. This is not possible, please translate at least one entry.", 'translation-toolkit');
 		exit();
 	}
 	
 	if (!$f->write_mofile($mo,$textdomain)) {
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		echo sprintf(__("You do not have the permission to write to the file '%s'.", CSP_PO_TEXTDOMAIN), $mo);
+		echo sprintf(__("You do not have the permission to write to the file '%s'.", 'translation-toolkit'), $mo);
 		exit();
 	}
 
 	header('Content-Type: application/json' );
 ?>
 {
-	filetime: '<?php echo date (__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($mo)); ?>'
+	filetime: '<?php echo date (__('m/d/Y H:i:s','translation-toolkit'), filemtime($mo)); ?>'
 }
 <?php		
 	exit();
@@ -1116,7 +1115,7 @@ function csp_po_ajax_handle_generate_mo_file(){
 
 function csp_po_ajax_handle_create_language_path() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );
 	require_once('includes/class-filesystem-translationfile.php' );
 	
@@ -1127,7 +1126,7 @@ function csp_po_ajax_handle_create_language_path() {
 	if (!$pofile->create_directory($path)) {
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		_e("You do not have the permission to create a new Language File Path.<br/>Please create the appropriated path using your FTP access.", CSP_PO_TEXTDOMAIN);
+		_e("You do not have the permission to create a new Language File Path.<br/>Please create the appropriated path using your FTP access.", 'translation-toolkit');
 	}
 	else{
 			header('Status: 200 ok' );
@@ -1140,7 +1139,7 @@ function csp_po_ajax_handle_create_language_path() {
 
 function csp_po_ajax_handle_create_pot_indicator() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
 	require_once('includes/locale-definitions.php' );
 	require_once('includes/class-filesystem-translationfile.php' );
 	
@@ -1161,7 +1160,7 @@ function csp_po_ajax_handle_create_pot_indicator() {
 	if(!$pofile->write_pofile($filename)) {
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		echo sprintf(__("You do not have the permission to create the file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
+		echo sprintf(__("You do not have the permission to create the file '%s'.", 'translation-toolkit'), $filename);
 	}
 	else{	
 		header('Status: 200 ok' );
@@ -1175,7 +1174,7 @@ function csp_po_ajax_handle_create_pot_indicator() {
 	if ($handle === false) {
 		header('Status: 404 Not Found' );
 		header('HTTP/1.1 404 Not Found' );
-		_e("You do not have the permission to choose the translation file directory<br/>Please upload at least one language file (*.mo|*.po) or an empty template file (*.pot) at the appropriated folder using FTP.", CSP_PO_TEXTDOMAIN);
+		_e("You do not have the permission to choose the translation file directory<br/>Please upload at least one language file (*.mo|*.po) or an empty template file (*.pot) at the appropriated folder using FTP.", 'translation-toolkit');
 	}
 	else{
 		@fwrite($handle, 

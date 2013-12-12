@@ -52,7 +52,7 @@ class TranslationToolkit_Helpers {
 	 */
 	static function check_security() {
 		if ( !is_user_logged_in() || !current_user_can( apply_filters( 'tt_settings_cap', 'manage_options' ) ) ) {
-			wp_die( __( 'You do not have permission to manage translation files.', CSP_PO_TEXTDOMAIN ) );
+			wp_die( __( 'You do not have permission to manage translation files.', 'translation-toolkit' ) );
 		}
 	} // END check_security()
 	
@@ -214,7 +214,7 @@ class TranslationToolkit_Helpers {
 			$data['img_type'] .= "_mu";
 		}
 		
-		$data['type-desc'] = __( 'WordPress', CSP_PO_TEXTDOMAIN );
+		$data['type-desc'] = __( 'WordPress', 'translation-toolkit' );
 		$data['name'] = "WordPress";
 		$data['author'] = '<a href="http://codex.wordpress.org/WordPress_in_Your_Language\">WordPress.org</a>';
 		$data['version'] = $GLOBALS['wp_version'];
@@ -222,7 +222,7 @@ class TranslationToolkit_Helpers {
 			$data['version'] .= " | " . ( isset( $GLOBALS['wpmu_version'] ) ? $GLOBALS['wpmu_version'] : $GLOBALS['wp_version'] );
 		}
 		$data['description'] = "WordPress is a state-of-the-art publishing platform with a focus on aesthetics, web standards, and usability. WordPress is both free and priceless at the same time.<br />More simply, WordPress is what you use when you want to work with your blogging software, not fight it.";
-		$data['status'] =  __("activated",CSP_PO_TEXTDOMAIN);
+		$data['status'] =  __("activated",'translation-toolkit');
 		$data['base_path'] = str_replace("\\","/", ABSPATH);
 		$data['special_path'] = '';
 		$data['filename'] = str_replace( str_replace( "\\","/", ABSPATH ), '', str_replace( "\\", "/", WP_LANG_DIR ) );
@@ -246,7 +246,7 @@ class TranslationToolkit_Helpers {
 				if ( empty( $hits[1] ) === false ) {
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".( is_readable( $filename ) ? 'r' : '' ) . ( is_writable( $filename ) ? 'w' : '' ),
-						'stamp' => date( __( 'm/d/Y H:i:s', CSP_PO_TEXTDOMAIN ), filemtime( $filename ) ) . " " . file_permissions( $filename )
+						'stamp' => date( __( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime( $filename ) ) . " " . file_permissions( $filename )
 					);
 					$data['special_path'] = '';
 				}
@@ -271,7 +271,7 @@ class TranslationToolkit_Helpers {
 		$data['locale'] = get_locale();
 		$data['type'] = 'plugins';	
 		$data['img_type'] = 'buddypress';	
-		$data['type-desc'] = __('BuddyPress',CSP_PO_TEXTDOMAIN);	
+		$data['type-desc'] = __('BuddyPress','translation-toolkit');	
 		$data['name'] = $values['Name'];
 		if (isset($values['AuthorURI'])) {
 			$data['author'] = "<a href='".$values['AuthorURI']."'>".$values['Author']."</a>";
@@ -280,7 +280,7 @@ class TranslationToolkit_Helpers {
 		}
 		$data['version'] = $values['Version'];
 		$data['description'] = $values['Description'];
-		$data['status'] = is_plugin_active($plug) ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
+		$data['status'] = is_plugin_active($plug) ? __("activated",'translation-toolkit') : __("deactivated",'translation-toolkit');
 		$data['base_path'] = str_replace("\\","/", WP_PLUGIN_DIR.'/'.dirname($plug).'/' );
 		$data['special_path'] = '';
 		$data['filename'] = "buddypress";
@@ -301,7 +301,7 @@ class TranslationToolkit_Helpers {
 			if (empty($hits[2]) === false) {				
 				$data['languages'][$hits[1]][$hits[2]] = array(
 					'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-					'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+					'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 				);
 			}
 		}
@@ -321,12 +321,12 @@ class TranslationToolkit_Helpers {
 		$data['locale'] = get_locale();
 		$data['type'] = 'plugins';	
 		$data['img_type'] = 'buddypress-bbpress';	
-		$data['type-desc'] = __('bbPress',CSP_PO_TEXTDOMAIN);	
+		$data['type-desc'] = __('bbPress','translation-toolkit');	
 		$data['name'] = "bbPress";
 		$data['author'] = "<a href='http://bbpress.org/'>bbPress.org</a>";
 		$data['version'] = '-n.a.-';
 		$data['description'] = "bbPress is forum software with a twist from the creators of WordPress.";
-		$data['status'] = is_plugin_active($plug) ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
+		$data['status'] = is_plugin_active($plug) ? __("activated",'translation-toolkit') : __("deactivated",'translation-toolkit');
 		$data['base_path'] = str_replace("\\","/", WP_PLUGIN_DIR.'/'.dirname($plug).'/bp-forums/bbpress/' );
 		if (!is_dir($data['base_path'])) return false;
 		$data['special_path'] = '';
@@ -350,7 +350,7 @@ class TranslationToolkit_Helpers {
 				if (empty($hits[2]) === false) {				
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-						'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+						'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 					);
 				}
 			}
@@ -372,7 +372,7 @@ class TranslationToolkit_Helpers {
 		$data['locale'] = get_locale();
 		$data['type'] = 'plugins';	
 		$data['img_type'] = 'plugins';	
-		$data['type-desc'] = __('Plugin',CSP_PO_TEXTDOMAIN);	
+		$data['type-desc'] = __('Plugin','translation-toolkit');	
 		$data['name'] = $values['Name'];
 		if (isset($values['AuthorURI'])) {
 			$data['author'] = "<a href='".$values['AuthorURI']."'>".$values['Author']."</a>";
@@ -381,7 +381,7 @@ class TranslationToolkit_Helpers {
 		}
 		$data['version'] = $values['Version'];
 		$data['description'] = $values['Description'];
-		$data['status'] = is_plugin_active($plug) ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
+		$data['status'] = is_plugin_active($plug) ? __("activated",'translation-toolkit') : __("deactivated",'translation-toolkit');
 		$data['base_path'] = str_replace("\\","/", WP_PLUGIN_DIR.'/'.dirname($plug).'/' );
 		$data['special_path'] = '';
 		$data['filename'] = "";
@@ -414,7 +414,7 @@ class TranslationToolkit_Helpers {
 				$data['gettext_ready'] = true;
 				$data['php-path-string'] = '';	
 			}
-			if (isset($hits[1]) && $hits[1] != 'plugin_') 	$data['dev-hints'] = __("<strong>Loading Issue: </strong>Author is using <em>load_textdomain</em> instead of <em>load_plugin_textdomain</em> function. This may break behavior of WordPress, because some filters and actions won't be executed anymore. Please contact the Author about that.",CSP_PO_TEXTDOMAIN);
+			if (isset($hits[1]) && $hits[1] != 'plugin_') 	$data['dev-hints'] = __("<strong>Loading Issue: </strong>Author is using <em>load_textdomain</em> instead of <em>load_plugin_textdomain</em> function. This may break behavior of WordPress, because some filters and actions won't be executed anymore. Please contact the Author about that.",'translation-toolkit');
 			if($data['gettext_ready'] && !$data['textdomain']['is_const']) break; //make it short :-)
 			if (preg_match_all("/define\s*\(([^\)]+)\)/" , $content, $hits)) {
 				$const_list = array_merge($const_list, $hits[1]);
@@ -463,12 +463,12 @@ class TranslationToolkit_Helpers {
 				}
 				if($encrypted) {
 					$data['img_type'] = 'plugins_encrypted';
-					$data['dev-security'] .= __("<strong>Full Encryped PHP Code: </strong>This plugin consists out of encryped code will be <strong>eval</strong>'d at runtime! It can't be checked against exploitable code pieces. That's why it will become potential target of hidden intrusion.",CSP_PO_TEXTDOMAIN);
+					$data['dev-security'] .= __("<strong>Full Encryped PHP Code: </strong>This plugin consists out of encryped code will be <strong>eval</strong>'d at runtime! It can't be checked against exploitable code pieces. That's why it will become potential target of hidden intrusion.",'translation-toolkit');
 					$data['deny_scanning'] = true;
 				}
 				else {
 					$data['img_type'] = 'plugins_maybe';
-					$data['dev-hints'] .= __("<strong>Textdomain definition: </strong>This plugin provides a textdomain definition at plugin header fields but seems not to load any translation file. If it doesn't show your translation, please contact the plugin Author.",CSP_PO_TEXTDOMAIN);
+					$data['dev-hints'] .= __("<strong>Textdomain definition: </strong>This plugin provides a textdomain definition at plugin header fields but seems not to load any translation file. If it doesn't show your translation, please contact the plugin Author.",'translation-toolkit');
 				}
 			}
 		}
@@ -487,7 +487,7 @@ class TranslationToolkit_Helpers {
 					if (empty($hits[2]) === false) {				
 						$data['languages'][$hits[1]][$hits[2]] = array(
 							'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-							'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+							'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 						);
 						$data['special_path'] = '';
 					}
@@ -501,11 +501,11 @@ class TranslationToolkit_Helpers {
 							$data['filename'] = $hits[1];
 							$data['textdomain']['identifier'] = $hits[1];
 							$data['img_type'] = 'plugins_maybe';
-							$data['dev-hints'] .= __("<strong>Textdomain definition: </strong>There are problems to find the used textdomain. It has been taken from existing translation files. If it doesn't work with your install, please contact the Author of this plugin.",CSP_PO_TEXTDOMAIN);
+							$data['dev-hints'] .= __("<strong>Textdomain definition: </strong>There are problems to find the used textdomain. It has been taken from existing translation files. If it doesn't work with your install, please contact the Author of this plugin.",'translation-toolkit');
 
 							$data['languages'][$hits[2]][$hits[3]] = array(
 								'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-								'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 							);
 							$data['special_path'] = '';
 						}
@@ -524,7 +524,7 @@ class TranslationToolkit_Helpers {
 						{
 							$data['languages'][$hits[2]][$hits[3]] = array(
 								'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-								'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 							);
 						}
 						$data['special_path'] = ltrim($hits[1], "/");
@@ -540,11 +540,11 @@ class TranslationToolkit_Helpers {
 							$data['filename'] = $hits[2];
 							$data['textdomain']['identifier'] = $hits[2];
 							$data['img_type'] = 'plugins_maybe';
-							$data['dev-hints'] .= __("<strong>Textdomain definition: </strong>There are problems to find the used textdomain. It has been taken from existing translation files. If it doesn't work with your install, please contact the Author of this plugin.",CSP_PO_TEXTDOMAIN);
+							$data['dev-hints'] .= __("<strong>Textdomain definition: </strong>There are problems to find the used textdomain. It has been taken from existing translation files. If it doesn't work with your install, please contact the Author of this plugin.",'translation-toolkit');
 
 							$data['languages'][$hits[3]][$hits[4]] = array(
 								'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-								'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 							);
 							$data['special_path'] = ltrim($hits[1], "/");
 						}
@@ -593,7 +593,7 @@ class TranslationToolkit_Helpers {
 		$data['locale'] = get_locale();
 		$data['type'] = 'plugins-mu';	
 		$data['img_type'] = 'plugins-mu';	
-		$data['type-desc'] = __('μ Plugin',CSP_PO_TEXTDOMAIN);	
+		$data['type-desc'] = __('μ Plugin','translation-toolkit');	
 		$data['name'] = $values['Name'];
 		if (isset($values['AuthorURI'])) {
 			$data['author'] = "<a href='".$values['AuthorURI']."'>".$values['Author']."</a>";
@@ -602,7 +602,7 @@ class TranslationToolkit_Helpers {
 		}
 		$data['version'] = $values['Version'];
 		$data['description'] = $values['Description'];
-		$data['status'] = __("activated",CSP_PO_TEXTDOMAIN);
+		$data['status'] = __("activated",'translation-toolkit');
 		$data['base_path'] = str_replace("\\","/", WPMU_PLUGIN_DIR.'/' );
 		$data['special_path'] = '';
 		$data['filename'] = "";
@@ -658,7 +658,7 @@ class TranslationToolkit_Helpers {
 				if (empty($hits[2]) === false) {				
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-						'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+						'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 					);
 					$data['special_path'] = '';
 				}
@@ -700,15 +700,15 @@ class TranslationToolkit_Helpers {
 		$data['locale'] = get_locale();
 		$data['type'] = 'themes';
 		$data['img_type'] = ($is_child_theme ? 'childthemes' : 'themes' );	
-		$data['type-desc'] = ($is_child_theme ? __('Childtheme',CSP_PO_TEXTDOMAIN) : __('Theme',CSP_PO_TEXTDOMAIN));	
+		$data['type-desc'] = ($is_child_theme ? __('Childtheme','translation-toolkit') : __('Theme','translation-toolkit'));	
 		$data['name'] = $values['Name'];
 		$data['author'] = $values['Author'];
 		$data['version'] = $values['Version'];
 		$data['description'] = $values['Description'];
-		$data['status'] = $values['Name'] == $active->name ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
-	//	$data['status'] = $theme == $active->name ? __("activated",CSP_PO_TEXTDOMAIN) : __("deactivated",CSP_PO_TEXTDOMAIN);
+		$data['status'] = $values['Name'] == $active->name ? __("activated",'translation-toolkit') : __("deactivated",'translation-toolkit');
+	//	$data['status'] = $theme == $active->name ? __("activated",'translation-toolkit') : __("deactivated",'translation-toolkit');
 		if ($is_child_theme) {
-			$data['status'] .= ' / <b></i>'.__('child theme of',CSP_PO_TEXTDOMAIN).' '.$values['Parent Theme'].'</i></b>';
+			$data['status'] .= ' / <b></i>'.__('child theme of','translation-toolkit').' '.$values['Parent Theme'].'</i></b>';
 		}
 		$data['special-path'] = '';
 		$data['is-path-unclear'] = false;
@@ -730,13 +730,13 @@ class TranslationToolkit_Helpers {
 				||
 				preg_match("/[^_^!]load_(child_theme_|theme_|)textdomain\s*\(\s*/", $main, $hits)			
 			) {
-				if (isset($hits[1]) && $hits[1] != 'child_theme_' && $hits[1] != 'theme_') 	$data['dev-hints'] = __("<strong>Loading Issue: </strong>Author is using <em>load_textdomain</em> instead of <em>load_theme_textdomain</em> or <em>load_child_theme_textdomain</em> function. This may break behavior of WordPress, because some filters and actions won't be executed anymore. Please contact the Author about that.",CSP_PO_TEXTDOMAIN);
+				if (isset($hits[1]) && $hits[1] != 'child_theme_' && $hits[1] != 'theme_') 	$data['dev-hints'] = __("<strong>Loading Issue: </strong>Author is using <em>load_textdomain</em> instead of <em>load_theme_textdomain</em> or <em>load_child_theme_textdomain</em> function. This may break behavior of WordPress, because some filters and actions won't be executed anymore. Please contact the Author about that.",'translation-toolkit');
 
 				//fallback for variable names used to load textdomain, assumes theme name
 				if(isset($hits[3]) && strpos($hits[3], '$') !== false) {
 					unset($hits[3]);
 					if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
-					$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to load the textdomain. It will be assumed to be equal to theme name now.",CSP_PO_TEXTDOMAIN);
+					$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to load the textdomain. It will be assumed to be equal to theme name now.",'translation-toolkit');
 				}			
 				//make it short
 				$data['gettext_ready'] = true;
@@ -772,7 +772,7 @@ class TranslationToolkit_Helpers {
 					}elseif (empty($hits[2]) === false) {
 						$data['languages'][$hits[2]][$hits[3]] = array(
 							'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-							'stamp' => date(__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($filename))." ".file_permissions($filename)
+							'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
 						);
 						$data['filename'] = '';
 						$sd = dirname(str_replace($dn, '', $filename));
@@ -782,7 +782,7 @@ class TranslationToolkit_Helpers {
 				}
 				if($naming_convention_error && count($data['languages']) == 0) {
 					if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
-					$data['dev-hints'] .= sprintf(__("<strong>Naming Issue: </strong>Author uses unsupported language file naming convention! Instead of example <em>de_DE.po</em> the non theme standard version <em>%s</em> has been used. If you translate this Theme, only renamed language files will be working!",CSP_PO_TEXTDOMAIN), $values['Template'].'-de_DE.po' );
+					$data['dev-hints'] .= sprintf(__("<strong>Naming Issue: </strong>Author uses unsupported language file naming convention! Instead of example <em>de_DE.po</em> the non theme standard version <em>%s</em> has been used. If you translate this Theme, only renamed language files will be working!",'translation-toolkit'), $values['Template'].'-de_DE.po' );
 				}
 
 				//completely other directories can be defined WP if >= 2.7.0
@@ -844,18 +844,18 @@ class TranslationToolkit_Helpers {
 				$constant_failed = true;
 				$data['textdomain']['identifier'] = $values['Template'];
 				if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
-				$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to define the textdomain constant. It will be assumed to be equal to theme name now.",CSP_PO_TEXTDOMAIN);
+				$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to define the textdomain constant. It will be assumed to be equal to theme name now.",'translation-toolkit');
 			}			
 
 		}		
 		//check now known issues for themes
 		if(isset($data['textdomain']['identifier']) && $data['textdomain']['identifier'] == 'woothemes') {
 			if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
-			$data['dev-hints'] .= __("<strong>WooThemes Issue: </strong>The Author is known for not supporting a translatable backend. Please expect only translations for frontend or contact the Author for support!",CSP_PO_TEXTDOMAIN);
+			$data['dev-hints'] .= __("<strong>WooThemes Issue: </strong>The Author is known for not supporting a translatable backend. Please expect only translations for frontend or contact the Author for support!",'translation-toolkit');
 		}
 		if(isset($data['textdomain']['identifier']) && $data['textdomain']['identifier'] == 'ares' && $constant_failed) {
 			if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
-			$data['dev-hints'] .= __("<strong>Ares Theme Issue: </strong>This theme uses a textdomain defined by string concatination code. The textdomain will be patched to 'AresLanguage', please contact the theme author to change this into a fix constant value! ",CSP_PO_TEXTDOMAIN);
+			$data['dev-hints'] .= __("<strong>Ares Theme Issue: </strong>This theme uses a textdomain defined by string concatination code. The textdomain will be patched to 'AresLanguage', please contact the theme author to change this into a fix constant value! ",'translation-toolkit');
 			$data['textdomain']['identifier'] = 'AresLanguage';
 		}
 

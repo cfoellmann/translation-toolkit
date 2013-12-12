@@ -94,11 +94,11 @@ class TranslationToolkit_Admin {
 	 */
 	function admin_menu() {
 		
-//		load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages', 'codestyling-localization/languages');
+//		load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages', 'codestyling-localization/languages');
 		$hook = add_submenu_page(
 			apply_filters( 'tt_page_parent', 'tools.php' ),
-			__( 'WordPress Localization',CSP_PO_TEXTDOMAIN ),
-			__( 'Localization', CSP_PO_TEXTDOMAIN ),
+			__( 'WordPress Localization','translation-toolkit' ),
+			__( 'Localization', 'translation-toolkit' ),
 			apply_filters( 'tt_settings_cap', 'manage_options' ),
 			'translation-toolkit',
 			array( &$this, 'main_page' )
@@ -127,7 +127,7 @@ class TranslationToolkit_Admin {
 		//$request = unserialize(csp_fetch_remote_content('http://api.wordpress.org/plugins/info/1.0/codestyling-localization'));
 		$screen->add_help_tab(
 			array(
-				'title' => __( 'Overview', CSP_PO_TEXTDOMAIN ),
+				'title' => __( 'Overview', 'translation-toolkit' ),
 				'id' => 'overview',
 				'content' => '',
 				'callback' => array( 'TranslationToolkit_Help', 'helptab_overview' ),
@@ -135,7 +135,7 @@ class TranslationToolkit_Admin {
 		);
 		$screen->add_help_tab(
 			array(
-				'title' => __( 'Low Memory Mode', CSP_PO_TEXTDOMAIN ),
+				'title' => __( 'Low Memory Mode', 'translation-toolkit' ),
 				'id' => 'lowmemory',
 				'content' => '',
 				'callback' => array( 'TranslationToolkit_Help', 'helptab_low_memory' ),
@@ -145,7 +145,7 @@ class TranslationToolkit_Admin {
 		$content = array();
 		$screen->add_help_tab(
 			array(
-				'title' => __( 'Compatibility', CSP_PO_TEXTDOMAIN ),
+				'title' => __( 'Compatibility', 'translation-toolkit' ),
 				'id' => 'compatibility',
 				'content' => '',
 				'callback' => array( 'TranslationToolkit_Help', 'helptab_compatibility' ),
@@ -153,7 +153,7 @@ class TranslationToolkit_Admin {
 		);
 		$screen->add_help_tab(
 			array(
-				'title' => __( 'Textdomains', CSP_PO_TEXTDOMAIN ),
+				'title' => __( 'Textdomains', 'translation-toolkit' ),
 				'id' => 'textdomain',
 				'content' => '',
 				'callback' => array( 'TranslationToolkit_Help', 'helptab_textdomain' ),
@@ -161,7 +161,7 @@ class TranslationToolkit_Admin {
 		);
 		$screen->add_help_tab(
 			array(
-				'title' => __( 'Translation Format', CSP_PO_TEXTDOMAIN ),
+				'title' => __( 'Translation Format', 'translation-toolkit' ),
 				'id' => 'translationformat',
 				'content' => '',
 				'callback' => array( 'TranslationToolkit_Help', 'helptab_translationformat' ),
@@ -170,7 +170,7 @@ class TranslationToolkit_Admin {
 		if ( CSL_FILESYSTEM_DIRECT !== true ) {
 			$screen->add_help_tab(
 				array(
-					'title' => __( 'File Permissions', CSP_PO_TEXTDOMAIN ),
+					'title' => __( 'File Permissions', 'translation-toolkit' ),
 					'id' => 'filepermissions',
 					'content' => '',
 					'callback' => array( 'TranslationToolkit_Help', 'helptab_filepermissions' ),
@@ -178,7 +178,7 @@ class TranslationToolkit_Admin {
 			);
 		}
 		$screen->add_help_tab(array(
-			'title' => __( 'Child Themes', CSP_PO_TEXTDOMAIN ),
+			'title' => __( 'Child Themes', 'translation-toolkit' ),
 			'id' => 'workonchildthemes',
 			'content' => '',
 			'callback' => array( 'TranslationToolkit_Help', 'helptab_workonchildthemes' ),
@@ -192,17 +192,17 @@ class TranslationToolkit_Admin {
 		global $csp_l10n_sys_locales, $tt_tabs;
 	?>
 	<div id="csp-wrap-main" class="wrap">
-		<h2><?php _e( 'Manage Language Files', CSP_PO_TEXTDOMAIN ); ?></h2>
+		<h2><?php _e( 'Manage Language Files', 'translation-toolkit' ); ?></h2>
 		<?php if ( CSL_FILESYSTEM_DIRECT !== true) { ?>
 			<div>
-			<p class="warning"><strong><?php _e('File Permission Problem:',CSP_PO_TEXTDOMAIN);?></strong> <?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', CSP_PO_TEXTDOMAIN); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="filepermissions"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
+			<p class="warning"><strong><?php _e('File Permission Problem:','translation-toolkit');?></strong> <?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', 'translation-toolkit'); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="filepermissions"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 			</div>
 		<?php } ?>
 		<p>
 			<input id="enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>>
-			<label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label>
+			<label for="enable_low_memory_mode"><?php _e('enable low memory mode', 'translation-toolkit'); ?></label>
 			<img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading-small.gif"?>" />
-			&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
+			&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
 		</p>
 		<h3 class="nav-tab-wrapper">
 			<?php
@@ -216,9 +216,9 @@ class TranslationToolkit_Admin {
 		<table class="widefat clear" style="cursor:default;" cellspacing="0">
 			<thead>
 			  <tr>
-				<th scope="col"><?php _e( 'Type', CSP_PO_TEXTDOMAIN ); ?></th>
-				<th scope="col"><?php _e( 'Description', CSP_PO_TEXTDOMAIN ); ?></th>
-				<th scope="col"><?php _e( 'Languages', CSP_PO_TEXTDOMAIN ); ?></th>
+				<th scope="col"><?php _e( 'Type', 'translation-toolkit' ); ?></th>
+				<th scope="col"><?php _e( 'Description', 'translation-toolkit' ); ?></th>
+				<th scope="col"><?php _e( 'Languages', 'translation-toolkit' ); ?></th>
 			  </tr>
 			</thead>
 			<tbody class="list" id="the-gettext-list">
@@ -232,21 +232,21 @@ class TranslationToolkit_Admin {
 			
 				foreach( $rows as $data ) : 
 				?>
-				<tr<?php if ( __( "activated", CSP_PO_TEXTDOMAIN ) == $data['status'] ) echo ' class="csp-active"'; ?>>
+				<tr<?php if ( __( "activated", 'translation-toolkit' ) == $data['status'] ) echo ' class="csp-active"'; ?>>
 					<td align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/".$data['img_type'].".gif"; ?>" /><div><strong><?php echo $data['type-desc']; ?></strong></div></td>
 					<td>
 						<h3 class="csp-type-name"><?php echo $data['name']; ?><span style="font-weight:normal;">&nbsp;&nbsp;&copy;&nbsp;</span><sup><em><?php echo $data['author']; ?></em></sup></h3>
 						<table class="csp-type-info" border="0" width="100%">
 							<tr>
-								<td width="140px"><strong><?php _e('Textdomain',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-								<td class="csp-info-value"><?php echo $data['textdomain']['identifier']; ?><?php if ($data['textdomain']['is_const']) echo " (".__( 'defined by constant',CSP_PO_TEXTDOMAIN).")"; ?></td>
+								<td width="140px"><strong><?php _e('Textdomain','translation-toolkit'); ?>:</strong></td>
+								<td class="csp-info-value"><?php echo $data['textdomain']['identifier']; ?><?php if ($data['textdomain']['is_const']) echo " (".__( 'defined by constant','translation-toolkit').")"; ?></td>
 							</tr>
 							<tr>
-								<td><strong><?php _e('Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td><strong><?php _e('Version','translation-toolkit'); ?>:</strong></td>
 								<td class="csp-info-value"><?php echo $data['version']; ?></td>
 							</tr>
 							<tr>
-								<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td><strong><?php _e('State','translation-toolkit'); ?>:</strong></td>
 								<td class="csp-info-value csp-info-status"><?php echo $data['status']; ?></td>
 							</tr>
 							<tr>
@@ -255,42 +255,42 @@ class TranslationToolkit_Admin {
 							<?php if (isset($data['dev-hints'])) : ?>
 							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 							<tr>
-								<td><strong style="color: #f00;"><?php _e('Compatibility',CSP_PO_TEXTDOMAIN); ?>:</strong>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
+								<td><strong style="color: #f00;"><?php _e('Compatibility','translation-toolkit'); ?>:</strong>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="compatibility"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></td>
 								<td class="csp-info-value"><?php echo $data['dev-hints'];?></td>
 							</tr>
 							<?php endif; ?>
 							<?php if (isset($data['dev-security'])) : ?>
 							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 							<tr>
-								<td><strong style="color: #f00;"><?php _e('Security Risk',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+								<td><strong style="color: #f00;"><?php _e('Security Risk','translation-toolkit'); ?>:</strong></td>
 								<td class="csp-info-value"><?php echo $data['dev-security'];?></td>
 							</tr>
 							<?php endif; ?>
 							<?php  if ($data['type'] == 'wordpress-xxx') : ?>
 							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 							<tr>
-								<td><strong style="color: #f00;"><?php _e('Memory Warning',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-								<td class="csp-info-value"><?php _e( "Since WordPress 3.x version it may require at least <strong>58MB</strong> PHP memory_limit! The reason is still unclear but it doesn't freeze anymore. Instead a error message will be shown and the scanning process aborts while reaching your limits.", CSP_PO_TEXTDOMAIN ); ?></td>
+								<td><strong style="color: #f00;"><?php _e('Memory Warning','translation-toolkit'); ?>:</strong></td>
+								<td class="csp-info-value"><?php _e( "Since WordPress 3.x version it may require at least <strong>58MB</strong> PHP memory_limit! The reason is still unclear but it doesn't freeze anymore. Instead a error message will be shown and the scanning process aborts while reaching your limits.", 'translation-toolkit' ); ?></td>
 							<tr>
 							<?php endif; ?>
 							<?php if ($data['is-path-unclear']) : ?>
 							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 							<tr>
-								<td><strong style="color: #f00;"><?php _e('Language Folder',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-								<td class="csp-info-value"><?php _e('The translation file folder is ambiguous, please select by clicking the appropriated language file folder or ask the Author about!',CSP_PO_TEXTDOMAIN); ?></td>
+								<td><strong style="color: #f00;"><?php _e('Language Folder','translation-toolkit'); ?>:</strong></td>
+								<td class="csp-info-value"><?php _e('The translation file folder is ambiguous, please select by clicking the appropriated language file folder or ask the Author about!','translation-toolkit'); ?></td>
 							<tr>
 							<?php endif; ?>
 						</table>
 						<?php if (isset($data['child-plugins'])) { foreach($data['child-plugins'] as $child) { ?>
 						<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
-							<h3 class="csp-type-name"><?php echo $child['name']; ?> <small><em><?php _e('by',CSP_PO_TEXTDOMAIN); ?> <?php echo $child['author']; ?></em></small></h3>
+							<h3 class="csp-type-name"><?php echo $child['name']; ?> <small><em><?php _e('by','translation-toolkit'); ?> <?php echo $child['author']; ?></em></small></h3>
 							<table class="csp-type-info" border="0">
 								<tr>
-									<td><strong><?php _e('Version',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+									<td><strong><?php _e('Version','translation-toolkit'); ?>:</strong></td>
 									<td width="100%" class="csp-info-value"><?php echo $child['version']; ?></td>
 								</tr>
 								<tr>
-									<td><strong><?php _e('State',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
+									<td><strong><?php _e('State','translation-toolkit'); ?>:</strong></td>
 									<td class="csp-info-value csp-info-status"><?php echo $child['status']; ?></td>
 								</tr>
 								<tr>
@@ -302,17 +302,17 @@ class TranslationToolkit_Admin {
 					</td>
 					<td class="component-details">
 						<?php if ( $data['type'] == 'wordpress' && $data['is_US_Version'] ) {?>
-							<div style="color:#f00;"><?php _e("The original US version doesn't contain the language directory.",CSP_PO_TEXTDOMAIN); ?></div>
+							<div style="color:#f00;"><?php _e("The original US version doesn't contain the language directory.",'translation-toolkit'); ?></div>
 							<br/>
-							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo str_replace( "\\", '/', WP_CONTENT_DIR ) . "/languages" ?>' );"><?php _e( 'try to create the WordPress language directory', CSP_PO_TEXTDOMAIN ); ?></a></div>
+							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo str_replace( "\\", '/', WP_CONTENT_DIR ) . "/languages" ?>' );"><?php _e( 'try to create the WordPress language directory', 'translation-toolkit' ); ?></a></div>
 							<br/>
 							<div>
-								<?php _e('or create the missing directory using FTP Access as:',CSP_PO_TEXTDOMAIN); ?>
+								<?php _e('or create the missing directory using FTP Access as:','translation-toolkit'); ?>
 								<br/><br/>
 								<?php echo str_replace( "\\", '/', WP_CONTENT_DIR ) . "/"; ?><strong style="color:#f00;">languages</strong>			
 							</div>
 						<?php } elseif ( $data['is-path-unclear'] ) { ?>
-							<strong style="border-bottom: 1px solid #ccc;"><?php _e('Available Directories:',CSP_PO_TEXTDOMAIN) ?></strong><br/><br/>
+							<strong style="border-bottom: 1px solid #ccc;"><?php _e('Available Directories:','translation-toolkit') ?></strong><br/><br/>
 							<?php 
 								$tmp = array(); 
 								$dirs = rscanpath($data['base_path'], $tmp);
@@ -323,12 +323,12 @@ class TranslationToolkit_Admin {
 								} 
 							?>
 						<?php } elseif ( $data['name'] == 'bbPress' && isset( $data['is_US_Version'] ) && $data['is_US_Version'] ) { ?>	
-							<div style="color:#f00;"><?php _e( "The original bbPress component doesn't contain a language directory.",CSP_PO_TEXTDOMAIN); ?></div>
+							<div style="color:#f00;"><?php _e( "The original bbPress component doesn't contain a language directory.",'translation-toolkit'); ?></div>
 							<br/>
-							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo $data['base_path']."my-languages"; ?>' );"><?php _e('try to create the bbPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
+							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo $data['base_path']."my-languages"; ?>' );"><?php _e('try to create the bbPress language directory','translation-toolkit'); ?></a></div>
 							<br/>
 							<div>
-								<?php _e('or create the missing directory using FTP Access as:',CSP_PO_TEXTDOMAIN); ?>
+								<?php _e('or create the missing directory using FTP Access as:','translation-toolkit'); ?>
 								<br/><br/>
 								<?php echo $data['base_path']; ?><strong style="color:#f00;">my-languages</strong>			
 							</div>			
@@ -337,18 +337,18 @@ class TranslationToolkit_Admin {
 							<tr class="mo-list-head">
 								<td colspan="4" nowrap="nowrap">
 									<img alt="GNU GetText" class="alignleft" src="<?php echo CSP_PO_BASE_URL; ?>/images/gettext.gif" style="display:none;" />
-									<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile button" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", CSP_PO_TEXTDOMAIN); ?></a>
+									<a rel="<?php echo implode('|', array_keys($data['languages']));?>" class="clickable mofile button" onclick="csp_add_language(this,'<?php echo $data['type']; ?>','<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."',this.rel,'".$data['type']."','".$data['simple-filename']."','".$data['translation_template']."','".$data['textdomain']['identifier']."',".($data['deny_scanning'] ? '1' : '0') ?>);"><?php _e("Add New Language", 'translation-toolkit'); ?></a>
 									<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
-									&nbsp;<a class="clickable mofile button" onclick="csp_merge_maintheme_languages(this,'<?php echo $data['theme-template']; ?>','<?php echo $data['theme-self']; ?>','<?php echo $data['base_path']; if(!empty($data['special_path'])) echo $data['special_path'].'/' ?>','<?php echo $data['textdomain']['identifier']; ?>','mo-list-<?php echo $mo_list_counter; ?>' );"><?php _e("Sync Files with Main Theme", CSP_PO_TEXTDOMAIN); ?></a>
-									<a rel="workonchildthemes" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" href="javascript:void(0);" class="question-help" align="left"><img src="http://wp34.de/wp-content/plugins/codestyling-localization/images/question.gif"></a>
+									&nbsp;<a class="clickable mofile button" onclick="csp_merge_maintheme_languages(this,'<?php echo $data['theme-template']; ?>','<?php echo $data['theme-self']; ?>','<?php echo $data['base_path']; if(!empty($data['special_path'])) echo $data['special_path'].'/' ?>','<?php echo $data['textdomain']['identifier']; ?>','mo-list-<?php echo $mo_list_counter; ?>' );"><?php _e("Sync Files with Main Theme", 'translation-toolkit'); ?></a>
+									<a rel="workonchildthemes" title="<?php _e("What does that mean?",'translation-toolkit') ?>" href="javascript:void(0);" class="question-help" align="left"><img src="http://wp34.de/wp-content/plugins/codestyling-localization/images/question.gif"></a>
 									<?php endif; ?>
 								</td>
-								<td colspan="1" nowrap="nowrap" class="csp-ta-right"><?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',count($data['languages']),CSP_PO_TEXTDOMAIN ), count($data['languages'])); ?></td>
+								<td colspan="1" nowrap="nowrap" class="csp-ta-right"><?php echo sprintf(_n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',count($data['languages']),'translation-toolkit' ), count($data['languages'])); ?></td>
 							</tr>
 							<tr class="mo-list-desc">
-								<td nowrap="nowrap" align="left" class="lang-info-desc"><?php _e('Language',CSP_PO_TEXTDOMAIN);?></td>
-								<td nowrap="nowrap" align="center"><?php _e('Permissions',CSP_PO_TEXTDOMAIN);?></td>
-								<td nowrap="nowrap" align="center"><?php _e('Actions',CSP_PO_TEXTDOMAIN);?></td>
+								<td nowrap="nowrap" align="left" class="lang-info-desc"><?php _e('Language','translation-toolkit');?></td>
+								<td nowrap="nowrap" align="center"><?php _e('Permissions','translation-toolkit');?></td>
+								<td nowrap="nowrap" align="center"><?php _e('Actions','translation-toolkit');?></td>
 							</tr>
 							<?php 
 								foreach($data['languages'] as $lang => $gtf) : 
@@ -359,102 +359,102 @@ class TranslationToolkit_Admin {
 							<!-- special case woocommerce german: start -->
 							<?php $copy_base_file = $data['base_file']; $data['base_file'] = 'languages/informal/woocommerce-'; ?>
 							<tr class="mo-file" lang="<?php echo $lang; ?>">
-								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(informal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale','translation-toolkit'); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(informal)','translation-toolkit'); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
 								<td nowrap="nowrap" align="center">
 									<div style="width:44px">
 										<?php if (array_key_exists('po', $gtf)) {
 											echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
 										} else { ?>
-										<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<a class="csp-filetype-po" title="<?php _e('-n.a.-','translation-toolkit'); ?> [---|---|---]">&nbsp;</a>
 										<?php } ?>
 										<?php if (array_key_exists('mo', $gtf)) {
 											echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
 										} else { ?>
-										<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<a class="csp-filetype-mo" title="<?php _e('-n.a.-','translation-toolkit'); ?> [---|---|---]">&nbsp;</a>
 										<?php } ?>
 									</div>
 								</td>
 								<td nowrap="nowrap" style="padding-right: 5px;">
-									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit','translation-toolkit'); ?></a>
 									<span>&nbsp;</span>
 									<?php if (!$data['deny_scanning']) : ?>
-									<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan','translation-toolkit'); ?></a>
 									<span>&nbsp;</span>
 									<?php else: ?>
-									<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+									<span style="text-decoration: line-through;"><?php _e('Rescan','translation-toolkit'); ?></span>
 									<span>&nbsp;</span>
 									<?php endif; ?>
-									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete','translation-toolkit'); ?></a>
 								</td>
 							</tr>
 							<?php $data['base_file'] = 'languages/formal/woocommerce-'; ?>
 							<tr class="mo-file" lang="<?php echo $lang; ?>">
-								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(formal)',CSP_PO_TEXTDOMAIN); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale','translation-toolkit'); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native.' '.__( '(formal)','translation-toolkit'); ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
 								<td nowrap="nowrap" align="center">
 									<div style="width:44px">
 										<?php if (array_key_exists('po', $gtf)) {
 											echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
 										} else { ?>
-										<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<a class="csp-filetype-po" title="<?php _e('-n.a.-','translation-toolkit'); ?> [---|---|---]">&nbsp;</a>
 										<?php } ?>
 										<?php if (array_key_exists('mo', $gtf)) {
 											echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
 										} else { ?>
-										<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<a class="csp-filetype-mo" title="<?php _e('-n.a.-','translation-toolkit'); ?> [---|---|---]">&nbsp;</a>
 										<?php } ?>
 									</div>
 								</td>
 								<td nowrap="nowrap" style="padding-right: 5px;">
-									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit','translation-toolkit'); ?></a>
 									<span>&nbsp;</span>
 									<?php if (!$data['deny_scanning']) : ?>
-									<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."'"; ?>)"><?php _e('Rescan','translation-toolkit'); ?></a>
 									<span>&nbsp;</span>
 									<?php else: ?>
-									<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+									<span style="text-decoration: line-through;"><?php _e('Rescan','translation-toolkit'); ?></span>
 									<span>&nbsp;</span>
 									<?php endif; ?>
-									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete','translation-toolkit'); ?></a>
 								</td>
 							</tr>
 							<?php $data['base_file'] =  $copy_base_file;?>
 							<tr class="mo-file" lang="<?php echo $lang; ?>">
 								<td colspan="2" class="lang-info-api">&nbsp;</td>
-								<td width="100%" colspan="3" class="lang-info-desc"><small><strong style="color:#f00;"><?php _e('Warning',CSP_PO_TEXTDOMAIN); ?>: </strong><?php _e('German translations are currently supported by a temporary workaround only, because they will be handled completely uncommon beside WordPress standards!',CSP_PO_TEXTDOMAIN); ?></small></td>
+								<td width="100%" colspan="3" class="lang-info-desc"><small><strong style="color:#f00;"><?php _e('Warning','translation-toolkit'); ?>: </strong><?php _e('German translations are currently supported by a temporary workaround only, because they will be handled completely uncommon beside WordPress standards!','translation-toolkit'); ?></small></td>
 							</tr>
 							<!-- special case woocommerce german: end -->
 							<?php else : ?>
 							<tr class="mo-file" lang="<?php echo $lang; ?>">
-								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native; ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
+								<td nowrap="nowrap" width="100%" class="lang-info-desc"><img title="<?php _e('Locale','translation-toolkit'); ?>: <?php echo $lang ?>" alt="(locale: <?php echo $lang; ?>)" src="<?php echo CSP_PO_BASE_URL."/images/flags/".$country_www.".gif"; ?>" /><?php if (get_locale() == $lang) echo "<strong>"; ?>&nbsp;<?php echo $lang_native; ?><?php if (get_locale() == $lang) echo "</strong>"; ?></td>
 								<td nowrap="nowrap" align="center">
 									<div style="width:44px">
 										<?php if (array_key_exists('po', $gtf)) {
 											echo "<a class=\"csp-filetype-po".$gtf['po']['class']."\" title=\"".$gtf['po']['stamp'].($gtf['po']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".po".'\',\'csp-filetype-po-rw\' );' : '')."\">&nbsp;</a>";
 										} else { ?>
-										<a class="csp-filetype-po" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<a class="csp-filetype-po" title="<?php _e('-n.a.-','translation-toolkit'); ?> [---|---|---]">&nbsp;</a>
 										<?php } ?>
 										<?php if (array_key_exists('mo', $gtf)) {
 											echo "<a class=\"csp-filetype-mo".$gtf['mo']['class']."\" title=\"".$gtf['mo']['stamp'].($gtf['mo']['class'] == '-r' ? '" onclick="csp_make_writable(this,\''.$data['base_path'].$data['base_file'].$lang.".mo".'\',\'csp-filetype-mo-rw\' );' : '')."\">&nbsp;</a>";
 										} else { ?>
-										<a class="csp-filetype-mo" title="<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]">&nbsp;</a>
+										<a class="csp-filetype-mo" title="<?php _e('-n.a.-','translation-toolkit'); ?> [---|---|---]">&nbsp;</a>
 										<?php } ?>
 									</div>
 								</td>
 								<td nowrap="nowrap" style="padding-right: 5px;">
-									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_launch_editor(this, '<?php echo $data['base_file'].$lang.".po" ;?>', '<?php echo $data['base_path']; ?>','<?php echo $data['textdomain']['identifier']; ?>' );"><?php _e('Edit','translation-toolkit'); ?></a>
 									<span>&nbsp;</span>
 									<?php if (!$data['deny_scanning']) : ?>
 										<?php if (isset($data['theme-self']) && ($data['theme-self'] != $data['theme-template'])) : ?>
-											<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."','".$data['theme-template']."'"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+											<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."','".$data['theme-template']."'"; ?>)"><?php _e('Rescan','translation-toolkit'); ?></a>
 										<?php else: ?>
-											<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."',''"; ?>)"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>
+											<a class="clickable button" onclick="csp_rescan_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."','".$data['type']."','".$data['simple-filename']."',''"; ?>)"><?php _e('Rescan','translation-toolkit'); ?></a>
 										<?php endif; ?>
 									<span>&nbsp;</span>
 									<?php else: ?>
-									<span style="text-decoration: line-through;"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>
+									<span style="text-decoration: line-through;"><?php _e('Rescan','translation-toolkit'); ?></span>
 									<span>&nbsp;</span>
 									<?php endif; ?>
-									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>
+									<a class="clickable button" onclick="csp_remove_language(this,'<?php echo rawurlencode($data['name'])." v".$data['version']."','mo-list-".$mo_list_counter."','".$data['base_path']."','".$data['base_file']."','".$lang."'"; ?>)"><?php _e('Delete','translation-toolkit'); ?></a>
 								</td>
 							</tr>
 							<?php endif; ?>
@@ -469,45 +469,45 @@ class TranslationToolkit_Admin {
 	</div><!-- csp-wrap-main closed -->
 	<div id="csp-wrap-editor" class="wrap" style="display:none">
 		<div class="icon32" id="icon-tools"><br/></div>
-		<h2><?php _e('Translate Language File', CSP_PO_TEXTDOMAIN); ?>&nbsp;&nbsp;&nbsp;<a class="clickable button" onclick="window.location.reload()"><?php _e('back to overview page &raquo;', CSP_PO_TEXTDOMAIN) ?></a></h2>
+		<h2><?php _e('Translate Language File', 'translation-toolkit'); ?>&nbsp;&nbsp;&nbsp;<a class="clickable button" onclick="window.location.reload()"><?php _e('back to overview page &raquo;', 'translation-toolkit') ?></a></h2>
 		<div id="csp-json-header">
-			<div class="po-header-toggle"><span><b><?php _e('Project-Id-Version:',CSP_PO_TEXTDOMAIN); ?></b></span> <span id="prj-id-ver">---</span> | <strong><?php _e('File:', CSP_PO_TEXTDOMAIN); ?></strong> <a onclick="csp_toggle_header(this,'po-hdr' );"><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></a></div>
+			<div class="po-header-toggle"><span><b><?php _e('Project-Id-Version:','translation-toolkit'); ?></b></span> <span id="prj-id-ver">---</span> | <strong><?php _e('File:', 'translation-toolkit'); ?></strong> <a onclick="csp_toggle_header(this,'po-hdr' );"><?php _e('unknown', 'translation-toolkit'); ?></a></div>
 		</div>
 		<div class="action-bar">
 			<p id="textdomain-error" class="hidden"><small><?php 
-				_e('<strong>Error</strong>: The actual loaded translation content does not match the textdomain:',CSP_PO_TEXTDOMAIN); 
+				_e('<strong>Error</strong>: The actual loaded translation content does not match the textdomain:','translation-toolkit'); 
 				echo '&nbsp;<span></span><br/>';
-				_e('Expect, that any text you translate will not occure as long as the textdomain is mismatching!',CSP_PO_TEXTDOMAIN); 
+				_e('Expect, that any text you translate will not occure as long as the textdomain is mismatching!','translation-toolkit'); 
 				echo '<br/>';
-				_e('This is a coding issue at the source files you try to translate, please contact the original Author and explain this mismatch.',CSP_PO_TEXTDOMAIN); 
-			?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
+				_e('This is a coding issue at the source files you try to translate, please contact the original Author and explain this mismatch.','translation-toolkit'); 
+			?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
 			<p id="textdomain-warning" class="hidden"><small><?php 
-				_e('<strong>Warning</strong>: The actual loaded translation content contains mixed textdomains and is not pure translateable within one textdomain.',CSP_PO_TEXTDOMAIN); 
+				_e('<strong>Warning</strong>: The actual loaded translation content contains mixed textdomains and is not pure translateable within one textdomain.','translation-toolkit'); 
 				echo '<br/>';
-				_e('It seems, that there is code contained extracted out of other plugins, themes or widgets and used by copy & paste inside some source files.',CSP_PO_TEXTDOMAIN); 
+				_e('It seems, that there is code contained extracted out of other plugins, themes or widgets and used by copy & paste inside some source files.','translation-toolkit'); 
 				echo '<br/>';
-				_e('The affected unknown textdomains are:',CSP_PO_TEXTDOMAIN); 
+				_e('The affected unknown textdomains are:','translation-toolkit'); 
 				echo '&nbsp;<span>&nbsp;</span>';		
-			?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
-			<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:',CSP_PO_TEXTDOMAIN); ?></b>&nbsp;&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
-			<div class="alignleft">&nbsp;&nbsp;<input id="csp-write-mo-file" class="button button-secondary" style="display:none" type="submit" value="<?php _e('generate mo-file', CSP_PO_TEXTDOMAIN); ?>" onclick="csp_generate_mofile(this);" /></div>
-			<div class="alignleft" style="margin-left:10px;font-size:11px;padding-top:3px;"><?php _e('last written:',CSP_PO_TEXTDOMAIN);?>&nbsp;&nbsp;<span id="catalog-last-saved" ><?php _e('unknown',CSP_PO_TEXTDOMAIN); ?></span><img id="csp-generate-mofile" src="<?php echo CSP_PO_BASE_URL."/images/";?>write-mofile.gif" /></div>
+			?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></small></p>
+			<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:','translation-toolkit'); ?></b>&nbsp;&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="textdomain"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
+			<div class="alignleft">&nbsp;&nbsp;<input id="csp-write-mo-file" class="button button-secondary" style="display:none" type="submit" value="<?php _e('generate mo-file', 'translation-toolkit'); ?>" onclick="csp_generate_mofile(this);" /></div>
+			<div class="alignleft" style="margin-left:10px;font-size:11px;padding-top:3px;"><?php _e('last written:','translation-toolkit');?>&nbsp;&nbsp;<span id="catalog-last-saved" ><?php _e('unknown','translation-toolkit'); ?></span><img id="csp-generate-mofile" src="<?php echo CSP_PO_BASE_URL."/images/";?>write-mofile.gif" /></div>
 			<br class="clear" />
 		</div>
 		<ul class="subsubsub">
-			<li><a id="csp-filter-all" class="csp-filter current" onclick="csp_filter_result(this, csp_idx.total)"><?php _e('Total', CSP_PO_TEXTDOMAIN); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
-			<li><a id="csp-filter-plurals" class="csp-filter" onclick="csp_filter_result(this, csp_idx.plurals)"><?php _e('Plural', CSP_PO_TEXTDOMAIN); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
-			<li><a id="csp-filter-ctx" class="csp-filter" onclick="csp_filter_result(this, csp_idx.ctx)"><?php _e('Context', CSP_PO_TEXTDOMAIN); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
-			<li><a id="csp-filter-open" class="csp-filter" onclick="csp_filter_result(this, csp_idx.open)"><?php _e('Not translated', CSP_PO_TEXTDOMAIN); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
-			<li><a id="csp-filter-rem" class="csp-filter" onclick="csp_filter_result(this, csp_idx.rem)"><?php _e('Comments', CSP_PO_TEXTDOMAIN); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
-			<li><a id="csp-filter-code" class="csp-filter" onclick="csp_filter_result(this, csp_idx.code)"><?php _e('Code Hint', CSP_PO_TEXTDOMAIN); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
-			<li><a id="csp-filter-trail" class="csp-filter" onclick="csp_filter_result(this, csp_idx.trail)"><?php _e('Trailing Space', CSP_PO_TEXTDOMAIN); ?> ( <span class="csp-flt-cnt">0</span> )</a></li>
-			<li style="display:none;"> | <span id="csp-filter-search" class="current"><?php _e('Search Result', CSP_PO_TEXTDOMAIN); ?>  ( <span class="csp-flt-cnt">0</span> )</span></li>
-			<li style="display:none;"> | <span id="csp-filter-regexp" class="current"><?php _e('Expression Result', CSP_PO_TEXTDOMAIN); ?>  ( <span class="csp-flt-cnt">0</span> )</span></li>
+			<li><a id="csp-filter-all" class="csp-filter current" onclick="csp_filter_result(this, csp_idx.total)"><?php _e('Total', 'translation-toolkit'); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
+			<li><a id="csp-filter-plurals" class="csp-filter" onclick="csp_filter_result(this, csp_idx.plurals)"><?php _e('Plural', 'translation-toolkit'); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
+			<li><a id="csp-filter-ctx" class="csp-filter" onclick="csp_filter_result(this, csp_idx.ctx)"><?php _e('Context', 'translation-toolkit'); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
+			<li><a id="csp-filter-open" class="csp-filter" onclick="csp_filter_result(this, csp_idx.open)"><?php _e('Not translated', 'translation-toolkit'); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
+			<li><a id="csp-filter-rem" class="csp-filter" onclick="csp_filter_result(this, csp_idx.rem)"><?php _e('Comments', 'translation-toolkit'); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
+			<li><a id="csp-filter-code" class="csp-filter" onclick="csp_filter_result(this, csp_idx.code)"><?php _e('Code Hint', 'translation-toolkit'); ?> ( <span class="csp-flt-cnt">0</span> )</a> | </li>
+			<li><a id="csp-filter-trail" class="csp-filter" onclick="csp_filter_result(this, csp_idx.trail)"><?php _e('Trailing Space', 'translation-toolkit'); ?> ( <span class="csp-flt-cnt">0</span> )</a></li>
+			<li style="display:none;"> | <span id="csp-filter-search" class="current"><?php _e('Search Result', 'translation-toolkit'); ?>  ( <span class="csp-flt-cnt">0</span> )</span></li>
+			<li style="display:none;"> | <span id="csp-filter-regexp" class="current"><?php _e('Expression Result', 'translation-toolkit'); ?>  ( <span class="csp-flt-cnt">0</span> )</span></li>
 		</ul>
 		<div class="tablenav">
 			<div class="alignleft">
-				<div class="alignleft" style="padding-top: 5px;font-size:11px;"><strong><?php _e('Page Size', CSP_PO_TEXTDOMAIN); ?>:&nbsp;</strong></div>
+				<div class="alignleft" style="padding-top: 5px;font-size:11px;"><strong><?php _e('Page Size', 'translation-toolkit'); ?>:&nbsp;</strong></div>
 				<select id="catalog-pagesize" name="catalog-pagesize" onchange="csp_change_pagesize(this.value);" class="alignleft" style="font-size:11px;" autocomplete="off">
 					<option value="10">10</option>
 					<option value="25">25</option>
@@ -519,27 +519,27 @@ class TranslationToolkit_Admin {
 				</select>
 			</div>
 			<div id="catalog-pages-top" class="tablenav-pages alignright">
-				<a href="#" class="prev page-numbers"><?php _e('&laquo; Previous', CSP_PO_TEXTDOMAIN); ?></a>
+				<a href="#" class="prev page-numbers"><?php _e('&laquo; Previous', 'translation-toolkit'); ?></a>
 				<a href="#" class="page-numbers">1</a>
 				<a href="#" class="page-numbers">2</a>
 				<a href="#" class="page-numbers">3</a>
 				<span class="page-numbers current">4</span>
-				<a href="#" class="next page-numbers"><?php _e('Next &raquo;', CSP_PO_TEXTDOMAIN); ?></a>
+				<a href="#" class="next page-numbers"><?php _e('Next &raquo;', 'translation-toolkit'); ?></a>
 			</div>
 			<br class="clear" />
 		</div>
 		<table class="widefat" cellspacing="0">
 			<thead>
 				<tr>
-					<th nowrap="nowrap"><span><?php _e('Infos',CSP_PO_TEXTDOMAIN); ?></span></th>
+					<th nowrap="nowrap"><span><?php _e('Infos','translation-toolkit'); ?></span></th>
 					<th width="50%">
 						<table>
 							<tr>
-								<th style="background:transparent;border-bottom:0px;padding:0px;"><?php _e('Original:',CSP_PO_TEXTDOMAIN); ?></th>
+								<th style="background:transparent;border-bottom:0px;padding:0px;"><?php _e('Original:','translation-toolkit'); ?></th>
 								<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
 									<input id="s_original" name="s_original" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
 									<br/>
-									<input id="ignorecase_key" name="ignorecase_key" type="checkbox" value="" onclick="csp_search_key('s_original')" /><label for="ignorecase_key" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', CSP_PO_TEXTDOMAIN) ?></label>
+									<input id="ignorecase_key" name="ignorecase_key" type="checkbox" value="" onclick="csp_search_key('s_original')" /><label for="ignorecase_key" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
 								</th>
 								<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
 									<a class="clickable regexp" onclick="csp_search_regexp('s_original')"></a>
@@ -550,11 +550,11 @@ class TranslationToolkit_Admin {
 					<th width="50%">
 						<table>
 							<tr>
-								<th style="background:transparent;border-bottom:0px;padding:0px;"><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></th>
+								<th style="background:transparent;border-bottom:0px;padding:0px;"><?php _e('Translation:','translation-toolkit'); ?></th>
 								<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
 									<input id="s_translation" name="s_translation" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
 									<br/>
-									<input id="ignorecase_val" name="ignorecase_val" type="checkbox" value="" onclick="csp_search_val('s_translation')" /><label for="ignorecase_val" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', CSP_PO_TEXTDOMAIN) ?></label>
+									<input id="ignorecase_val" name="ignorecase_val" type="checkbox" value="" onclick="csp_search_val('s_translation')" /><label for="ignorecase_val" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
 								</th>
 								<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
 									<a class="clickable regexp" onclick="csp_search_regexp('s_translation')"></a>
@@ -562,22 +562,22 @@ class TranslationToolkit_Admin {
 							</tr>
 						</table>
 					</th>
-					<th nowrap="nowrap"><span><?php _e('Actions',CSP_PO_TEXTDOMAIN); ?></span></th>
+					<th nowrap="nowrap"><span><?php _e('Actions','translation-toolkit'); ?></span></th>
 				</tr>
 			</thead>
 			<tbody id="catalog-body">
-				<tr><td colspan="4" align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading.gif"?>" /><br /><span style="color:#328AB2;"><?php _e('Please wait, file content presently being loaded ...',CSP_PO_TEXTDOMAIN); ?></span></td></tr>
+				<tr><td colspan="4" align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/loading.gif"?>" /><br /><span style="color:#328AB2;"><?php _e('Please wait, file content presently being loaded ...','translation-toolkit'); ?></span></td></tr>
 			</tbody>
 		</table>	
 		<div class="tablenav">
-			<a class="alignright button" href="javascript:void(0);" onclick="window.scrollTo(0,0);" style="margin:3px 0 0 30px;"><?php _e('scroll to top', CSP_PO_TEXTDOMAIN); ?></a>
+			<a class="alignright button" href="javascript:void(0);" onclick="window.scrollTo(0,0);" style="margin:3px 0 0 30px;"><?php _e('scroll to top', 'translation-toolkit'); ?></a>
 			<div id="catalog-pages-bottom" class="tablenav-pages">
-				<a href="#" class="prev page-numbers"><?php _e('&laquo; Previous', CSP_PO_TEXTDOMAIN); ?></a>
+				<a href="#" class="prev page-numbers"><?php _e('&laquo; Previous', 'translation-toolkit'); ?></a>
 				<a href="#" class="page-numbers">1</a>
 				<a href="#" class="page-numbers">2</a>
 				<a href="#" class="page-numbers">3</a>
 				<span class="page-numbers current">4</span>
-				<a href="#" class="next page-numbers"><?php _e('Next &raquo;', CSP_PO_TEXTDOMAIN); ?></a>
+				<a href="#" class="next page-numbers"><?php _e('Next &raquo;', 'translation-toolkit'); ?></a>
 			</div>
 			<br class="clear" />
 		</div>
@@ -587,8 +587,8 @@ class TranslationToolkit_Admin {
 		<div>
 			<h3 id="csp-dialog-header">
 				<img alt="" id="csp-dialog-icon" class="alignleft" src="<?php echo CSP_PO_BASE_URL; ?>/images/gettext.gif" />
-				<span id="csp-dialog-caption" class="alignleft"><?php _e('Edit Catalog Entry',CSP_PO_TEXTDOMAIN); ?></span>
-				<img alt="" id="csp-dialog-cancel" class="alignright clickable" title="<?php _e('close', CSP_PO_TEXTDOMAIN); ?>" src="<?php echo CSP_PO_BASE_URL."/images/close.gif"; ?>" onclick="csp_cancel_dialog();" />
+				<span id="csp-dialog-caption" class="alignleft"><?php _e('Edit Catalog Entry','translation-toolkit'); ?></span>
+				<img alt="" id="csp-dialog-cancel" class="alignright clickable" title="<?php _e('close', 'translation-toolkit'); ?>" src="<?php echo CSP_PO_BASE_URL."/images/close.gif"; ?>" onclick="csp_cancel_dialog();" />
 				<br class="clear" />
 			</h3>	
 			<div id="csp-dialog-body"></div>
@@ -674,13 +674,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 
@@ -723,7 +723,7 @@ class TranslationToolkit_Admin {
 					denyscan: denyscan
 				},
 				onSuccess: function(transport) {
-					$('csp-dialog-caption').update("<?php _e('Add New Language',CSP_PO_TEXTDOMAIN); ?>");
+					$('csp-dialog-caption').update("<?php _e('Add New Language','translation-toolkit'); ?>");
 					$("csp-dialog-body").update(transport.responseText).setStyle({'padding' : '10px'});
 					tb_show(null,"#TB_inline?height=530&width=500&inlineId=csp-dialog-container&modal=true",false);
 				}
@@ -769,13 +769,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 
@@ -838,7 +838,7 @@ class TranslationToolkit_Admin {
 						"<td nowrap=\"nowrap\" width=\"16px\" align=\"center\"><img src=\"<?php echo CSP_PO_BASE_URL."/images/"; ?>"+transport.responseJSON.google+".png\" /></td>"+
 						"<td nowrap=\"nowrap\" width=\"16px\" align=\"center\" class=\"lang-info-api\"><img src=\"<?php echo CSP_PO_BASE_URL."/images/"; ?>"+transport.responseJSON.microsoft+".png\" /></td>"+
 						"<td nowrap=\"nowrap\" width=\"100%\"  class=\"lang-info-desc\">"+
-							"<img title=\"<?php _e('Locale',CSP_PO_TEXTDOMAIN); ?>: "+transport.responseJSON.language+"\" alt=\"(locale: "+transport.responseJSON.language+")\" src=\""+transport.responseJSON.image+"\" />" +
+							"<img title=\"<?php _e('Locale','translation-toolkit'); ?>: "+transport.responseJSON.language+"\" alt=\"(locale: "+transport.responseJSON.language+")\" src=\""+transport.responseJSON.image+"\" />" +
 							("<?php echo get_locale(); ?>" == transport.responseJSON.language ? "<strong>" : "") + 
 							"&nbsp;" + transport.responseJSON.lang_native +
 							("<?php echo get_locale(); ?>" == transport.responseJSON.language ? "</strong>" : "") + 
@@ -846,19 +846,19 @@ class TranslationToolkit_Admin {
 						"<td align=\"center\">"+
 							"<div style=\"width:44px\">"+
 							"<a class=\"csp-filetype-po-rw\" title=\""+transport.responseJSON.permissions+"\">&nbsp;</a>"+
-							"<a class=\"csp-filetype-mo\" title=\"<?php _e('-n.a.-',CSP_PO_TEXTDOMAIN); ?> [---|---|---]\">&nbsp;</a>"+
+							"<a class=\"csp-filetype-mo\" title=\"<?php _e('-n.a.-','translation-toolkit'); ?> [---|---|---]\">&nbsp;</a>"+
 							"</div>"+
 						"</td>"+
 						"<td nowrap=\"nowrap\">"+
-							"<a class=\"clickable button\" onclick=\"csp_launch_editor(this, '"+transport.responseJSON.subpath+transport.responseJSON.language+".po"+"', '"+transport.responseJSON.path+"','"+transport.responseJSON.textdomain+"' );\"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>"+
+							"<a class=\"clickable button\" onclick=\"csp_launch_editor(this, '"+transport.responseJSON.subpath+transport.responseJSON.language+".po"+"', '"+transport.responseJSON.path+"','"+transport.responseJSON.textdomain+"' );\"><?php _e('Edit','translation-toolkit'); ?></a>"+
 							"\n<span>&nbsp;</span>\n"+(transport.responseJSON.denyscan == false ? 
-							"<a class=\"clickable button\" onclick=\"csp_rescan_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"','"+transport.responseJSON.type+"','"+transport.responseJSON.simplefilename+"')\"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></a>"+
+							"<a class=\"clickable button\" onclick=\"csp_rescan_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"','"+transport.responseJSON.type+"','"+transport.responseJSON.simplefilename+"')\"><?php _e('Rescan','translation-toolkit'); ?></a>"+
 							"\n<span>&nbsp;</span>\n" 
 							: 
-							"<span style=\"text-decoration: line-through;\"><?php _e('Rescan',CSP_PO_TEXTDOMAIN); ?></span>"+
+							"<span style=\"text-decoration: line-through;\"><?php _e('Rescan','translation-toolkit'); ?></span>"+
 							"\n<span>&nbsp;</span>\n" 
 							) +
-							"<a class=\"clickable button\" onclick=\"csp_remove_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"' );\"><?php _e('Delete',CSP_PO_TEXTDOMAIN); ?></a>"+
+							"<a class=\"clickable button\" onclick=\"csp_remove_language(this,'"+escape(transport.responseJSON.name)+"','"+transport.responseJSON.row+"','"+transport.responseJSON.path+"','"+transport.responseJSON.subpath+"','"+transport.responseJSON.language+"' );\"><?php _e('Delete','translation-toolkit'); ?></a>"+
 						"</td>"+
 						"</tr>";			
 					$$('#'+transport.responseJSON.row+' .mo-file').each(function(tr) {
@@ -877,13 +877,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 
@@ -922,7 +922,7 @@ class TranslationToolkit_Admin {
 					numlangs: $$('#'+row+' .mo-list-head').first().down(2).rel.split('|').size()
 				},
 				onSuccess: function(transport) {
-					$('csp-dialog-caption').update("<?php _e('Confirm Delete Language',CSP_PO_TEXTDOMAIN); ?>");
+					$('csp-dialog-caption').update("<?php _e('Confirm Delete Language','translation-toolkit'); ?>");
 					$("csp-dialog-body").update(transport.responseText).setStyle({'padding' : '10px'});
 					tb_show.defer(null,"#TB_inline?height=180&width=300&inlineId=csp-dialog-container&modal=true",false);
 				}
@@ -981,13 +981,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 
@@ -1032,7 +1032,7 @@ class TranslationToolkit_Admin {
 					themetemplate: themetemplate
 				},
 				onSuccess: function(transport) {
-					$('csp-dialog-caption').update("<?php _e('Rescanning PHP Source Files',CSP_PO_TEXTDOMAIN); ?>");
+					$('csp-dialog-caption').update("<?php _e('Rescanning PHP Source Files','translation-toolkit'); ?>");
 					$("csp-dialog-body").update(transport.responseText).setStyle({'padding' : '10px'});
 					tb_show.defer(null,"#TB_inline?height=230&width=510&inlineId=csp-dialog-container&modal=true",false);
 				}
@@ -1059,7 +1059,7 @@ class TranslationToolkit_Admin {
 				return false;
 			}
 			$('csp-dialog-scan-info').hide();
-			$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', CSP_PO_TEXTDOMAIN); ?>' });
+			$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', 'translation-toolkit'); ?>' });
 			$('csp-dialog-cancel').show();
 			$('csp-dialog-progressfile').update('&nbsp;' );
 			elem = $$("#"+csp_php_source_json.row+" .mo-file[lang=\""+csp_php_source_json.language+"\"] div a").first();
@@ -1096,12 +1096,12 @@ class TranslationToolkit_Admin {
 						csp_php_source_json.title = transport.responseJSON.title;
 					}catch(e) {
 						$('csp-dialog-scan-info').hide();
-						$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', CSP_PO_TEXTDOMAIN); ?>' });
+						$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', 'translation-toolkit'); ?>' });
 						$('csp-dialog-cancel').show();
 						csp_php_source_json = 0;
 						var mem_reg = /Allowed memory size of (\d+) bytes exhausted/;
 						mem_reg.exec(transport.responseText);
-						error_text = "<?php _e('You are trying to rescan files which expands above your PHP Memory Limit at %s MB during the analysis.<br/>Please enable the <em>low memory mode</em> for scanning this component.',CSP_PO_TEXTDOMAIN); ?>";
+						error_text = "<?php _e('You are trying to rescan files which expands above your PHP Memory Limit at %s MB during the analysis.<br/>Please enable the <em>low memory mode</em> for scanning this component.','translation-toolkit'); ?>";
 						csp_show_error(error_text.replace('%s', RegExp.$1 / 1024.0 / 1024.0));
 						csp_ajax_params.action = '';
 					}
@@ -1110,7 +1110,7 @@ class TranslationToolkit_Admin {
 					var perc = Math.min(Math.round(csp_php_source_json.next*1000.0/csp_php_source_json.files.size())/10.0, 100.00);
 					$('csp-dialog-progressvalue').update(Math.min(csp_php_source_json.next, csp_php_source_json.files.size()));
 					$('csp-dialog-progressbar').setStyle({'width' : ''+perc+'%'});
-					if (csp_php_source_json.files[csp_php_source_json.next-csp_chuck_size]) $('csp-dialog-progressfile').update("<?php _e('File:', CSP_PO_TEXTDOMAIN); ?>&nbsp;"+csp_php_source_json.files[csp_php_source_json.next-csp_chuck_size].replace(csp_php_source_json.path,""));
+					if (csp_php_source_json.files[csp_php_source_json.next-csp_chuck_size]) $('csp-dialog-progressfile').update("<?php _e('File:', 'translation-toolkit'); ?>&nbsp;"+csp_php_source_json.files[csp_php_source_json.next-csp_chuck_size].replace(csp_php_source_json.path,""));
 					csp_scan_source_files().delay(0.1);
 				},
 				onFailure: function(transport) {
@@ -1120,13 +1120,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									csp_scan_source_files();
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 									csp_php_source_json = 0;
@@ -1143,7 +1143,7 @@ class TranslationToolkit_Admin {
 						jQuery('#upgrade').hide().attr('disabled', 'disabled' );	
 					}else {			
 						$('csp-dialog-scan-info').hide();
-						$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', CSP_PO_TEXTDOMAIN); ?>' });
+						$('csp-dialog-rescan').show().writeAttribute({'value' : '<?php _e('finished', 'translation-toolkit'); ?>' });
 						$('csp-dialog-cancel').show();
 						csp_php_source_json = 0;
 						csp_show_error(transport.responseText);
@@ -1283,7 +1283,7 @@ class TranslationToolkit_Admin {
 				"<input class=\"button\" type=\"submit\" onclick=\"return csp_cancel_dialog();\" value=\"  Ok  \"/>"+
 				"</p>"+
 				"</div>";
-		$('csp-dialog-caption').update("CodeStyling Localization - <?php _e('Access Error',CSP_PO_TEXTDOMAIN); ?>");
+		$('csp-dialog-caption').update("CodeStyling Localization - <?php _e('Access Error','translation-toolkit'); ?>");
 		$("csp-dialog-body").update(error).setStyle({'padding' : '10px'});
 		if ($('csp-dialog-saving')) $('csp-dialog-saving').hide();
 		tb_show.defer(null,"#TB_inline?height=140&width=510&inlineId=csp-dialog-container&modal=true",false);
@@ -1332,7 +1332,7 @@ class TranslationToolkit_Admin {
 					}catch(e) {
 						var mem_reg = /Allowed memory size of (\d+) bytes exhausted/;
 						mem_reg.exec(transport.responseText);
-						error_text = "<?php _e('You are trying to open a translation catalog which expands above your PHP Memory Limit at %s MB during read.<br/>Please enable the <em>low memory mode</em> for opening this components catalog.',CSP_PO_TEXTDOMAIN); ?>";
+						error_text = "<?php _e('You are trying to open a translation catalog which expands above your PHP Memory Limit at %s MB during read.<br/>Please enable the <em>low memory mode</em> for opening this components catalog.','translation-toolkit'); ?>";
 						$('catalog-body').update('<tr><td colspan="4" align="center" style="color:#f00;">'+error_text.replace('%s', RegExp.$1 / 1024.0 / 1024.0)+'</td></tr>' );
 					}				
 					$('catalog-last-saved').update(transport.responseJSON.last_saved);
@@ -1356,13 +1356,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 
@@ -1405,14 +1405,14 @@ class TranslationToolkit_Admin {
 		var cnt = Math.round(csp_idx.cur.size() * 1.0 / csp_pagesize + 0.499);
 		if (cnt > 1) {
 
-			if (csp_pagenum > 1) { inner += "<a class=\"next page-numbers\" onclick=\"csp_change_pagenum("+(csp_pagenum-1)+")\"><?php _e('&laquo; Previous', CSP_PO_TEXTDOMAIN); ?></a>"; }
+			if (csp_pagenum > 1) { inner += "<a class=\"next page-numbers\" onclick=\"csp_change_pagenum("+(csp_pagenum-1)+")\"><?php _e('&laquo; Previous', 'translation-toolkit'); ?></a>"; }
 			var low = Math.max(csp_pagenum - 5,1);
 			if (low > 1) inner += "<span>&nbsp;...&nbsp;</span>"; 
 			for (i=low; i<=Math.min(low+10,cnt); i++) {
 				inner += "<a class=\"page-numbers"+(i==csp_pagenum ? ' current' : '')+"\" onclick=\"csp_change_pagenum("+i+")\">"+i+"</a>";
 			}
 			if (Math.min(low+10,cnt) < cnt) inner += "<span>&nbsp;...&nbsp;</span>"; 
-			if (csp_pagenum < cnt) { inner += "<a class=\"next page-numbers\" onclick=\"csp_change_pagenum("+(csp_pagenum+1)+")\"><?php _e('Next &raquo;', CSP_PO_TEXTDOMAIN); ?></a>"; }
+			if (csp_pagenum < cnt) { inner += "<a class=\"next page-numbers\" onclick=\"csp_change_pagenum("+(csp_pagenum+1)+")\"><?php _e('Next &raquo;', 'translation-toolkit'); ?></a>"; }
 		}
 		cp.update(inner);
 		$('catalog-pages-bottom').update(inner);
@@ -1422,8 +1422,8 @@ class TranslationToolkit_Admin {
 		for (var i=(csp_pagenum-1)*csp_pagesize; i<Math.min(csp_pagenum * csp_pagesize, csp_idx.cur.size());i++) {
 			inner += "<tr"+(i % 2 == 0 ? '' : ' class="odd"')+" id=\"msg-row-"+csp_idx.cur[i]+"\">";
 			var tooltip = [];
-			if (!csp_pofile[csp_idx.cur[i]].rem.empty()) tooltip.push(String.fromCharCode(3)+"<?php _e('Comment',CSP_PO_TEXTDOMAIN); ?>"+String.fromCharCode(4)+csp_pofile[csp_idx.cur[i]].rem);
-			if (csp_pofile[csp_idx.cur[i]].code) tooltip.push(String.fromCharCode(3)+"<?php _e('Code Hint',CSP_PO_TEXTDOMAIN); ?>"+String.fromCharCode(4)+csp_pofile[csp_idx.cur[i]].code);
+			if (!csp_pofile[csp_idx.cur[i]].rem.empty()) tooltip.push(String.fromCharCode(3)+"<?php _e('Comment','translation-toolkit'); ?>"+String.fromCharCode(4)+csp_pofile[csp_idx.cur[i]].rem);
+			if (csp_pofile[csp_idx.cur[i]].code) tooltip.push(String.fromCharCode(3)+"<?php _e('Code Hint','translation-toolkit'); ?>"+String.fromCharCode(4)+csp_pofile[csp_idx.cur[i]].code);
 			if (tooltip.size() > 0) {
 				tooltip = tooltip.join(String.fromCharCode(1)).replace("\n", String.fromCharCode(1)).escapeHTML();
 				tooltip = tooltip.replace(/\1/g, '<br/>').replace(/\3/g, '<strong>').replace(/\4/g, '</strong>' );
@@ -1431,7 +1431,7 @@ class TranslationToolkit_Admin {
 			else { tooltip = '' };
 			inner += "<td nowrap=\"nowrap\">";
 			if(csp_pofile[csp_idx.cur[i]].ref.size() > 0) {
-				inner += "<a class=\"csp-msg-tip\"><img alt=\"\" src=\"<?php echo CSP_PO_BASE_URL;?>/images/php.gif\" /><span><strong><?php _e('Files:',CSP_PO_TEXTDOMAIN); ?></strong>";
+				inner += "<a class=\"csp-msg-tip\"><img alt=\"\" src=\"<?php echo CSP_PO_BASE_URL;?>/images/php.gif\" /><span><strong><?php _e('Files:','translation-toolkit'); ?></strong>";
 				csp_pofile[csp_idx.cur[i]].ref.each(function(r) {
 					inner += "<em onclick=\"csp_view_phpfile(this, '"+r+"', "+csp_idx.cur[i]+")\">"+r+"</em><br />";
 				});
@@ -1441,18 +1441,18 @@ class TranslationToolkit_Admin {
 			inner += "</td>";
 			ctx_str = '';
 			if (csp_pofile[csp_idx.cur[i]].ctx) {
-				ctx_str = "<div><b style=\"border-bottom: 1px dotted #000;\"><?php _e('Context',CSP_PO_TEXTDOMAIN); ?>:</b>&nbsp;<span style=\"color:#f00;\">"+csp_pofile[csp_idx.cur[i]].ctx+"</span></div>";
+				ctx_str = "<div><b style=\"border-bottom: 1px dotted #000;\"><?php _e('Context','translation-toolkit'); ?>:</b>&nbsp;<span style=\"color:#f00;\">"+csp_pofile[csp_idx.cur[i]].ctx+"</span></div>";
 			}
 			if (Object.isArray(csp_pofile[csp_idx.cur[i]].key)) {
 				inner += 
-					"<td>"+ctx_str+"<div><span class=\"csp-pl-form\"><?php _e('Singular:',CSP_PO_TEXTDOMAIN); ?> </span>"+csp_pofile[csp_idx.cur[i]].key[0].escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>')+"</div><div><span class=\"csp-pl-form\"><?php _e('Plural:',CSP_PO_TEXTDOMAIN); ?> </span>"+csp_pofile[csp_idx.cur[i]].key[1].escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>')+"</div></td>"+
+					"<td>"+ctx_str+"<div><span class=\"csp-pl-form\"><?php _e('Singular:','translation-toolkit'); ?> </span>"+csp_pofile[csp_idx.cur[i]].key[0].escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>')+"</div><div><span class=\"csp-pl-form\"><?php _e('Plural:','translation-toolkit'); ?> </span>"+csp_pofile[csp_idx.cur[i]].key[1].escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>')+"</div></td>"+
 					"<td>"+ctx_str;
 				for (pl=0;pl<csp_num_plurals; pl++) {
 					if (csp_num_plurals == 1) {
-						inner += "<div><span class=\"csp-pl-form\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+" </span>"+(!csp_pofile[csp_idx.cur[i]].val.empty() ? csp_pofile[csp_idx.cur[i]].val.escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>') : '&nbsp;')+"</div>"
+						inner += "<div><span class=\"csp-pl-form\"><?php _e('Plural Index Result =','translation-toolkit'); ?> "+pl+" </span>"+(!csp_pofile[csp_idx.cur[i]].val.empty() ? csp_pofile[csp_idx.cur[i]].val.escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>') : '&nbsp;')+"</div>"
 					}
 					else{
-						inner += "<div><span class=\"csp-pl-form\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+" </span>"+(!csp_pofile[csp_idx.cur[i]].val[pl].empty() ? csp_pofile[csp_idx.cur[i]].val[pl].escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>') : '&nbsp;')+"</div>"
+						inner += "<div><span class=\"csp-pl-form\"><?php _e('Plural Index Result =','translation-toolkit'); ?> "+pl+" </span>"+(!csp_pofile[csp_idx.cur[i]].val[pl].empty() ? csp_pofile[csp_idx.cur[i]].val[pl].escapeHTML().replace(/\s+$/g,'<span style="border: solid 1px #FF8080;">&nbsp;</span>') : '&nbsp;')+"</div>"
 					}
 				}
 				inner += "</td>";
@@ -1464,8 +1464,8 @@ class TranslationToolkit_Admin {
 			}
 			inner += 
 				"<td nowrap=\"nowrap\">"+
-				  "<a class=\"tr-edit-link\" onclick=\"return csp_edit_catalog(this);\"><?php _e('Edit',CSP_PO_TEXTDOMAIN); ?></a>&nbsp;|&nbsp;"+  
-				  "<a onclick=\"return csp_copy_catalog(this);\"><?php _e('Copy',CSP_PO_TEXTDOMAIN); ?></a>"; // TODO: add here comment editing link
+				  "<a class=\"tr-edit-link\" onclick=\"return csp_edit_catalog(this);\"><?php _e('Edit','translation-toolkit'); ?></a>&nbsp;|&nbsp;"+  
+				  "<a onclick=\"return csp_copy_catalog(this);\"><?php _e('Copy','translation-toolkit'); ?></a>"; // TODO: add here comment editing link
 			inner += "</td></tr>";
 		}	
 		cb.replace("<tbody id=\"catalog-body\">"+inner+"</tbody>");
@@ -1596,16 +1596,16 @@ class TranslationToolkit_Admin {
 
 	function csp_search_regexp(elem) {
 		$(elem).blur();
-		$('csp-dialog-caption').update("<?php _e('Extended Expression Search',CSP_PO_TEXTDOMAIN); ?>");
+		$('csp-dialog-caption').update("<?php _e('Extended Expression Search','translation-toolkit'); ?>");
 		$("csp-dialog-body").update(
-			"<div><strong><?php _e('Expression:',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
+			"<div><strong><?php _e('Expression:','translation-toolkit'); ?></strong></div>"+
 			"<input type=\"text\" id=\"csp-dialog-expression\" style=\"width:98%;font-size:11px;line-height:normal;\" value=\"\"\>"+		
-			"<div style=\"margin-top:10px; color:#888;\"><strong><?php _e('Examples: <small>Please refer to official Perl regular expression descriptions</small>',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
+			"<div style=\"margin-top:10px; color:#888;\"><strong><?php _e('Examples: <small>Please refer to official Perl regular expression descriptions</small>','translation-toolkit'); ?></strong></div>"+
 			'<div style="height: 215px; overflow:scroll;">'+
 			<?php require('../includes/js-help-perlreg.php' ); // @TODO ?>
 			'</div>'+
 			"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
-			"<input class=\"button\" type=\"submit\" onclick=\"return csp_exec_expression('"+elem+"' );\" value=\"  <?php echo _e('Search', CSP_PO_TEXTDOMAIN); ?>  \"/>"+
+			"<input class=\"button\" type=\"submit\" onclick=\"return csp_exec_expression('"+elem+"' );\" value=\"  <?php echo _e('Search', 'translation-toolkit'); ?>  \"/>"+
 			"</p>"
 		).setStyle({'padding' : '10px'});		
 		tb_show(null,"#TB_inline?height=385&width=600&inlineId=csp-dialog-container&modal=true",false);	
@@ -1771,13 +1771,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									csp_save_translation(elem, isplural, additional_action);
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 									if (additional_action != 'close') {
@@ -1868,13 +1868,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 
@@ -1902,25 +1902,25 @@ class TranslationToolkit_Admin {
 		elem.blur();
 		elem.up().up().addClassName('highlight-editing' );
 		var msg_idx = parseInt(elem.up().up().id.replace('msg-row-',''));
-		$('csp-dialog-caption').update("<?php _e('Edit Catalog Entry',CSP_PO_TEXTDOMAIN); ?>");
+		$('csp-dialog-caption').update("<?php _e('Edit Catalog Entry','translation-toolkit'); ?>");
 		if (Object.isArray(csp_pofile[msg_idx].key)) {
 			trans = '';
 			for (pl=0;pl<csp_num_plurals; pl++) {
 				if (!csp_destlang.empty()) {
 					switch(pl){
 						case 0:
-							trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid', 'csp-dialog-msgstr-0' );\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by',CSP_PO_TEXTDOMAIN); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>";
+							trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =','translation-toolkit'); ?> "+pl+"</strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid', 'csp-dialog-msgstr-0' );\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by','translation-toolkit'); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>";
 						break;
 						case 1:
-							trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid-plural', 'csp-dialog-msgstr-1' );\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by',CSP_PO_TEXTDOMAIN); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>";
+							trans += "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Plural Index Result =','translation-toolkit'); ?> "+pl+"</strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid-plural', 'csp-dialog-msgstr-1' );\"><img style=\"display:none;\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by','translation-toolkit'); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>";
 						break;
 						default:
-							trans += "<div style=\"margin-top:10px;height:20px;\"><strong><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong></div>";
+							trans += "<div style=\"margin-top:10px;height:20px;\"><strong><?php _e('Plural Index Result =','translation-toolkit'); ?> "+pl+"</strong></div>";
 						break;
 					}
 				}
 				else{
-					trans += "<div style=\"margin-top:10px;\"><strong><?php _e('Plural Index Result =',CSP_PO_TEXTDOMAIN); ?> "+pl+"</strong></div>";
+					trans += "<div style=\"margin-top:10px;\"><strong><?php _e('Plural Index Result =','translation-toolkit'); ?> "+pl+"</strong></div>";
 				}
 				if (csp_num_plurals == 1) {
 					trans += "<textarea id=\"csp-dialog-msgstr-"+pl+"\" class=\"csp-area-multi\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val.escapeHTML()+"</textarea>";
@@ -1931,34 +1931,34 @@ class TranslationToolkit_Admin {
 			}
 
 			$("csp-dialog-body").update(	
-				"<small style=\"display:block;text-align:right;\"><b><?php _e('Access Keys:',CSP_PO_TEXTDOMAIN); ?></b> <em>ALT</em> + <em>Shift</em> + [<b>p</b>]revious | [<b>s</b>]ave | [<b>n</b>]next</small>"+
-				"<div><strong><?php _e('Singular:',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
+				"<small style=\"display:block;text-align:right;\"><b><?php _e('Access Keys:','translation-toolkit'); ?></b> <em>ALT</em> + <em>Shift</em> + [<b>p</b>]revious | [<b>s</b>]ave | [<b>n</b>]next</small>"+
+				"<div><strong><?php _e('Singular:','translation-toolkit'); ?></strong></div>"+
 				"<textarea id=\"csp-dialog-msgid\" class=\"csp-area-multi\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key[0].escapeHTML()+"</textarea>"+
-				"<div style=\"margin-top:10px;\"><strong><?php _e('Plural:',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
+				"<div style=\"margin-top:10px;\"><strong><?php _e('Plural:','translation-toolkit'); ?></strong></div>"+
 				"<textarea id=\"csp-dialog-msgid-plural\" class=\"csp-area-multi\" cols=\"50\" rows=\"1\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key[1].escapeHTML()+"</textarea>"+
-				"<div style=\"font-weight:bold;padding-top: 5px;border-bottom: dotted 1px #aaa;\"><?php _e("Plural Index Calculation:",CSP_PO_TEXTDOMAIN);?>&nbsp;&nbsp;&nbsp;<span style=\"color:#D54E21;\">"+csp_func_plurals+"</span></div>"+
+				"<div style=\"font-weight:bold;padding-top: 5px;border-bottom: dotted 1px #aaa;\"><?php _e("Plural Index Calculation:",'translation-toolkit');?>&nbsp;&nbsp;&nbsp;<span style=\"color:#D54E21;\">"+csp_func_plurals+"</span></div>"+
 				trans+
 				"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
-				"<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx) > 0 ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, true, 'prev' );\" value=\"  <?php echo _e('« Save & Previous',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"p\"/>&nbsp;&nbsp;&nbsp;&nbsp;"+
-				"<input class=\"button\" type=\"submit\" onclick=\"return csp_save_translation(this, true, 'close' );\" value=\"  <?php echo _e('Save',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"s\"/>"+
-				"&nbsp;&nbsp;&nbsp;&nbsp;<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx)+1 < csp_idx.cur.size() ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, true, 'next' );\" value=\"  <?php echo _e('Save & Next »',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"n\"/>"+
+				"<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx) > 0 ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, true, 'prev' );\" value=\"  <?php echo _e('« Save & Previous','translation-toolkit'); ?>  \" accesskey=\"p\"/>&nbsp;&nbsp;&nbsp;&nbsp;"+
+				"<input class=\"button\" type=\"submit\" onclick=\"return csp_save_translation(this, true, 'close' );\" value=\"  <?php echo _e('Save','translation-toolkit'); ?>  \" accesskey=\"s\"/>"+
+				"&nbsp;&nbsp;&nbsp;&nbsp;<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx)+1 < csp_idx.cur.size() ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, true, 'next' );\" value=\"  <?php echo _e('Save & Next »','translation-toolkit'); ?>  \" accesskey=\"n\"/>"+
 				"</p><input id=\"csp-dialog-msg-idx\" type=\"hidden\" value=\""+msg_idx+"\" />"
 			).setStyle({'padding' : '10px'});		
 		}else{
 			$("csp-dialog-body").update(	
-				"<small style=\"display:block;text-align:right;\"><b><?php _e('Access Keys:',CSP_PO_TEXTDOMAIN); ?></b> <em>ALT</em> + <em>Shift</em> + [p]revious | [s]ave | [n]next</small>"+
-				"<div><strong><?php _e('Original:',CSP_PO_TEXTDOMAIN); ?></strong></div>"+
+				"<small style=\"display:block;text-align:right;\"><b><?php _e('Access Keys:','translation-toolkit'); ?></b> <em>ALT</em> + <em>Shift</em> + [p]revious | [s]ave | [n]next</small>"+
+				"<div><strong><?php _e('Original:','translation-toolkit'); ?></strong></div>"+
 				"<textarea id=\"csp-dialog-msgid\" class=\"csp-area-single\" cols=\"50\" rows=\"7\" style=\"width:98%;font-size:11px;line-height:normal;\" readonly=\"readonly\">"+csp_pofile[msg_idx].key.escapeHTML()+"</textarea>"
 				+ (csp_destlang.empty() ? 
-				"<div style=\"margin-top:10px;\"><strong><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></strong></div>"
+				"<div style=\"margin-top:10px;\"><strong><?php _e('Translation:','translation-toolkit'); ?></strong></div>"
 				:
-				 "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Translation:',CSP_PO_TEXTDOMAIN); ?></strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid', 'csp-dialog-msgstr' );\"><img style=\"display:none;\" align=\"left\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by',CSP_PO_TEXTDOMAIN); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>"
+				 "<div style=\"margin-top:10px;height:20px;\"><strong class=\"alignleft\"><?php _e('Translation:','translation-toolkit'); ?></strong><a class=\"alignright clickable service-api\" onclick=\"csp_translate_"+csp_api_type+"(this, 'csp-dialog-msgid', 'csp-dialog-msgstr' );\"><img style=\"display:none;\" align=\"left\" src=\"<?php echo CSP_PO_BASE_URL; ?>/images/loading-small.gif\" />&nbsp;<?php _e('translate with API Service by','translation-toolkit'); ?> "+csp_api_type.capitalize()+"</a><br class=\"clear\" /></div>"
 				 ) +
 				"<textarea id=\"csp-dialog-msgstr\" class=\"csp-area-single\" cols=\"50\" rows=\"7\" style=\"width:98%;font-size:11px;line-height:normal;\">"+csp_pofile[msg_idx].val.escapeHTML()+"</textarea>"+
 				"<p style=\"margin:5px 0 0 0;text-align:center; padding-top: 5px;border-top: solid 1px #aaa;\">"+
-				"<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx) > 0 ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'prev' );\" value=\"  <?php echo _e('« Save & Previous',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"p\"/>&nbsp;&nbsp;&nbsp;&nbsp;"+
-				"<input class=\"button\" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'close' );\" value=\"  <?php echo _e('Save',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"s\"/>"+
-				"&nbsp;&nbsp;&nbsp;&nbsp;<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx)+1 < csp_idx.cur.size() ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'next' );\" value=\"  <?php echo _e('Save & Next »',CSP_PO_TEXTDOMAIN); ?>  \" accesskey=\"n\"/>"+
+				"<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx) > 0 ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'prev' );\" value=\"  <?php echo _e('« Save & Previous','translation-toolkit'); ?>  \" accesskey=\"p\"/>&nbsp;&nbsp;&nbsp;&nbsp;"+
+				"<input class=\"button\" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'close' );\" value=\"  <?php echo _e('Save','translation-toolkit'); ?>  \" accesskey=\"s\"/>"+
+				"&nbsp;&nbsp;&nbsp;&nbsp;<input class=\"button\""+(csp_idx.cur.indexOf(msg_idx)+1 < csp_idx.cur.size() ? "" : " disabled=\"disabled\"")+" type=\"submit\" onclick=\"return csp_save_translation(this, false, 'next' );\" value=\"  <?php echo _e('Save & Next »','translation-toolkit'); ?>  \" accesskey=\"n\"/>"+
 				"</p><input id=\"csp-dialog-msg-idx\" type=\"hidden\" value=\""+msg_idx+"\" />"
 			).setStyle({'padding' : '10px'});
 		}
@@ -1996,7 +1996,7 @@ class TranslationToolkit_Admin {
 				onSuccess: function(transport) {
 					//own <iframe> creation, because of POST content filling into inline thickbox
 					var iframe = null;
-					$('csp-dialog-caption').update("<?php _e('File:', CSP_PO_TEXTDOMAIN); ?> "+phpfile.split(':')[0]);
+					$('csp-dialog-caption').update("<?php _e('File:', 'translation-toolkit'); ?> "+phpfile.split(':')[0]);
 					$('csp-dialog-body').insert(iframe = new Element('iframe', {'class' : 'csp-dialog-iframe', 'frameBorder' : '0'}).writeAttribute({'width' : '100%', 'height' : '570px', 'margin': '0'})).setStyle({'padding' : '0px'});
 					tb_show(null,"#TB_inline?height=600&width=600&inlineId=csp-dialog-container&modal=true",false);
 					iframe.contentWindow.document.open();
@@ -2039,13 +2039,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 									$('csp-generate-mofile').hide();
@@ -2100,13 +2100,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 
@@ -2157,13 +2157,13 @@ class TranslationToolkit_Admin {
 							closeOnEscape: false,
 							modal: true,
 							resizable: false,
-							title: '<b><?php echo esc_js(__( 'User Credentials required', CSP_PO_TEXTDOMAIN)); ?></b>',
+							title: '<b><?php echo esc_js(__( 'User Credentials required', 'translation-toolkit')); ?></b>',
 							buttons: { 
-								"<?php echo esc_js(__( 'Ok', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Ok', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close");
 									jQuery(elem).trigger('click' );
 								},
-								"<?php echo esc_js(__( 'Cancel', CSP_PO_TEXTDOMAIN)); ?>": function() { 
+								"<?php echo esc_js(__( 'Cancel', 'translation-toolkit')); ?>": function() { 
 									jQuery('#csp-credentials').dialog("close"); 
 									csp_ajax_params.action = '';
 								} 

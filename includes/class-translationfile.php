@@ -975,7 +975,7 @@ class CspTranslationFile {
 		}?>",
 	destlang: "<?php echo ( isset($sys_locales[$loc]) && !empty($api_type) && $api_type != 'none' ? $sys_locales[$loc][$api_type.'-api'] : ''); ?>",
 	api_type: "<?php echo $api_type; ?>",
-	last_saved : "<?php $mo = $this->strings->_substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s',CSP_PO_TEXTDOMAIN), filemtime($mo)); } else { _e('unknown',CSP_PO_TEXTDOMAIN); } ?>",
+	last_saved : "<?php $mo = $this->strings->_substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s','translation-toolkit'), filemtime($mo)); } else { _e('unknown','translation-toolkit'); } ?>",
 	plurals_num : <?php echo $this->nplurals; ?>,
 	plurals_func : "<?php echo $this->plural_func; ?>",
 	path : "<?php echo $path; ?>",

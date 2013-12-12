@@ -215,7 +215,7 @@ function csp_self_script_protection_head() {
 
 function csp_handle_csp_self_protection_result() {
 	csp_po_check_security();
-	load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );	
+	load_plugin_textdomain('translation-toolkit', PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );	
 	$incidents = 0;
 	if (isset($_POST['data']['dirty_enqueues'])) $incidents += count($_POST['data']['dirty_enqueues']);
 	if (isset($_POST['data']['dirty_theme'])) $incidents += count($_POST['data']['dirty_theme']);
@@ -225,16 +225,16 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['dubious'])) $incidents += count($_POST['data']['externals']['dubious']['tokens']);
 	if (isset($_POST['data']['php'])) $incidents += count($_POST['data']['php']);
 ?>
-<p class="self-protection"><strong><?php _e('Scripting Guard',CSP_PO_TEXTDOMAIN);?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details',CSP_PO_TEXTDOMAIN); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', CSP_PO_TEXTDOMAIN), $incidents, _n('incident', 'incidents', $incidents, CSP_PO_TEXTDOMAIN)); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
+<p class="self-protection"><strong><?php _e('Scripting Guard','translation-toolkit');?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details','translation-toolkit'); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', 'translation-toolkit'), $incidents, _n('incident', 'incidents', $incidents, 'translation-toolkit')); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 <div id="self-protection-details" style="display:none;">
 <?php
 	if (isset($_POST['data']['php']) && count($_POST['data']['php'])) : ?>
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/php-core.gif"; ?>" />
-		<strong style="color:#800;"><?php _e('PHP runtime error reporting detected !',CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('some executed PHP code is not written proper',CSP_PO_TEXTDOMAIN); ?></strong> | 
-		<?php _e('Originator:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong> <small>(<?php _e('probably by Theme or Plugin',CSP_PO_TEXTDOMAIN); ?>)</small><br/>
-		<?php _e('Below listed error reports has been traced and removed during page creation:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#800;"><?php _e('PHP runtime error reporting detected !','translation-toolkit'); ?></strong><br/>
+		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('some executed PHP code is not written proper','translation-toolkit'); ?></strong> | 
+		<?php _e('Originator:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong> <small>(<?php _e('probably by Theme or Plugin','translation-toolkit'); ?>)</small><br/>
+		<?php _e('Below listed error reports has been traced and removed during page creation:','translation-toolkit'); ?><br/>
 		<ol>
 		<?php foreach($_POST['data']['php'] as $message) : ?>
 			<li><?php echo $message; ?></li>
@@ -246,10 +246,10 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['dirty_enqueues']) && count($_POST['data']['dirty_enqueues'])) : ?>
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/wordpress.gif"; ?>" />
-		<strong style="color:#800;"><?php _e('Malfunction at admin script core detected !',CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('misplaced core file(s) enqueued',CSP_PO_TEXTDOMAIN); ?></strong> | 
-		<?php _e('Polluter:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong> <small>(<?php _e('probably by Theme or Plugin',CSP_PO_TEXTDOMAIN); ?>)</small><br/>
-		<?php _e('Below listed scripts has been dequeued because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#800;"><?php _e('Malfunction at admin script core detected !','translation-toolkit'); ?></strong><br/>
+		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('misplaced core file(s) enqueued','translation-toolkit'); ?></strong> | 
+		<?php _e('Polluter:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong> <small>(<?php _e('probably by Theme or Plugin','translation-toolkit'); ?>)</small><br/>
+		<?php _e('Below listed scripts has been dequeued because of injection:','translation-toolkit'); ?><br/>
 		<ol>
 		<?php foreach($_POST['data']['dirty_enqueues'] as $script) : ?>
 			<li><?php echo strip_tags($script); ?></li>
@@ -261,10 +261,10 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['dirty_theme']) && count($_POST['data']['dirty_theme'])) : $ct = function_exists('wp_get_theme') ? wp_get_theme() : current_theme_info(); ?>
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/themes.gif"; ?>" />
-		<strong style="color:#800;"><?php _e('Malfunction at current Theme detected!',CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Name:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct->name; ?></strong> | 
-		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $ct->author; ?></strong><br/>
-		<?php _e('Below listed scripts has been automatically stripped because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#800;"><?php _e('Malfunction at current Theme detected!','translation-toolkit'); ?></strong><br/>
+		<?php _e('Name:','translation-toolkit');?> <strong><?php echo $ct->name; ?></strong> | 
+		<?php _e('Author:','translation-toolkit');?> <strong><?php echo $ct->author; ?></strong><br/>
+		<?php _e('Below listed scripts has been automatically stripped because of injection:','translation-toolkit'); ?><br/>
 		<ol>
 		<?php foreach($_POST['data']['dirty_theme'] as $script) : ?>
 			<li><?php echo strip_tags($script); ?></li>
@@ -289,10 +289,10 @@ function csp_handle_csp_self_protection_result() {
 ?>
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/plugins.gif"; ?>" />
-		<strong style="color:#800;"><?php _e('Malfunction at 3rd party Plugin detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Name:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $data['Name']; ?></strong> | 
-		<?php _e('Author:',CSP_PO_TEXTDOMAIN);?> <strong><?php echo $data['Author']; ?></strong><br/>
-		<?php _e('Below listed scripts has been automatically stripped because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#800;"><?php _e('Malfunction at 3rd party Plugin detected!' ,'translation-toolkit'); ?></strong><br/>
+		<?php _e('Name:','translation-toolkit');?> <strong><?php echo $data['Name']; ?></strong> | 
+		<?php _e('Author:','translation-toolkit');?> <strong><?php echo $data['Author']; ?></strong><br/>
+		<?php _e('Below listed scripts has been automatically stripped because of injection:','translation-toolkit'); ?><br/>
 		<ol>
 		<?php foreach($affected as $script) : ?>
 			<li><?php echo strip_tags($script); ?></li>
@@ -305,10 +305,10 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['runtime']) && count($_POST['data']['runtime'])) : ?>
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/badscript.png"; ?>" />
-		<strong style="color:#800;"><?php _e('Malfunction at 3rd party inlined Javascript(s) detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('javascript runtime exception', CSP_PO_TEXTDOMAIN); ?></strong> | 
-		<?php _e('Polluter:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Below listed exception(s) has been caught and traced:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#800;"><?php _e('Malfunction at 3rd party inlined Javascript(s) detected!' ,'translation-toolkit'); ?></strong><br/>
+		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('javascript runtime exception', 'translation-toolkit'); ?></strong> | 
+		<?php _e('Polluter:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong><br/>
+		<?php _e('Below listed exception(s) has been caught and traced:','translation-toolkit'); ?><br/>
 		<ol>
 		<?php foreach($_POST['data']['runtime'] as $script) : ?>
 			<li><?php echo strip_tags(stripslashes($script)); ?></li>
@@ -320,10 +320,10 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['dubious']) && count($_POST['data']['externals']['dubious']['tokens'])) : $errors = 0; ?>
 		<div>
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/dubious-scripts.png"; ?>" />
-		<strong style="color:#800;"><?php _e('Malfunction at dubious external scripts detected !' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Reason:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown external script has been enqueued or hardly attached.', CSP_PO_TEXTDOMAIN); ?></strong> | 
-		<?php _e('Polluter:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('unknown', CSP_PO_TEXTDOMAIN); ?></strong> <small>(<?php _e('probably by Theme or Plugin',CSP_PO_TEXTDOMAIN); ?>)</small><br/>
-		<?php _e('Below listed external scripts have been traced, verified and automatically stripped because of injection:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#800;"><?php _e('Malfunction at dubious external scripts detected !' ,'translation-toolkit'); ?></strong><br/>
+		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('unknown external script has been enqueued or hardly attached.', 'translation-toolkit'); ?></strong> | 
+		<?php _e('Polluter:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong> <small>(<?php _e('probably by Theme or Plugin','translation-toolkit'); ?>)</small><br/>
+		<?php _e('Below listed external scripts have been traced, verified and automatically stripped because of injection:','translation-toolkit'); ?><br/>
 		<ol>
 		<?php  
 		for($i=0;$i<count($_POST['data']['externals']['dubious']['tokens']); $i++) :
@@ -338,8 +338,8 @@ function csp_handle_csp_self_protection_result() {
 		</ol>
 		<?php if ($errors > 0) : ?>
 		<p style="color:#800;font-weight:bold;"><?php 
-			$text = sprintf(_n('%d file', '%d files', $errors, CSP_PO_TEXTDOMAIN), $errors);
-			echo sprintf(__('This page will not work as expected because %s could not be get from CDN. Check and update the Plugin doing your CDN redirection!',CSP_PO_TEXTDOMAIN), $text); 
+			$text = sprintf(_n('%d file', '%d files', $errors, 'translation-toolkit'), $errors);
+			echo sprintf(__('This page will not work as expected because %s could not be get from CDN. Check and update the Plugin doing your CDN redirection!','translation-toolkit'), $text); 
 		?></p>
 		<?php endif; ?>
 		</div>
@@ -348,9 +348,9 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['cdn']) && count($_POST['data']['externals']['cdn']['tokens'])) : $errors = 0; ?>
 		<div style="border-top: 1px dashed gray; padding-top: 10px;">
 		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/cdn-scripts.png"; ?>" />
-		<strong style="color:#008;"><?php _e('CDN based script loading redirection detected!' ,CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Warning:',CSP_PO_TEXTDOMAIN);?> <strong><?php _e('may break the dependency script loading feature within WordPress core files.', CSP_PO_TEXTDOMAIN); ?></strong><br/>
-		<?php _e('Below listed redirects have been traced and verified but not revoked:',CSP_PO_TEXTDOMAIN); ?><br/>
+		<strong style="color:#008;"><?php _e('CDN based script loading redirection detected!' ,'translation-toolkit'); ?></strong><br/>
+		<?php _e('Warning:','translation-toolkit');?> <strong><?php _e('may break the dependency script loading feature within WordPress core files.', 'translation-toolkit'); ?></strong><br/>
+		<?php _e('Below listed redirects have been traced and verified but not revoked:','translation-toolkit'); ?><br/>
 		<ol>
 		<?php  
 		for($i=0;$i<count($_POST['data']['externals']['cdn']['tokens']); $i++) :
@@ -365,8 +365,8 @@ function csp_handle_csp_self_protection_result() {
 		</ol>
 		<?php if ($errors > 0) : ?>
 		<p style="color:#800;font-weight:bold;"><?php 
-			$text = sprintf(_n('%d file', '%d files', $errors, CSP_PO_TEXTDOMAIN), $errors);
-			echo sprintf(__('This page will not work as expected because %s could not be get from CDN. Check and update the Plugin doing your CDN redirection!',CSP_PO_TEXTDOMAIN), $text); 
+			$text = sprintf(_n('%d file', '%d files', $errors, 'translation-toolkit'), $errors);
+			echo sprintf(__('This page will not work as expected because %s could not be get from CDN. Check and update the Plugin doing your CDN redirection!','translation-toolkit'), $text); 
 		?></p>
 		<?php endif; ?>
 		</div>

@@ -57,10 +57,10 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 		
 		$error = false;
 		if(!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
-			if (file_exists($pofile)) if (!@unlink($pofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
+			if (file_exists($pofile)) if (!@unlink($pofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", 'translation-toolkit'), $mofile);
 		}else {
 			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$pofile));			
-			if($wp_filesystem->is_file($target_file)) if (!$wp_filesystem->delete($target_file)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $pofile);
+			if($wp_filesystem->is_file($target_file)) if (!$wp_filesystem->delete($target_file)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", 'translation-toolkit'), $pofile);
 		}
 		if ($error) {
 			header('Status: 404 Not Found');
@@ -112,10 +112,10 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 	
 		$error = false;
 		if (!$this->supports_filesystem || $wp_filesystem->method == 'direct') {
-			if (file_exists($mofile)) if (!@unlink($mofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
+			if (file_exists($mofile)) if (!@unlink($mofile)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", 'translation-toolkit'), $mofile);
 		}else {
 			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$mofile));			
-			if($wp_filesystem->is_file($target_file)) if (!$wp_filesystem->delete($target_file)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", CSP_PO_TEXTDOMAIN), $mofile);
+			if($wp_filesystem->is_file($target_file)) if (!$wp_filesystem->delete($target_file)) $error = sprintf(__("You do not have the permission to delete the file '%s'.", 'translation-toolkit'), $mofile);
 		}
 		if ($error) {
 			header('Status: 404 Not Found');
@@ -223,10 +223,10 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 					if (!is_writable($filename)) {
 						@chmod($filename, 0666);
 					}
-					if (!is_writable($filename)) $error = __('Server Restrictions: Changing file rights is not permitted.', CSP_PO_TEXTDOMAIN);
+					if (!is_writable($filename)) $error = __('Server Restrictions: Changing file rights is not permitted.', 'translation-toolkit');
 				}
 			}
-			else $error = sprintf(__("You do not have the permission to modify the file rights for a not existing file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
+			else $error = sprintf(__("You do not have the permission to modify the file rights for a not existing file '%s'.", 'translation-toolkit'), $filename);
 		} else {
 			$target_file = str_replace('//', '/', $wp_filesystem->abspath().str_replace($this->real_abspath, '',$filename));			
 			if($wp_filesystem->is_file($target_file)) {
@@ -236,10 +236,10 @@ class CspFileSystem_TranslationFile extends CspTranslationFile {
 					if (!is_writable($filename)) {
 						$wp_filesystem->chmod($target_file, 0666);
 					}
-					if (!is_writable($filename)) $error = __('Server Restrictions: Changing file rights is not permitted.', CSP_PO_TEXTDOMAIN);
+					if (!is_writable($filename)) $error = __('Server Restrictions: Changing file rights is not permitted.', 'translation-toolkit');
 				}
 			}else{
-				$error = sprintf(__("You do not have the permission to modify the file rights for a not existing file '%s'.", CSP_PO_TEXTDOMAIN), $filename);
+				$error = sprintf(__("You do not have the permission to modify the file rights for a not existing file '%s'.", 'translation-toolkit'), $filename);
 			}
 			
 		}
