@@ -45,7 +45,7 @@ class TranslationToolkit_Help {
 		
 	} // END __construct()
 
-	static function helptab_overview() { ?>
+	static function helptab_about() { ?>
 		<p>
 			<strong>Codestyling Localization </strong> - <em>"<?php _e( '... translate your WordPress, Plugins and Themes', 'translation-toolkit' ); ?>"</em>
 		</p>
@@ -70,6 +70,12 @@ class TranslationToolkit_Help {
 		</p>
 		<p>
 		<?php _e( 'It could be, that your provider confirms, that you have enough PHP memory for your installation but it is not. You can detect your real available memory limit using the plugin <a href="http://wordpress.org/extend/plugins/wp-system-health/" target="_blank">WP System Health</a>. It has a build in feature (called <em>Test Suite</em>) to evaluate correctly the memory limit the server will permit.', 'translation-toolkit' ); ?>
+		</p>
+		<p>
+			<input id="enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>>
+			<label for="enable_low_memory_mode"><?php _e('enable low memory mode', 'translation-toolkit'); ?></label>
+			<img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/loading-small.gif'; ?>" />
+			&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="lowmemory"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a>
 		</p>
 		<?php
 	}

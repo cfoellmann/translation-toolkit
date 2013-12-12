@@ -128,14 +128,7 @@ class TranslationToolkit_Admin {
 
 		$screen = get_current_screen();
 		//$request = unserialize(csp_fetch_remote_content('http://api.wordpress.org/plugins/info/1.0/codestyling-localization'));
-		$screen->add_help_tab(
-			array(
-				'title' => __( 'Overview', 'translation-toolkit' ),
-				'id' => 'overview',
-				'content' => '',
-				'callback' => array( 'TranslationToolkit_Help', 'helptab_overview' ),
-			)
-		);
+		
 		$screen->add_help_tab(
 			array(
 				'title' => __( 'Low Memory Mode', 'translation-toolkit' ),
@@ -180,12 +173,22 @@ class TranslationToolkit_Admin {
 				)
 			);
 		}
-		$screen->add_help_tab(array(
-			'title' => __( 'Child Themes', 'translation-toolkit' ),
-			'id' => 'workonchildthemes',
-			'content' => '',
-			'callback' => array( 'TranslationToolkit_Help', 'helptab_workonchildthemes' ),
-		));
+		$screen->add_help_tab(
+			array(
+				'title' => __( 'Child Themes', 'translation-toolkit' ),
+				'id' => 'workonchildthemes',
+				'content' => '',
+				'callback' => array( 'TranslationToolkit_Help', 'helptab_workonchildthemes' ),
+			)
+		);
+		$screen->add_help_tab(
+			array(
+				'title' => __( 'About', 'translation-toolkit' ),
+				'id' => 'about',
+				'content' => '',
+				'callback' => array( 'TranslationToolkit_Help', 'helptab_about' ),
+			)
+		);
 		
 	} // END load_assets()
 	
@@ -199,17 +202,18 @@ class TranslationToolkit_Admin {
 	?>
 	<div id="csp-wrap-main" class="wrap">
 		<h2><?php _e( 'Manage Language Files', 'translation-toolkit' ); ?></h2>
-		<?php if ( CSL_FILESYSTEM_DIRECT !== true) { ?>
+		<?php if ( CSL_FILESYSTEM_DIRECT !== true ) { ?>
 			<div>
-			<p class="warning"><strong><?php _e('File Permission Problem:','translation-toolkit');?></strong> <?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', 'translation-toolkit'); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="filepermissions"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a></p>
+				<p class="warning">
+					<strong><?php _e('File Permission Problem:','translation-toolkit');?></strong>
+					<?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', 'translation-toolkit'); ?>&nbsp;
+					<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="filepermissions">
+						<img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" />
+					</a>
+				</p>
 			</div>
 		<?php } ?>
-		<p>
-			<input id="enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>>
-			<label for="enable_low_memory_mode"><?php _e('enable low memory mode', 'translation-toolkit'); ?></label>
-			<img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/loading-small.gif'; ?>" />
-			&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="lowmemory"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a>
-		</p>
+		
 		<h3 class="nav-tab-wrapper">
 			<?php
 			foreach ( $tt_tabs['translation-toolkit'] as $id => $tab ) {
