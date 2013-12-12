@@ -3,7 +3,7 @@
 Plugin Name: Translation Toolkit
 Plugin URI: https://github.com/wp-repository/translation-toolkit/
 Description: @TODO
-Version: 0.1
+Version: 0.1-beta
 Author: Project Contributors
 Author URI: https://github.com/wp-repository/translation-toolkit/graphs/contributors
 Text Domain: translation-toolkit
@@ -26,7 +26,167 @@ Domain Path: /languages
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * @author Translation Toolkit Contributors <https://github.com/wp-repository/translation-toolkit/graphs/contributors>
+ * @license GPLv2 <http://www.gnu.org/licenses/gpl-2.0.html>
+ * @package Translation Toolkit
+ */
+
+//avoid direct calls to this file
+if ( ! function_exists( 'add_filter' ) ) {
+	header( 'Status: 403 Forbidden' );
+	header( 'HTTP/1.1 403 Forbidden' );
+	exit();
+}
+
+require_once( dirname(__FILE__) . '/deprecated.php' );
+
+/** Register autoloader */
+spl_autoload_register( 'TranslationToolkit::autoload' );
+
+class TranslationToolkit {
+	
+	/**
+	 * Holds a copy of the object for easy reference.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var object
+	 */
+	private static $instance;
+
+	/**
+	 * Current version of the plugin.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string
+	 */
+	public $version = '0.1-beta';
+	// public $db_version = '1';
+
+	/**
+	 * Holds a copy of the main plugin filepath.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string
+	 */
+	private static $file = __FILE__;
+	
+	/**
+	 * @TODO
+	 *
+	 * @since 1.0.0
+	 */
+	public function __construct() {
+
+		self::$instance = $this;
+		
+		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
+
+		// initialize config and data on activation
+		register_activation_hook( __FILE__, array( 'Translation_Toolkit', 'activate_plugin' ) );
+		register_deactivation_hook( __FILE__, array( 'Translation_Toolkit', 'deactivate_plugin' ) );
+
+	} // END __construct()
+
+	/**
+	 * @TODO
+	 *
+	 * @since 1.0.0
+	 */
+	public function init() {
+
+		if ( is_admin() ) {
+			
+			$translationtoolkit_admin = new TranslationToolkit_Admin;
+			
+		}
+
+	} // END init()
+	
+	/**
+	 * PSR-0 compliant autoloader to load classes as needed.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $classname The name of the class
+	 * @return null Return early if the class name does not start with the correct prefix
+	 */
+	public static function autoload( $classname ) {
+
+		if ( 'TranslationToolkit' !== mb_substr( $classname, 0, 18 ) )
+			return;
+
+		$filename = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . str_replace( '_', DIRECTORY_SEPARATOR, $classname ) . '.php';
+		if ( file_exists( $filename ) )
+			require $filename;
+
+	} // END autoload()
+	
+	/**
+	 * Getter method for retrieving the object instance.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function get_instance() {
+
+		return self::$instance;
+
+	} // END get_instance()
+
+	/**
+	 * Getter method for retrieving the main plugin filepath.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function get_file() {
+
+		return self::$file;
+
+	} // END get_file()
+	
+	/**
+	 * Load the plugin's textdomain hooked to 'plugins_loaded'.
+	 *
+	 * @since 1.0.0
+	 */
+	function load_plugin_textdomain() {
+		
+		load_plugin_textdomain( 'translation-toolkit', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		
+	}
+	
+	/**
+	 * Desc.
+	 *
+	 * @since 1.0.0
+	 */
+	function activate_plugin() {
+		
+	} // END activate_plugin()
+	
+	/**
+	 * Desc.
+	 *
+	 * @since 1.0.0
+	 */
+	function deactivate_plugin() {
+		
+	} // END deactivate_plugin()
+
+} // END class TranslationToolkit
+
+/** Instantiate the init class */
+$translationtoolkit = new TranslationToolkit();
  
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 //	constant definition
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2116,11 +2276,7 @@ function csp_po_init_per_user_trans() {
 	if (!defined('TRANSLATION_API_PER_USER_DONE')) define('TRANSLATION_API_PER_USER_DONE', true);
 }
 
-function csp_po_init() {
-	//currently not used, subject of later extension
-	$low_mem_mode = (bool)get_option('codestyling-localization.low-memory', false);
-	define('CSL_LOW_MEMORY', $low_mem_mode);	
-}
+
 function csp_callback_help_overview() {
 ?>
 	<p>
