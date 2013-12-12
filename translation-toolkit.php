@@ -1772,101 +1772,15 @@ function csp_po_ajax_handle_launch_editor() {
 		//overwrite with full imploded sparse file contents now
 		$f->write_pofile($_POST['basepath'].$_POST['file'],false,false,'no' );
 	}
-	if ($f->supports_textdomain_extension() || $_POST['type'] == 'wordpress'){
-		if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
-		$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales, csp_get_translate_api_type());
-	}else {
-		header('Status: 404 Not Found' );
-		header('HTTP/1.1 404 Not Found' );
-		_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",CSP_PO_TEXTDOMAIN);
-		?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="translationformat"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><?php
-	}
-	exit();
-}
-
-function csp_po_ajax_handle_translate_by_google() {
-	csp_po_check_security();
-	if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
-	// reference documentation: http://code.google.com/intl/de-DE/apis/ajaxlanguage/documentation/reference.html
-	// example API v1 - 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=hello%20world&langpair=en%7Cit'
-	// example API v2 - [ GET https://www.googleapis.com/language/translate/v2?key=INSERT-YOUR-KEY&source=en&target=de&q=Hello%20world ]
-	$msgid = $_POST['msgid'];
-	$search = array('\\\\\\\"', '\\\\\"','\\\\n', '\\\\r', '\\\\t', '\\\\$','\\0', "\\'", '\\\\' );
-	$replace = array('\"', '"', "\n", "\r", "\\t", "\\$", "\0", "'", "\\");
-	$msgid = str_replace( $search, $replace, $msgid );
-	add_filter('https_ssl_verify', '__return_false' );
-	//OLD: $res = csp_fetch_remote_content("http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&format=html&q=".urlencode($msgid)."&langpair=en%7C".$_POST['destlang']);
-	$res = csp_fetch_remote_content("https://www.googleapis.com/language/translate/v2?key=".(defined('GOOGLE_TRANSLATE_KEY') ? GOOGLE_TRANSLATE_KEY : '')."&source=en&target=".$_POST['destlang']."&q=".urlencode($msgid));
-	if ($res) {
-		header('Content-Type: application/json' );
-		echo $res;
-	}
-	else{
-		header('Status: 404 Not Found' );
-		header('HTTP/1.1 404 Not Found' );
-		load_plugin_textdomain(CSP_PO_TEXTDOMAIN, PLUGINDIR.'/codestyling-localization/languages','codestyling-localization/languages' );
-		_e("Sorry, Google Translation is not available.", CSP_PO_TEXTDOMAIN);	
-	}
-	exit();
-}
-
-function csp_po_ajax_handle_translate_by_microsoft() {
-	csp_po_check_security();
-	if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
-	$msgid = $_POST['msgid'];
-	$search = array('\\\\\\\"', '\\\\\"','\\\\n', '\\\\r', '\\\\t', '\\\\$','\\0', "\\'", '\\\\' );
-	$replace = array('\"', '"', "\n", "\r", "\\t", "\\$", "\0", "'", "\\");
-	$msgid = str_replace( $search, $replace, $msgid );	
-	
-	require_once('includes/translation-api-microsoft.php' );
-	header('Content-Type: text/plain' );
-	try {
-		//Client ID of the application.
-		$clientID     = defined('MICROSOFT_TRANSLATE_CLIENT_ID') ? MICROSOFT_TRANSLATE_CLIENT_ID : '';
-		//Client Secret key of the application.
-		$clientSecret = defined('MICROSOFT_TRANSLATE_CLIENT_SECRET') ? MICROSOFT_TRANSLATE_CLIENT_SECRET : '';
-		//OAuth Url.
-		$authUrl      = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/";
-		//Application Scope Url
-		$scopeUrl     = "http://api.microsofttranslator.com";
-		//Application grant type
-		$grantType    = "client_credentials";
-
-		//Create the AccessTokenAuthentication object.
-		$authObj      = new AccessTokenAuthentication();
-		//Get the Access token.
-		$accessToken  = $authObj->getTokens($grantType, $scopeUrl, $clientID, $clientSecret, $authUrl);
-		//Create the authorization Header string.
-		$authHeader = "Authorization: Bearer ". $accessToken;
-
-		//Set the params.//
-		$fromLanguage = "en";
-		$toLanguage   = strip_tags($_POST['destlang']);
-		$inputStr     = $msgid;
-		$contentType  = 'text/plain';
-		$category     = 'general';
-		
-		$params = "text=".urlencode($inputStr)."&to=".$toLanguage."&from=".$fromLanguage;
-		$translateUrl = "http://api.microsofttranslator.com/v2/Http.svc/Translate?$params";
-		
-		//Create the Translator Object.
-		$translatorObj = new HTTPTranslator();
-		
-		//Get the curlResponse.
-		$curlResponse = $translatorObj->curlRequest($translateUrl, $authHeader);
-		
-		//Interprets a string of XML into an object.
-		$xmlObj = simplexml_load_string($curlResponse);
-		foreach((array)$xmlObj[0] as $val){
-			$translatedStr = $val;
-		}
-		echo $translatedStr;
-	} catch(Exception $e) {
-		header('Status: 404 Not Found' );
-		header('HTTP/1.1 404 Not Found' );
-		echo $e->getMessage();
-	}	
-
+//	if ($f->supports_textdomain_extension() || $_POST['type'] == 'wordpress'){
+//		if (!defined('TRANSLATION_API_PER_USER_DONE')) csp_po_init_per_user_trans();
+//		$f->echo_as_json($_POST['basepath'], $_POST['file'], $csp_l10n_sys_locales, csp_get_translate_api_type());
+//	}else {
+//		header('Status: 404 Not Found' );
+//		header('HTTP/1.1 404 Not Found' );
+//		_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",CSP_PO_TEXTDOMAIN);
+//		?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="translationformat"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a><?php
+//	}
 	exit();
 }
 
@@ -2049,92 +1963,22 @@ function csp_po_ajax_handle_create_pot_indicator() {
 //////////////////////////////////////////////////////////////////////////////////////////
 //	Admin Initialization ad Page Handler
 //////////////////////////////////////////////////////////////////////////////////////////
-if (function_exists('add_action')) {
-	if (is_admin() && !defined('DOING_AJAX')) {
+if ( function_exists( 'add_action' ) ) {
+	if ( is_admin() && !defined( 'DOING_AJAX' ) ) {
 		add_action('admin_head', 'csp_po_admin_head' );
 		require_once('includes/locale-definitions.php' );
 	}
-	if(is_admin()) {
-		add_action('admin_init', 'csp_po_init_per_user_trans' );	
+	if( is_admin() ) {
 		add_action('admin_init', 'csp_check_filesystem' );
 	}
 }
 
 function csp_check_filesystem() {
 	//file system investigation
-	if (function_exists('get_filesystem_method')) {
-		$fsm = get_filesystem_method(array());
-		define("CSL_FILESYSTEM_DIRECT", $fsm == 'direct' );
+	if ( function_exists( 'get_filesystem_method' ) ) {
+		$fsm = get_filesystem_method( array() );
+		define( "CSL_FILESYSTEM_DIRECT", $fsm == 'direct' );
 	}else{
-		define("CSL_FILESYSTEM_DIRECT", true);
+		define( "CSL_FILESYSTEM_DIRECT", true );
 	}
-}
-
-function csp_po_init_per_user_trans() {
-	//process per user settings
-	if (is_user_logged_in() && defined('TRANSLATION_API_PER_USER') && (TRANSLATION_API_PER_USER === true) && current_user_can('manage_options')) {
-		$myself = wp_get_current_user();
-		$func = function_exists('get_user_meta') ? 'get_user_meta' : 'get_usermeta';
-		$g = call_user_func($func, $myself->ID, 'csp-google-api-key', true);
-		if (!empty($g) && !defined('GOOGLE_TRANSLATE_KEY'))  define('GOOGLE_TRANSLATE_KEY', $g);
-		$m1 = call_user_func($func, $myself->ID, 'csp-microsoft-api-client-id', true);
-		if (!empty($m1) && !defined('MICROSOFT_TRANSLATE_CLIENT_ID'))  define('MICROSOFT_TRANSLATE_CLIENT_ID', $m1);
-		$m2 = call_user_func($func, $myself->ID, 'csp-microsoft-api-client-secret', true);
-		if (!empty($m2) && !defined('MICROSOFT_TRANSLATE_CLIENT_SECRET'))  define('MICROSOFT_TRANSLATE_CLIENT_SECRET', $m2);
-	}		
-	if (!defined('TRANSLATION_API_PER_USER_DONE')) define('TRANSLATION_API_PER_USER_DONE', true);
-}
-
-function csp_extend_user_profile($profileuser) {
-	if (!@is_object($profiluser)) {
-		$profileuser = wp_get_current_user();
-	}
-	$func = function_exists('get_user_meta') ? 'get_user_meta' : 'get_usermeta';
-?>
-<h3 id="translations"><?php _e('Translation API Keys', CSP_PO_TEXTDOMAIN); ?><br/><small><em>(Codestyling Localization)</em></small></h3>
-<table class="form-table">
-<tr>
-<th><label for="google-api-key"><?php _e('Google Translate API Key', CSP_PO_TEXTDOMAIN); ?></label></th>
-<td><input type="text" class="regular-text" name="csp-google-api-key" id="csp-google-api-key" value="<?php echo call_user_func($func, $profileuser->ID, 'csp-google-api-key', true); ?>" autocomplete="off" />
-</tr>
-<tr>
-<th><label for="microsoft-api-client-id"><?php _e('Microsoft Translator - Client ID', CSP_PO_TEXTDOMAIN); ?></label></th>
-<td><input type="text" class="regular-text" name="csp-microsoft-api-client-id" id="csp-microsoft-api-client-id" value="<?php echo call_user_func($func, $profileuser->ID, 'csp-microsoft-api-client-id', true); ?>" autocomplete="off" />
-</tr>
-<tr>
-<th><label for="microsoft-api-client-secret"><?php _e('Microsoft Translator - Client Secret', CSP_PO_TEXTDOMAIN); ?></label></th>
-<td><input type="text" class="regular-text" name="csp-microsoft-api-client-secret" id="csp-microsoft-api-client-secret" value="<?php echo call_user_func($func, $profileuser->ID, 'csp-microsoft-api-client-secret', true); ?>" autocomplete="off" />
-</tr>
-</table>
-<?php
-}
-
-function csp_save_user_profile() {
-	$myself = wp_get_current_user();
-	$func = function_exists('update_user_meta') ? 'update_user_meta' : 'update_usermeta';
-	if (isset($_POST['csp-google-api-key'])) {
-		call_user_func($func, $myself->ID, 'csp-google-api-key', $_POST['csp-google-api-key']);
-	}
-	if (isset($_POST['csp-microsoft-api-client-id'])) {
-		call_user_func($func, $myself->ID, 'csp-microsoft-api-client-id', $_POST['csp-microsoft-api-client-id']);
-	}
-	if (isset($_POST['csp-microsoft-api-client-secret'])) {
-		call_user_func($func, $myself->ID, 'csp-microsoft-api-client-secret', $_POST['csp-microsoft-api-client-secret']);
-	}
-}
-
-function csp_get_translate_api_type() {
-	$api_type = (string)get_option('codestyling-localization.translate-api', 'none' );
-	switch($api_type) {
-		case 'google':
-			if(!defined('GOOGLE_TRANSLATE_KEY')) $api_type = 'none';
-			break;
-		case 'microsoft':
-			if(!defined('MICROSOFT_TRANSLATE_CLIENT_ID') || !defined('MICROSOFT_TRANSLATE_CLIENT_SECRET') || !function_exists('curl_version')) $api_type = 'none';
-			break;
-		default:
-			$api_type = 'none';
-			break;
-	}
-	return $api_type;
 }

@@ -79,12 +79,6 @@ class TranslationToolkit_Admin {
 		);
 		
 		add_action( 'load-'.$hook, array( $this, 'load_assets' ) ); //only load the scripts and stylesheets by hook, if this admin page will be shown
-
-		//User Profile extension if necessary
-		if ( defined('TRANSLATION_API_PER_USER') && ( TRANSLATION_API_PER_USER === true ) /*&& current_user_can('manage_options')*/ ) {
-			add_action( 'show_user_profile', 'csp_extend_user_profile' );
-			add_action( 'personal_options_update', 'csp_save_user_profile' );
-		}	
 		
 	} // END admin_menu()
 	
@@ -176,10 +170,6 @@ class TranslationToolkit_Admin {
 		$mo_list_counter = 0;
 		global $csp_l10n_sys_locales, $wp_version;
 		$csp_wp_main_page = (version_compare($wp_version, '2.7 ', '>=') ? "tools" : "edit");
-
-		$google_api = defined('GOOGLE_TRANSLATE_KEY' );
-		$microsoft_api = defined('MICROSOFT_TRANSLATE_CLIENT_ID') && defined('MICROSOFT_TRANSLATE_CLIENT_SECRET') && function_exists('curl_version' );
-		$api_type = csp_get_translate_api_type();
 	?>
 	<div id="csp-wrap-main" class="wrap">
 	<div class="icon32" id="icon-tools"><br/></div>
@@ -197,74 +187,6 @@ class TranslationToolkit_Admin {
 		&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="lowmemory"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a>
 		<?php endif; ?>
 	</p>
-	<p class="translation-apis">
-		<label class="alignleft"><strong><?php _e('Translation Service-APIs:',CSP_PO_TEXTDOMAIN); ?></strong></label> 
-		<img class="alignleft" alt="" title="API: not used" src="<?php echo CSP_PO_BASE_URL."/images/off.png"; ?>" /><input id="translate-api-none" class="translate-api-none alignleft" name="translate-api" value="none" type="radio" autocomplete="off" <?php checked('none', $api_type); ?>/> <label class="alignleft" for="translate-api-none"><?php _e('None',CSP_PO_TEXTDOMAIN); ?></label>
-		<img class="alignleft" alt="" title="API: Google Translate" src="<?php echo CSP_PO_BASE_URL."/images/google.png"; ?>" /><input id="translate-api-google" class="translate-api-google alignleft" name="translate-api" value="google" type="radio" autocomplete="off" <?php checked('google', $api_type); ?> <?php disabled(false, $google_api); ?>/> <label class="alignleft<?php if(!$google_api) echo ' disabled'; ?>" for="translate-api-google"><?php _e('Google',CSP_PO_TEXTDOMAIN); ?></label>
-		<img class="alignleft" alt="" title="API: Microsoft Translate" src="<?php echo CSP_PO_BASE_URL."/images/bing.gif"; ?>" /><input id="translate-api-microsoft" class="translate-api-microsoft alignleft" name="translate-api" value="microsoft" type="radio" autocomplete="off" <?php checked('microsoft', $api_type); ?> <?php disabled(false, $microsoft_api); ?>/> <label class="alignleft<?php if(!$microsoft_api) echo ' disabled'; ?>" for="translate-api-microsoft"><?php _e('Microsoft',CSP_PO_TEXTDOMAIN); ?></label>
-		<?php if(defined('TRANSLATION_PROVIDER_MODE') && TRANSLATION_PROVIDER_MODE === true) : ?>
-			<?php if(defined('TRANSLATION_API_PER_USER') && TRANSLATION_API_PER_USER === true) : ?>
-			<a class="alignright" href="profile.php?#translations"><?php _e('User Profile settings...',CSP_PO_TEXTDOMAIN); ?></a><img class="alignright" alt="" title="API: How to use" src="<?php echo CSP_PO_BASE_URL."/images/user.gif"; ?>" />
-			<?php endif; ?>
-		<?php else: ?>
-		<a class="alignright" id="explain-apis" href="#"><?php _e('How to use translation API services...',CSP_PO_TEXTDOMAIN); ?></a><img class="alignright" alt="" title="API: How to use" src="<?php echo CSP_PO_BASE_URL."/images/question.png"; ?>" />
-		<?php endif; ?>
-	</p>
-	<?php if(!defined('TRANSLATION_PROVIDER_MODE') || TRANSLATION_PROVIDER_MODE === false) : ?>
-	<div class="translation-apis-info">
-		<h5><?php _e("a) Global Unique Keys - single user configuration", CSP_PO_TEXTDOMAIN); ?></h5>
-		<div style="margin-left: 25px;">
-			<small style="color: #f33;">
-			<strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong> <?php _e('Keep in mind, that any WordPress administrator can use the service for translation purpose and may raise your costs in case of paid option used.', CSP_PO_TEXTDOMAIN); ?>
-			</small>
-			<br/><br/>
-			<h5>Google Translate API | <small><a target="_blank" href="https://developers.google.com/translate/v2/faq">FAQ</a></small></h5>
-			<p>
-				<small>
-				<strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong>
-				<?php echo sprintf(__( 'This API is not longer a free service, Google has relaunched the API in version 2 as a pay per use service. Please read the explantions at %s first.', CSP_PO_TEXTDOMAIN ), '<a target="_blank" href="https://developers.google.com/translate/v2/terms">Terms of Service</a>' ); ?>
-				<?php _e('Using this API within <em>Codestyling Localization</em> requires an API Key to be created at your Google account first. Once you have such a key, you can activate this API by defining a new constant at your <b>wp-config.php</b> file:', CSP_PO_TEXTDOMAIN); ?>
-				</br/>
-				<textarea class="google" readonly="readonly">define('GOOGLE_TRANSLATE_KEY', 'enter your key here' );</textarea>
-				</small>
-			</p>
-			<h5>Microsoft Translate API | <small><a target="_blank" href="http://social.msdn.microsoft.com/Forums/en-US/microsofttranslator/thread/c71aeddd-cc90-4228-93cc-51fb969fde09">FAQ</a></small></h5>
-			<p>
-				<small>
-				<?php  echo sprintf(__( 'Microsoft provides the translation services with a free option of 2 million characters per month. But this also requires a subscription at %s either for free or for extended payed service volumes.', CSP_PO_TEXTDOMAIN ), '<a target="_blank" href="http://go.microsoft.com/?linkid=9782667">Azure Marketplace</a>' ); ?>
-				<?php _e('Using this API within <em>Codestyling Localization</em> requires <em>client_id</em> and <em>client_secret</em> to be created at your Azure subscription first. Once you have this values, you can activate this API by defining new constants at your <b>wp-config.php</b> file:', CSP_PO_TEXTDOMAIN); ?>
-				</br/>
-				<textarea class="microsoft" readonly="readonly">
-	define('MICROSOFT_TRANSLATE_CLIENT_ID', 'enter your client id here' );
-	define('MICROSOFT_TRANSLATE_CLIENT_SECRET', 'enter your secret here' );
-				</textarea>
-				<br/>
-				<strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong> <?php _e('This API additionally requires PHP curl functions and will not be available without. Current curl version:', CSP_PO_TEXTDOMAIN); ?>
-				&nbsp;<b><i><?php if (function_exists('curl_version')) { $ver = curl_version(); echo $ver['version']; } else _e('not installed',CSP_PO_TEXTDOMAIN); ?></i></b>
-				</small>
-			</p>
-		</div>
-		<h5><?php _e("b) User Dedicated Keys - multiple user configurations", CSP_PO_TEXTDOMAIN); ?></h5>
-		<div style="margin-left: 25px;">
-			<small style="color: #f33;">
-			<strong><?php _e('Attention:', CSP_PO_TEXTDOMAIN); ?></strong> <?php _e('This will extends all <em>User Profile</em> pages with a new section to enter all required translation key data. Keep im mind, that this data are stored at the database and are contained at SQL backups.', CSP_PO_TEXTDOMAIN); ?>
-			</small>
-			<p>
-			<small>
-				<?php _e('You can activate the per user behavoir, if you define only a single constant at your <b>wp-config.php</b> file. This enables the new section at each <a target="_blank" href="profile.php?#translations">User Profile</a> with sufficiant permissions and is only editable by the releated logged in user.',CSP_PO_TEXTDOMAIN); ?>
-				<textarea class="google" readonly="readonly">define('TRANSLATION_API_PER_USER', true);</textarea>
-			</small>
-			</p>
-		</div>
-		<h5 style="border-top: 1px dashed gray;padding-top: 5px;"><?php _e("Special Hosting Configuration", CSP_PO_TEXTDOMAIN); ?></h5>
-		<div style="margin-left: 25px;">
-			<small>
-				<?php _e('If your are a provider and you are hosting WordPress installations for your customer, it is possible to deactivate this help information using an additional constant at your <b>wp-config.php</b> file. At single user mode (a) this simply does not show any help for API configuration, at multiuser mode (b) it shows the link to the profile page.', CSP_PO_TEXTDOMAIN); ?>
-				<textarea class="google" readonly="readonly">define('TRANSLATION_PROVIDER_MODE', true);</textarea>
-			</small>
-		</div>
-	</div>
-	<?php endif; ?>
 	<ul class="subsubsub">
 	<li>
 		<a<?php if(!isset($_GET['type'])) echo " class=\"current\""; ?> href="<?php echo $csp_wp_main_page ?>.php?page=codestyling-localization/codestyling-localization.php"><?php  _e('All Translations', CSP_PO_TEXTDOMAIN); ?>
@@ -2311,18 +2233,7 @@ class TranslationToolkit_Admin {
 				});		
 			csp_chuck_size = (jQuery(e.target).is(':checked') ? 1 : 20);
 		});
-		jQuery('#explain-apis').click(function(event) {
-			event.preventDefault();
-			jQuery('.translation-apis-info').slideToggle();
-		});
-		jQuery('.translation-apis input').click(function(event) {
-			new Ajax.Request('<?php echo CSP_PO_ADMIN_URL.'/admin-ajax.php' ?>', {  
-					parameters: {
-						action: 'csp_po_change_translate_api',
-						api_type: jQuery(this).val()
-					}
-			});	
-		});
+		
 		<?php global $wp_version; if (version_compare($wp_version, '3.3', '<')) : ?>
 		jQuery('.question-help').hide();
 		<?php else : ?>
