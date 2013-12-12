@@ -12,8 +12,17 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
+
+/**
+ * INIT
+ */
+
 function csp_po_init() {
 	//currently not used, subject of later extension
 	$low_mem_mode = (bool)get_option('codestyling-localization.low-memory', false);
 	define('CSL_LOW_MEMORY', $low_mem_mode);	
 }
+
+/**
+ * ADMIN
+ */
