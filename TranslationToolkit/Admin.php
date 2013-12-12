@@ -55,6 +55,10 @@ class TranslationToolkit_Admin {
 	 */
 	function admin_init() {
 		
+		//currently not used, subject of later extension
+		$low_mem_mode = (bool)get_option( 'codestyling-localization.low-memory', false );
+		define( 'CSL_LOW_MEMORY', $low_mem_mode );
+		
 	} // END admin_init()
 	
 	/**
@@ -86,12 +90,7 @@ class TranslationToolkit_Admin {
 	
 	function load_assets() {
 
-		add_filter('print_scripts_array', 'csp_filter_print_scripts_array', 0);
-		add_action('admin_enqueue_scripts', 'csp_start_protection', 0);
-		add_action('in_admin_footer', 'csp_start_protection', 0);
-		add_action('admin_head', 'csp_self_script_protection_head', 9999);
-		add_action('admin_print_footer_scripts', 'csp_self_script_protection_footer', 9999);
-		add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 9999);
+//		add_filter('script_loader_src', 'csp_redirect_prototype_js', 10, 9999);
 
 		wp_enqueue_script( 'thickbox' );
 		wp_enqueue_script('jquery-ui-dialog' );
