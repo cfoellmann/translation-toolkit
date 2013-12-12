@@ -109,6 +109,9 @@ class TranslationToolkit_Admin {
 	} // END admin_menu()
 	
 	function load_assets() {
+		
+		// Register css files
+		$dev = defined( 'TT_DEV' ) && TT_DEV ? '' : '.min';
 
 		wp_enqueue_script( 'thickbox' );
 		wp_enqueue_script( 'jquery-ui-dialog' );
@@ -116,11 +119,11 @@ class TranslationToolkit_Admin {
 		wp_enqueue_script( 'scriptaculous-effects' );
 
 		wp_enqueue_style( 'thickbox' );
-		wp_enqueue_style( 'codestyling-localization-ui', plugin_dir_path( TranslationToolkit::get_file() ) . '/css/ui.all.css' );
-		wp_enqueue_style( 'codestyling-localization', plugin_dir_path( TranslationToolkit::get_file() ) . '/css/plugin.css' );
-
+		wp_enqueue_style( 'translation-toolkit', plugin_dir_path( TranslationToolkit::get_file() ) . '/css/plugin.' . $dev . 'css' );
+		wp_enqueue_style( 'translation-toolkit-ui', plugin_dir_path( TranslationToolkit::get_file() ) . '/css/ui.all.' . $dev . 'css' );
+		
 		if ( is_rtl() ) {
-			wp_enqueue_style('codestyling-localization-rtl', plugin_dir_path( TranslationToolkit::get_file() ) . '/css/plugin-rtl.css' );
+			wp_enqueue_style( 'translation-toolkit-rtl', plugin_dir_path( TranslationToolkit::get_file() ) . '/css/plugin-rtl.' . $dev . 'css' );
 		}
 
 		$screen = get_current_screen();
