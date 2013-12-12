@@ -120,7 +120,7 @@ class TranslationToolkit_Ajax {
 								?>
 								<tr>
 									<td><input type="radio" name="mo-locale" value="<?php echo $key; ?><?php echo $selected; ?>" onclick="$('submit_language').enable();$('csp-dialog-language').value = this.value;" /></td>
-									<td><img alt="" title="locale: <?php echo $key ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . '/images/flags/' . $sys_locales[ $key ]['country-www'].'.gif'; ?>" /></td>
+									<td><img alt="" title="locale: <?php echo $key ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/flags/' . $sys_locales[ $key ]['country-www'].'.gif'; ?>" /></td>
 									<td><?php echo $key; ?></td>
 									<td style="padding-left: 5px;border-left: 1px solid #aaa;"><?php echo $values['lang-native']."<br />"; ?></td>
 								</tr>
@@ -241,7 +241,7 @@ class TranslationToolkit_Ajax {
 			</tr>
 			<tr>
 				<td nowrap="nowrap"><strong><?php _e('Language Target','translation-toolkit'); ?>:</strong></td>
-				<td><img alt="" title="locale: <?php echo strip_tags($_POST['language']); ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . '/images/flags/' . $country_www . '.gif'; ?>" /></td>			
+				<td><img alt="" title="locale: <?php echo strip_tags($_POST['language']); ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/flags/' . $country_www . '.gif'; ?>" /></td>			
 				<td><?php echo $lang_native; ?></td>
 			</tr>	
 			<tr>
@@ -518,7 +518,7 @@ class TranslationToolkit_Ajax {
 			subpath: '<?php echo strip_tags($_POST['subpath']); ?>',
 			language: '<?php echo strip_tags($_POST['language']); ?>',
 			lang_native: '<?php echo $sys_locales[strip_tags($_POST['language'])]['lang-native']; ?>',
-			image: '<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . '/images/flags/' . $sys_locales[ strip_tags( $_POST['language'] ) ]['country-www'] . '.gif'; ?>',
+			image: '<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/flags/' . $sys_locales[ strip_tags( $_POST['language'] ) ]['country-www'] . '.gif'; ?>',
 			type: '<?php echo strip_tags($_POST['type']); ?>',
 			simplefilename: '<?php echo strip_tags($_POST['simplefilename']); ?>',
 			transtemplate: '<?php echo strip_tags($_POST['transtemplate']); ?>',
@@ -785,7 +785,7 @@ class TranslationToolkit_Ajax {
 			header('Status: 404 Not Found' );
 			header('HTTP/1.1 404 Not Found' );
 			_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.",'translation-toolkit');
-			?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="translationformat"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . "/images/question.gif"; ?>" /></a><?php
+			?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="translationformat"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . "images/question.gif"; ?>" /></a><?php
 		}
 		 * 
 		 */
