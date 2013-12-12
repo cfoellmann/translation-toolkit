@@ -1203,17 +1203,5 @@ if ( function_exists( 'add_action' ) ) {
 		add_action('admin_head', 'csp_po_admin_head' );
 		require_once('includes/locale-definitions.php' );
 	}
-	if( is_admin() ) {
-		add_action('admin_init', 'csp_check_filesystem' );
-	}
 }
 
-function csp_check_filesystem() {
-	//file system investigation
-	if ( function_exists( 'get_filesystem_method' ) ) {
-		$fsm = get_filesystem_method( array() );
-		define( "CSL_FILESYSTEM_DIRECT", $fsm == 'direct' );
-	}else{
-		define( "CSL_FILESYSTEM_DIRECT", true );
-	}
-}

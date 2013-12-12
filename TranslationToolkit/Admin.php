@@ -83,6 +83,8 @@ class TranslationToolkit_Admin {
 		$low_mem_mode = (bool)get_option( 'codestyling-localization.low-memory', false );
 		define( 'CSL_LOW_MEMORY', $low_mem_mode );
 		
+		TranslationToolkit_Helpers::check_filesystem();
+		
 	} // END admin_init()
 	
 	/**
@@ -191,11 +193,11 @@ class TranslationToolkit_Admin {
 	?>
 	<div id="csp-wrap-main" class="wrap">
 		<h2><?php _e( 'Manage Language Files', CSP_PO_TEXTDOMAIN ); ?></h2>
-		<?php if (CSL_FILESYSTEM_DIRECT !== true) : ?>
+		<?php if ( CSL_FILESYSTEM_DIRECT !== true) { ?>
 			<div>
 			<p class="warning"><strong><?php _e('File Permission Problem:',CSP_PO_TEXTDOMAIN);?></strong> <?php _e('Your WordPress installation does not permit the modification of translation files directly. You will be prompt for FTP credentials if required.', CSP_PO_TEXTDOMAIN); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",CSP_PO_TEXTDOMAIN) ?>" rel="filepermissions"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
 			</div>
-		<?php endif; ?>
+		<?php } ?>
 		<p>
 			<input id="enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>>
 			<label for="enable_low_memory_mode"><?php _e('enable low memory mode', CSP_PO_TEXTDOMAIN); ?></label>
@@ -220,22 +222,17 @@ class TranslationToolkit_Admin {
 			  </tr>
 			</thead>
 			<tbody class="list" id="the-gettext-list">
-			<?php
-				
+				<?php
 				if ( isset( $_GET['tab'] ) ) {
 					$tab = $_GET['tab']; 
 				} else { // if ( !isset( $_GET['tab'] ) || 'all' == $_GET['tab'] )
 					$tab = '';
 				}
 				$rows = TranslationToolkit_Helpers::get_packages( $tab );
-				
-//				if ( isset($_GET['tab'] ) && $_GET['tab'] == 'compat' ) {
-//					$_GET['tab'] = '';
-//				}
-				
+			
 				foreach( $rows as $data ) : 
-			?>
-				<tr<?php if ( __("activated",CSP_PO_TEXTDOMAIN) == $data['status'] ) echo " class=\"csp-active\""; ?>>
+				?>
+				<tr<?php if ( __( "activated", CSP_PO_TEXTDOMAIN ) == $data['status'] ) echo ' class="csp-active"'; ?>>
 					<td align="center"><img alt="" src="<?php echo CSP_PO_BASE_URL."/images/".$data['img_type'].".gif"; ?>" /><div><strong><?php echo $data['type-desc']; ?></strong></div></td>
 					<td>
 						<h3 class="csp-type-name"><?php echo $data['name']; ?><span style="font-weight:normal;">&nbsp;&nbsp;&copy;&nbsp;</span><sup><em><?php echo $data['author']; ?></em></sup></h3>
@@ -273,7 +270,7 @@ class TranslationToolkit_Admin {
 							<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 							<tr>
 								<td><strong style="color: #f00;"><?php _e('Memory Warning',CSP_PO_TEXTDOMAIN); ?>:</strong></td>
-								<td class="csp-info-value"><?php _e('Since WordPress 3.x version it may require at least <strong>58MB</strong> PHP memory_limit! The reason is still unclear but it doesn\'t freeze anymore. Instead a error message will be shown and the scanning process aborts while reaching your limits.',CSP_PO_TEXTDOMAIN); ?></td>
+								<td class="csp-info-value"><?php _e( "Since WordPress 3.x version it may require at least <strong>58MB</strong> PHP memory_limit! The reason is still unclear but it doesn't freeze anymore. Instead a error message will be shown and the scanning process aborts while reaching your limits.", CSP_PO_TEXTDOMAIN ); ?></td>
 							<tr>
 							<?php endif; ?>
 							<?php if ($data['is-path-unclear']) : ?>
@@ -307,26 +304,26 @@ class TranslationToolkit_Admin {
 						<?php if ( $data['type'] == 'wordpress' && $data['is_US_Version'] ) {?>
 							<div style="color:#f00;"><?php _e("The original US version doesn't contain the language directory.",CSP_PO_TEXTDOMAIN); ?></div>
 							<br/>
-							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo str_replace("\\", '/', WP_CONTENT_DIR)."/languages" ?>' );"><?php _e('try to create the WordPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
+							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo str_replace( "\\", '/', WP_CONTENT_DIR ) . "/languages" ?>' );"><?php _e( 'try to create the WordPress language directory', CSP_PO_TEXTDOMAIN ); ?></a></div>
 							<br/>
 							<div>
 								<?php _e('or create the missing directory using FTP Access as:',CSP_PO_TEXTDOMAIN); ?>
 								<br/><br/>
-								<?php echo str_replace("\\", '/', WP_CONTENT_DIR)."/"; ?><strong style="color:#f00;">languages</strong>			
+								<?php echo str_replace( "\\", '/', WP_CONTENT_DIR ) . "/"; ?><strong style="color:#f00;">languages</strong>			
 							</div>
-						<?php } elseif($data['is-path-unclear']) { ?>
+						<?php } elseif ( $data['is-path-unclear'] ) { ?>
 							<strong style="border-bottom: 1px solid #ccc;"><?php _e('Available Directories:',CSP_PO_TEXTDOMAIN) ?></strong><br/><br/>
 							<?php 
 								$tmp = array(); 
 								$dirs = rscanpath($data['base_path'], $tmp);
 								$dir = $data['base_path'];
-								echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.$data['base_file'].'xx_XX.pot\' );">'. str_replace(str_replace("\\","/",WP_PLUGIN_DIR), '', $dir)."</a><br/>";
+								echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.$data['base_file'].'xx_XX.pot\' );">' . str_replace( str_replace( "\\", "/", WP_PLUGIN_DIR ), '', $dir ) . "</a><br/>";
 								foreach($dirs as $dir) { 
-									echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.'/'.$data['base_file'].'xx_XX.pot\' );">'. str_replace(str_replace("\\","/",WP_PLUGIN_DIR), '', $dir)."</a><br/>";
+									echo '<a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.'/'.$data['base_file'].'xx_XX.pot\' );">' . str_replace( str_replace( "\\", "/", WP_PLUGIN_DIR ), '', $dir ) . "</a><br/>";
 								} 
 							?>
-						<?php } elseif($data['name'] == 'bbPress' && isset($data['is_US_Version']) && $data['is_US_Version']) { ?>	
-							<div style="color:#f00;"><?php _e("The original bbPress component doesn't contain a language directory.",CSP_PO_TEXTDOMAIN); ?></div>
+						<?php } elseif ( $data['name'] == 'bbPress' && isset( $data['is_US_Version'] ) && $data['is_US_Version'] ) { ?>	
+							<div style="color:#f00;"><?php _e( "The original bbPress component doesn't contain a language directory.",CSP_PO_TEXTDOMAIN); ?></div>
 							<br/>
 							<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo $data['base_path']."my-languages"; ?>' );"><?php _e('try to create the bbPress language directory',CSP_PO_TEXTDOMAIN); ?></a></div>
 							<br/>

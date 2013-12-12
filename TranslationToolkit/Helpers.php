@@ -61,6 +61,22 @@ class TranslationToolkit_Helpers {
 	 *
 	 * @since 1.0.0
 	 */
+	static function check_filesystem() {
+		//file system investigation
+		if ( function_exists( 'get_filesystem_method' ) ) {
+			$fsm = get_filesystem_method( array() );
+			define( "CSL_FILESYSTEM_DIRECT", $fsm == 'direct' );
+		} else {
+			define( "CSL_FILESYSTEM_DIRECT", true );
+		}
+	} // END check_filesystem()
+
+	
+	/**
+	 * @TODO
+	 *
+	 * @since 1.0.0
+	 */
 	static function get_packages( $type ) {
 		
 		$res = array();
