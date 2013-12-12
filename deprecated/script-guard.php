@@ -226,12 +226,12 @@ function csp_handle_csp_self_protection_result() {
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['dubious'])) $incidents += count($_POST['data']['externals']['dubious']['tokens']);
 	if (isset($_POST['data']['php'])) $incidents += count($_POST['data']['php']);
 ?>
-<p class="self-protection"><strong><?php _e('Scripting Guard','translation-toolkit');?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details','translation-toolkit'); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', 'translation-toolkit'), $incidents, _n('incident', 'incidents', $incidents, 'translation-toolkit')); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="selfprotection"><img src="<?php echo CSP_PO_BASE_URL."/images/question.gif"; ?>" /></a></p>
+<p class="self-protection"><strong><?php _e('Scripting Guard','translation-toolkit');?></strong> [ <a class="self-protection-details" href="javascript:void(0)"><?php _e('details','translation-toolkit'); ?></a> ]&nbsp;&nbsp;&nbsp;<?php echo sprintf(__('The Plugin <em>Codestyling Localization</em> was forced to protect its own page rendering process against <b>%s</b> %s !', 'translation-toolkit'), $incidents, _n('incident', 'incidents', $incidents, 'translation-toolkit')); ?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="selfprotection"><img src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/question.gif"; ?>" /></a></p>
 <div id="self-protection-details" style="display:none;">
 <?php
 	if (isset($_POST['data']['php']) && count($_POST['data']['php'])) : ?>
 		<div>
-		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/php-core.gif"; ?>" />
+		<img class="alignleft" alt="" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/php-core.gif"; ?>" />
 		<strong style="color:#800;"><?php _e('PHP runtime error reporting detected !','translation-toolkit'); ?></strong><br/>
 		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('some executed PHP code is not written proper','translation-toolkit'); ?></strong> | 
 		<?php _e('Originator:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong> <small>(<?php _e('probably by Theme or Plugin','translation-toolkit'); ?>)</small><br/>
@@ -246,7 +246,7 @@ function csp_handle_csp_self_protection_result() {
 <?php
 	if (isset($_POST['data']['dirty_enqueues']) && count($_POST['data']['dirty_enqueues'])) : ?>
 		<div>
-		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/wordpress.gif"; ?>" />
+		<img class="alignleft" alt="" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/wordpress.gif"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at admin script core detected !','translation-toolkit'); ?></strong><br/>
 		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('misplaced core file(s) enqueued','translation-toolkit'); ?></strong> | 
 		<?php _e('Polluter:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong> <small>(<?php _e('probably by Theme or Plugin','translation-toolkit'); ?>)</small><br/>
@@ -261,7 +261,7 @@ function csp_handle_csp_self_protection_result() {
 <?php
 	if (isset($_POST['data']['dirty_theme']) && count($_POST['data']['dirty_theme'])) : $ct = function_exists('wp_get_theme') ? wp_get_theme() : current_theme_info(); ?>
 		<div>
-		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/themes.gif"; ?>" />
+		<img class="alignleft" alt="" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/themes.gif"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at current Theme detected!','translation-toolkit'); ?></strong><br/>
 		<?php _e('Name:','translation-toolkit');?> <strong><?php echo $ct->name; ?></strong> | 
 		<?php _e('Author:','translation-toolkit');?> <strong><?php echo $ct->author; ?></strong><br/>
@@ -289,7 +289,7 @@ function csp_handle_csp_self_protection_result() {
 			if (count($affected) == 0) continue;
 ?>
 		<div>
-		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/plugins.gif"; ?>" />
+		<img class="alignleft" alt="" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/plugins.gif"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at 3rd party Plugin detected!' ,'translation-toolkit'); ?></strong><br/>
 		<?php _e('Name:','translation-toolkit');?> <strong><?php echo $data['Name']; ?></strong> | 
 		<?php _e('Author:','translation-toolkit');?> <strong><?php echo $data['Author']; ?></strong><br/>
@@ -305,7 +305,7 @@ function csp_handle_csp_self_protection_result() {
 <?php
 	if (isset($_POST['data']['runtime']) && count($_POST['data']['runtime'])) : ?>
 		<div>
-		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/badscript.png"; ?>" />
+		<img class="alignleft" alt="" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/badscript.png"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at 3rd party inlined Javascript(s) detected!' ,'translation-toolkit'); ?></strong><br/>
 		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('javascript runtime exception', 'translation-toolkit'); ?></strong> | 
 		<?php _e('Polluter:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong><br/>
@@ -320,7 +320,7 @@ function csp_handle_csp_self_protection_result() {
 <?php
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['dubious']) && count($_POST['data']['externals']['dubious']['tokens'])) : $errors = 0; ?>
 		<div>
-		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/dubious-scripts.png"; ?>" />
+		<img class="alignleft" alt="" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/dubious-scripts.png"; ?>" />
 		<strong style="color:#800;"><?php _e('Malfunction at dubious external scripts detected !' ,'translation-toolkit'); ?></strong><br/>
 		<?php _e('Reason:','translation-toolkit');?> <strong><?php _e('unknown external script has been enqueued or hardly attached.', 'translation-toolkit'); ?></strong> | 
 		<?php _e('Polluter:','translation-toolkit');?> <strong><?php _e('unknown', 'translation-toolkit'); ?></strong> <small>(<?php _e('probably by Theme or Plugin','translation-toolkit'); ?>)</small><br/>
@@ -334,7 +334,7 @@ function csp_handle_csp_self_protection_result() {
 				$style = (($res === false || (is_object($res) && get_class($res) == 'WP_Error') || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
 				if(!empty($style)) $errors += 1; 
 		?>
-			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
+			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
 		<?php endfor; ?>
 		</ol>
 		<?php if ($errors > 0) : ?>
@@ -348,7 +348,7 @@ function csp_handle_csp_self_protection_result() {
 <?php
 	if (isset($_POST['data']['externals']) && isset($_POST['data']['externals']['cdn']) && count($_POST['data']['externals']['cdn']['tokens'])) : $errors = 0; ?>
 		<div style="border-top: 1px dashed gray; padding-top: 10px;">
-		<img class="alignleft" alt="" src="<?php echo CSP_PO_BASE_URL."/images/cdn-scripts.png"; ?>" />
+		<img class="alignleft" alt="" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/cdn-scripts.png"; ?>" />
 		<strong style="color:#008;"><?php _e('CDN based script loading redirection detected!' ,'translation-toolkit'); ?></strong><br/>
 		<?php _e('Warning:','translation-toolkit');?> <strong><?php _e('may break the dependency script loading feature within WordPress core files.', 'translation-toolkit'); ?></strong><br/>
 		<?php _e('Below listed redirects have been traced and verified but not revoked:','translation-toolkit'); ?><br/>
@@ -361,7 +361,7 @@ function csp_handle_csp_self_protection_result() {
 				$style = (($res === false || (is_object($res) && get_class($res) == 'WP_Error') || $res['response']['code'] != 200) ? ' style="color: #800;"': '' ) ;
 				if(!empty($style)) $errors += 1; 
 		?>
-			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo CSP_PO_BASE_URL."/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
+			<li<?php echo $style; ?>>[<strong><?php echo strip_tags(stripslashes($token)); ?></strong>] - <span class="cdn-file"><?php echo strip_tags(stripslashes($script));?></span> <img src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/status-".(empty($style) ? '200' : '404').'.gif'; ?>" /></li>
 		<?php endfor; ?>
 		</ol>
 		<?php if ($errors > 0) : ?>

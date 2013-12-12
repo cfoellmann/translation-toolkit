@@ -130,7 +130,7 @@ function csp_redirect_prototype_js($src, $handle) {
 		);
 		//load own older versions of the scripts that are working!
 		if (isset($handles[$handle])) {
-			return CSP_PO_BASE_URL.'/js/'.$handles[$handle].'.js';
+			return plugin_dir_path( TranslationToolkit::get_file() ) . '/js/'.$handles[$handle].'.js';
 		}
 	}
 	return $src;
@@ -149,9 +149,9 @@ function csp_po_admin_head() {
 		preg_match("/^codestyling\-localization\/codestyling\-localization\.php/", $_GET['page'])
 	) {
 		print '<link rel="stylesheet" href="'.get_site_url()."/wp-includes/js/thickbox/thickbox.css".'" type="text/css" media="screen"/>';
-		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/ui.all.css'.'" type="text/css" media="screen"/>';
-		print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin.css'.'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.plugin_dir_path( TranslationToolkit::get_file() ) . '/css/ui.all.css'.'" type="text/css" media="screen"/>';
+		print '<link rel="stylesheet" href="'.plugin_dir_path( TranslationToolkit::get_file() ) . '/css/plugin.css'.'" type="text/css" media="screen"/>';
 		if(function_exists('is_rtl') && is_rtl())
-			print '<link rel="stylesheet" href="'.CSP_PO_BASE_URL.'/css/plugin-rtl.css'.'" type="text/css" media="screen"/>';
+			print '<link rel="stylesheet" href="'.plugin_dir_path( TranslationToolkit::get_file() ) . '/css/plugin-rtl.css'.'" type="text/css" media="screen"/>';
 	}
 }

@@ -56,7 +56,6 @@ class TranslationToolkit_Help {
 			<small class="alignright" style="position:relative; margin-top: -30px; color: #aaa;">&copy; 2008 - 2012 by Heiko Rabe</small>
 			<a href="http://wordpress.org/extend/plugins/codestyling-localization/" target="_blank">Plugin Directory</a> | 
 			<a href="http://wordpress.org/extend/plugins/codestyling-localization/changelog/" target="_blank">Change Logs</a> | 
-			<a href="<?php echo CSP_PO_BASE_URL."/license.txt";?>" target="_blank">License</a> 
 			<a class="alignright" href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank"><?php _e( 'Dashboard in your Language','translation-toolkit' );?></a>
 		</p>
 	<?php

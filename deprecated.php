@@ -28,10 +28,6 @@ if ( ! function_exists( 'add_filter' ) ) {
 //if (!defined('E_USER_DEPRECATED '))
 //	define('E_USER_DEPRECATED ', 16384);
 
-define("CSP_PO_PLUGINPATH", "/" . dirname(plugin_basename( __FILE__ )));
-
-define('CSP_PO_BASE_URL', plugins_url( CSP_PO_PLUGINPATH ));
-
 //Bugfix: ensure valid JSON requests at IDN locations!
 //Attention: Google Chrome and Safari behave in different way (shared WebKit issue or all other are wrong?)!
 list($csp_domain, $csp_target) = csp_split_url( rtrim( admin_url(), '/' ) );
