@@ -100,6 +100,10 @@ class TranslationToolkit {
 	 * @since 1.0.0
 	 */
 	public function init() {
+		
+		if ( true == apply_filters( 'tt_dev', WP_DEBUG ) ) {
+			define( 'TT_DEV', true );
+		}
 
 		if ( is_admin() ) {
 			
