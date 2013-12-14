@@ -339,3 +339,15 @@ function csp_po_ajax_handle_translate_by_microsoft() {
 
 	exit();
 }
+
+add_action( 'wp_ajax_csp_po_change_translate_api', array( $this, 'csp_po_ajax_change_translate_api' ) );
+function csp_po_ajax_change_translate_api() {
+	TranslationToolkit_Helpers::check_security();
+	$api_type = 'none';
+	if (in_array($_POST['api_type'], array('google','microsoft'))) {
+		$api_type = $_POST['api_type'];
+	}
+	update_option('codestyling-localization.translate-api', $api_type);
+	exit();
+}
+

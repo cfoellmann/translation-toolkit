@@ -43,25 +43,25 @@ class TranslationToolkit_Ajax {
 
 		self::$instance = $this;
 		
-		add_action( 'wp_ajax_csp_po_dlg_new', array( $this, 'dlg_new' ) );
-		add_action( 'wp_ajax_csp_po_dlg_delete', array( $this, 'dlg_delete' ) );
-		add_action( 'wp_ajax_csp_po_dlg_rescan', array( $this, 'dlg_rescan' ) );
-		add_action( 'wp_ajax_csp_po_dlg_show_source', array( $this, 'dlg_show_source' ) );
+		add_action( 'wp_ajax_dlg_new', array( $this, 'dlg_new' ) );
+		add_action( 'wp_ajax_dlg_delete', array( $this, 'dlg_delete' ) );
+		add_action( 'wp_ajax_dlg_rescan', array( $this, 'dlg_rescan' ) );
+		add_action( 'wp_ajax_dlg_show_source', array( $this, 'dlg_show_source' ) );
 
-		add_action( 'wp_ajax_csp_po_merge_from_maintheme', array( $this, 'merge_from_maintheme' ) );
-		add_action( 'wp_ajax_csp_po_create', array( $this, 'create' ) );
-		add_action( 'wp_ajax_csp_po_destroy', array( $this, 'destroy' ) );
-		add_action( 'wp_ajax_csp_po_scan_source_file', array( $this, 'scan_source_file' ) );	
-		add_action( 'wp_ajax_csp_po_change_low_memory_mode', array( $this, 'csp_po_ajax_csp_po_change_low_memory_mode' ) );
-		add_action( 'wp_ajax_csp_po_change_translate_api', array( $this, 'csp_po_ajax_change_translate_api' ) );
-		add_action( 'wp_ajax_csp_po_change_permission', array( $this, 'change_permission' ) );
-		add_action( 'wp_ajax_csp_po_launch_editor', array( $this, 'launch_editor' ) );
-		add_action( 'wp_ajax_csp_po_translate_by_google', array( $this, 'translate_by_google' ) );
-		add_action( 'wp_ajax_csp_po_translate_by_microsoft', array( $this, 'translate_by_microsoft' ) );
-		add_action( 'wp_ajax_csp_po_save_catalog_entry', array( $this, 'save_catalog_entry' ) );
-		add_action( 'wp_ajax_csp_po_generate_mo_file', array( $this, 'generate_mo_file' ) );
-		add_action( 'wp_ajax_csp_po_create_language_path', array( $this, 'create_language_path' ) );
-		add_action( 'wp_ajax_csp_po_create_pot_indicator', array( $this, 'create_pot_indicator' ) );
+		add_action( 'wp_ajax_merge_from_maintheme', array( $this, 'merge_from_maintheme' ) );
+		add_action( 'wp_ajax_create', array( $this, 'create' ) );
+		add_action( 'wp_ajax_destroy', array( $this, 'destroy' ) );
+		add_action( 'wp_ajax_scan_source_file', array( $this, 'scan_source_file' ) );	
+		add_action( 'wp_ajax_change_low_memory_mode', array( $this, 'change_low_memory_mode' ) );
+		
+		add_action( 'wp_ajax_change_permission', array( $this, 'change_permission' ) );
+		add_action( 'wp_ajax_launch_editor', array( $this, 'launch_editor' ) );
+		add_action( 'wp_ajax_translate_by_google', array( $this, 'translate_by_google' ) );
+		add_action( 'wp_ajax_translate_by_microsoft', array( $this, 'translate_by_microsoft' ) );
+		add_action( 'wp_ajax_save_catalog_entry', array( $this, 'save_catalog_entry' ) );
+		add_action( 'wp_ajax_generate_mo_file', array( $this, 'generate_mo_file' ) );
+		add_action( 'wp_ajax_create_language_path', array( $this, 'create_language_path' ) );
+		add_action( 'wp_ajax_create_pot_indicator', array( $this, 'create_pot_indicator' ) );
 		
 	} // END __construct()
 	
@@ -563,26 +563,13 @@ class TranslationToolkit_Ajax {
 	 *
 	 * @since 1.0.0
 	 */
-	function csp_po_ajax_csp_po_change_low_memory_mode() {
+	function change_low_memory_mode() {
 		TranslationToolkit_Helpers::check_security();
-		update_option('codestyling-localization.low-memory', ($_POST['mode'] == 'true' ? true : false));
+		update_option( 'codestyling-localization.low-memory', ( $_POST['mode'] == 'true' ? true : false ) );
+		
 		exit();
-	}
-	
-	/**
-	 * @TODO
-	 *
-	 * @since 1.0.0
-	 */
-	function csp_po_ajax_change_translate_api() {
-		TranslationToolkit_Helpers::check_security();
-		$api_type = 'none';
-		if (in_array($_POST['api_type'], array('google','microsoft'))) {
-			$api_type = $_POST['api_type'];
-		}
-		update_option('codestyling-localization.translate-api', $api_type);
-		exit();
-	}
+		
+	} // END change_low_memory_mode()
 	
 	/**
 	 * @TODO
@@ -592,7 +579,7 @@ class TranslationToolkit_Ajax {
 	function scan_source_file() {
 		TranslationToolkit_Helpers::check_security();
 
-		$low_mem_scanning = (bool)get_option('codestyling-localization.low-memory', false);
+		$low_mem_scanning = (bool)get_option( 'codestyling-localization.low-memory', false );
 		$plurals = TranslationToolkit_Locale::plurals();
 		$textdomain = $_POST['textdomain'];
 		//TODO: give the domain into translation file as default domain
@@ -655,7 +642,7 @@ class TranslationToolkit_Ajax {
 			$s = (int)$_POST['num'];
 			$e = min($s + (int)$_POST['cnt'], count($php_files));
 			$last = ($e >= count($php_files));
-			for ($i=$s; $i<$e; $i++) {
+			for ( $i = $s; $i < $e; $i++ ) {
 				if ( $low_mem_scanning ) {
 					$options = array(
 						'type' => $_POST['type'],
@@ -664,14 +651,16 @@ class TranslationToolkit_Ajax {
 						'file' => $php_files[$i]
 					);
 					$r = wp_remote_post( plugin_dir_path( TranslationToolkit::get_file() ) . '/includes/low-memory-parsing.php', array( 'body' => $options ) ); // @TODO Why remote?
-					$data = unserialize(base64_decode($r['body']));
+					$data = unserialize( base64_decode( $r['body'] ) );
 					$pofile->add_messages($data);
 				} else {
-					$pofile->parsing_add_messages($_POST['path'], $php_files[$i], $textdomain);
+					$pofile->parsing_add_messages( $_POST['path'], $php_files[$i], $textdomain );
 				}
 			}	
-			if ($last) { $pofile->parsing_finalize($textdomain, strip_tags(rawurldecode($_POST['name']))); }
-			if ($pofile->write_pofile($_POST['pofile'], $last)) {
+			if ( $last ) {
+				$pofile->parsing_finalize( $textdomain, strip_tags( rawurldecode( $_POST['name'] ) ) );
+			}
+			if ( $pofile->write_pofile( $_POST['pofile'], $last ) ) {
 				header('Content-Type: application/json' );
 				echo '{ title: "'.date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($_POST['pofile']))." ".file_permissions($_POST['pofile']).'" }';
 			} else {
