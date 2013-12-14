@@ -195,3 +195,32 @@ class TranslationToolkit {
 
 /** Instantiate the init class */
 $translationtoolkit = new TranslationToolkit();
+
+// HELPERS
+class CspStringsAreAscii {
+	function _strlen($string) { return strlen($string); }
+	function _strpos($haystack, $needle, $offset = null) { return strpos($haystack, $needle, $offset); }
+	function _substr($string, $offset, $length = null) { return (is_null($length) ? substr($string, $offset) : substr($string, $offset, $length)); }
+	function _str_split($string, $chunkSize) { return str_split($string, $chunkSize); }
+	function _substr_count($haystack, $needle) { return substr_count($haystack, $needle); }
+	function _seems_utf8($string) { return seems_utf8($string); }
+	function _utf8_encode($string) { return utf8_encode($string); }
+}
+
+class CspStringsAreMultibyte {
+	function _strlen($string) { return mb_strlen($string, 'ascii'); }
+	function _strpos($haystack, $needle, $offset = null) { return mb_strpos($haystack, $needle, $offset, 'ascii'); }
+	function _substr($string, $offset, $length = null) { return (is_null($length) ? mb_substr($string, $offset, 1073741824, 'ascii') : mb_substr($string, $offset, $length, 'ascii')); }
+	function _str_split($string, $chunkSize) { 
+		//do not! break unicode / uft8 character in the middle of encoding, just at char border
+		$length = $this->_strlen($string); 
+		$out = array(); 
+		for ($i=0;$i<$length;$i+=$chunkSize) { 
+			$out[] = $this->_substr($string, $i, $chunkSize); 
+		}
+		return $out; 
+	}
+	function _substr_count($haystack, $needle) { return mb_substr_count($haystack, $needle, 'ascii'); }
+	function _seems_utf8($string) { return mb_check_encoding($string, 'UTF-8'); }
+	function _utf8_encode($string) { return mb_convert_encoding($string, 'UTF-8'); }
+}

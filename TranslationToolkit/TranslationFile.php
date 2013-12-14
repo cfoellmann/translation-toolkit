@@ -1,4 +1,16 @@
 <?php
+/**
+ * @author Translation Toolkit Contributors <https://github.com/wp-repository/translation-toolkit/graphs/contributors>
+ * @license GPLv2 <http://www.gnu.org/licenses/gpl-2.0.html>
+ * @package Translation Toolkit
+ */
+
+//avoid direct calls to this file
+if ( ! function_exists( 'add_filter' ) ) {
+	header( 'Status: 403 Forbidden' );
+	header( 'HTTP/1.1 403 Forbidden' );
+	exit();
+}
 
 /*
  License:
@@ -29,47 +41,14 @@ references and possible explainations:
 	http://mobile-website.mobi/php-utf8-vs-iso-8859-1-59
 	
  */
- 
-class CspStringsAreAscii {
-	function _strlen($string) { return strlen($string); }
-	function _strpos($haystack, $needle, $offset = null) { return strpos($haystack, $needle, $offset); }
-	function _substr($string, $offset, $length = null) { return (is_null($length) ? substr($string, $offset) : substr($string, $offset, $length)); }
-	function _str_split($string, $chunkSize) { return str_split($string, $chunkSize); }
-	function _substr_count($haystack, $needle) { return substr_count($haystack, $needle); }
-	function _seems_utf8($string) { return seems_utf8($string); }
-	function _utf8_encode($string) { return utf8_encode($string); }
-}
 
-class CspStringsAreMultibyte {
-	function _strlen($string) { return mb_strlen($string, 'ascii'); }
-	function _strpos($haystack, $needle, $offset = null) { return mb_strpos($haystack, $needle, $offset, 'ascii'); }
-	function _substr($string, $offset, $length = null) { return (is_null($length) ? mb_substr($string, $offset, 1073741824, 'ascii') : mb_substr($string, $offset, $length, 'ascii')); }
-	function _str_split($string, $chunkSize) { 
-		//do not! break unicode / uft8 character in the middle of encoding, just at char border
-		$length = $this->_strlen($string); 
-		$out = array(); 
-		for ($i=0;$i<$length;$i+=$chunkSize) { 
-			$out[] = $this->_substr($string, $i, $chunkSize); 
-		}
-		return $out; 
-	}
-	function _substr_count($haystack, $needle) { return mb_substr_count($haystack, $needle, 'ascii'); }
-	function _seems_utf8($string) { return mb_check_encoding($string, 'UTF-8'); }
-	function _utf8_encode($string) { return mb_convert_encoding($string, 'UTF-8'); }
-}
-
-class CspTranslationFile {
+class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 	
-	function CspTranslationFile($type = 'unknown') {
-		$this->__construct($type);
-	}
-	
-	function __construct($type = 'unknown') {
+	function __construct( $type = 'unknown' ) {
 		//now lets check whether overloaded functions been used and provide the correct str_* functions as usual
-		if(( ini_get( 'mbstring.func_overload' ) & 0x02) === 0x02 && extension_loaded('mbstring') && is_callable( 'mb_substr' )) {
+		if ( ( ini_get( 'mbstring.func_overload' ) & 0x02 ) === 0x02 && extension_loaded( 'mbstring' ) && is_callable( 'mb_substr' ) ) {
 			$this->strings = new CspStringsAreMultibyte();
-		}
-		else{
+		} else {
 			$this->strings = new CspStringsAreAscii();
 		}
 		$this->component_type = $type;
@@ -92,9 +71,9 @@ class CspTranslationFile {
 			'X-Poedit-Basepath'				=> '',
 			'X-Poedit-Bookmarks'			=> '',
 			'X-Poedit-SearchPath-0'			=> '.',
-			'X-Textdomain-Support'			=> 'no'
+			'X-Textdomain-Support'			=> 'no',
 		);
-		$this->header_vars = array_keys($this->header);
+		$this->header_vars = array_keys( $this->header );
 		$this->mo_header_vars = array(
 			'PO-Revision-Date',	
 			'MIME-Version',	
@@ -203,10 +182,10 @@ class CspTranslationFile {
 		return $s;
 	}
 		
-	function _clean_import($string) {
+	function _clean_import( $string ) {
 		$escapes = array('t' => "\t", 'n' => "\n", '\\' => '\\');
-		$lines = array_map('trim', explode("\n", $string));
-		$lines = array_map(array('CspTranslationFile', 'trim_quotes'), $lines);
+		$lines = array_map( 'trim', explode( "\n", $string ) );
+		$lines = array_map( array( 'TranslationToolkit_TranslationFile', 'trim_quotes' ), $lines );
 		$unpoified = '';
 		$previous_is_backslash = false;
 		foreach($lines as $line) {
@@ -645,7 +624,7 @@ class CspTranslationFile {
 		}
 	}
 	
-	function write_mofile($mofile, $textdomain) {
+	function write_mofile( $mofile, $textdomain ) {
 		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
 		if (isset($this->map["continents-cities\04Center"])) {
 			$trans = $this->map["continents-cities\04Center"];
@@ -660,39 +639,48 @@ class CspTranslationFile {
 		$this->_set_header_from_string($mohdr, '', true);
 		
 		$handle = @fopen($mofile, "wb");
-		if ($handle === false){
+		
+		if ( $handle === false ) {
 			$this->header = $mohdr_h;
 			$this->_set_header_from_string($mohdr, '', false);
 			return false;
 		}
+		
 		ksort($this->map, SORT_REGULAR);
 		//let's calculate none empty values	
 		$entries = 0;
-		foreach($this->map as $key => $value) {
-			if($this->_is_valid_entry($value, $textdomain)) { $entries++; }
+		
+		foreach( $this->map as $key => $value ) {
+			if( $this->_is_valid_entry( $value, $textdomain ) ) {
+				$entries++;
+			}
 		}
+		
 		$tab_size = $entries * 8;
 		//header: little endian magic|revision|entries|offset originals|offset translations|hashing table size|hashing table ofs
 		$header = pack('NVVVVVV@'.(28+$tab_size*2),0xDE120495,0x00000000,$entries,28,28+$tab_size,0x00000000,28+$tab_size*2);
 		$org_table = '';
 		$trans_table = '';
 		fwrite($handle, $header);
-		foreach($this->map as $key => $value) {
-			if ($this->_is_valid_entry($value, $textdomain)) {
+		
+		foreach( $this->map as $key => $value ) {
+			if ( $this->_is_valid_entry( $value, $textdomain ) ) {
 				$l=$this->strings->_strlen($key);
 				$org_table .= pack('VV', $l, ftell($handle)); 
 				$res = pack('A'.$l.'x',$key);
 				fwrite($handle, $res);
 			}
 		}
-		foreach($this->map as $key => $value) {
-			if ($this->_is_valid_entry($value, $textdomain)) {
+		
+		foreach( $this->map as $key => $value ) {
+			if ( $this->_is_valid_entry( $value, $textdomain ) ) {
 				$l=$this->strings->_strlen($value['T']);
 				$trans_table .= pack('VV', $l, ftell($handle)); 
 				$res = pack('A'.$l.'x',$value['T']);
 				fwrite($handle, $res);
 			}
 		}
+		
 		fseek($handle, 28, SEEK_SET);
 		fwrite($handle,$org_table);
 		fwrite($handle,$trans_table);
@@ -700,9 +688,9 @@ class CspTranslationFile {
 		$this->header = $mohdr_h;
 		$this->_set_header_from_string($mohdr, '', false);
 		return true;
-	}
+	} // ENF write_mofile()
 	
-	function ftp_get_mofile_content($mofile, $textdomain) {
+	function ftp_get_mofile_content( $mofile, $textdomain ) {
 		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
 		if (isset($this->map["continents-cities\04Center"])) {
 			$trans = $this->map["continents-cities\04Center"];
@@ -751,31 +739,38 @@ class CspTranslationFile {
 		$this->header = $mohdr_h;
 		$this->_set_header_from_string($mohdr, '', false);
 		return $content;
-	}
+	} // END ftp_get_mofile_content()
 	
-	function _reset_data(&$val, $key) {
+	function _reset_data( &$val, $key ) {
 		unset($val['R']); $val['R'] = array();
 		unset($val['CC']); $val['CC'] = array();
 		unset($val['LTD']); $val['LTD'] = array();
-	}
+	} // END _reset_data()
 
 	function parsing_init() {	
 		//reset the references and textdomains
 		$func = array(&$this, '_reset_data');
 		array_walk($this->map, $func);
 		$this->_set_header_from_string("X-Textdomain-Support: yes\n");	
-	}
+	} // END parsing_init()
 	
-	function add_messages($r = false) {
-		if ($r === false) return; //file doesn't exist
+	function add_messages( $r = false ) {
+		
+		if ( $r === false ) {
+			return; //file doesn't exist
+		}
+		
 		$gettext = $r['gettext'];
 		$not_gettext = $r['not_gettext'];
-		if (count($gettext)) {
-			foreach($gettext as $match) {
+		
+		if ( count( $gettext ) ) {
+			foreach( $gettext as $match ) {
 				$entry = null;
 								
-				if (isset($this->map[$match['msgid']]))
+				if (isset($this->map[$match['msgid']])) {
 					$entry = $this->map[$match['msgid']];
+				}
+				
 				if (!is_array($entry)) {
 					$entry = $this->_new_entry(
 						$match['msgid'], 
@@ -784,29 +779,33 @@ class CspTranslationFile {
 						false, false,false,
 						$match['LTD']
 					);
-				}
-				else{
-					if (!in_array($match['R'], $entry['R']))
+				} else {
+					if ( !in_array( $match['R'], $entry['R'] ) ) {
 						$entry['R'][] = $match['R'];
+					}
 				}
-				if (!in_array($match['LTD'], $entry['LTD'])) {
+				
+				if ( !in_array( $match['LTD'], $entry['LTD'] ) ) {
 					$entry['LTD'][] = $match['LTD'];
 				}
-				foreach($match['CC'] as $cc) {
-					if (!in_array($cc, $entry['CC'])) {
+				
+				foreach( $match['CC'] as $cc ) {
+					if ( !in_array( $cc, $entry['CC'] ) ) {
 						$entry['CC'][] = $cc;
 					}
 				}
 				
-				if(preg_match("/(%[A-Za-z0-9])/", $match['msgid']) > 0) {
-					if (!is_array($entry['F'])||(!in_array('php-format', $entry['F']))) {
+				if( preg_match( "/(%[A-Za-z0-9])/", $match['msgid'] ) > 0) {
+					if ( !is_array( $entry['F']) || ( !in_array( 'php-format', $entry['F'] ) ) ) {
 						$entry['F'][] = 'php-format';
 					}
-				}			
+				}
+				
 				$this->map[$match['msgid']] = $entry;				
 			}
 		}
-		if (count($not_gettext)) {
+		
+		if ( count( $not_gettext ) ) {
 			foreach($not_gettext as $match) {
 				$entry = null;
 				if (isset($this->map[$match['msgid']]))
@@ -821,8 +820,7 @@ class CspTranslationFile {
 						$match['CC'],
 						$match['LTD']
 					);
-				}
-				else{
+				} else {
 					if (!in_array($match['R'], $entry['R'])) {
 						$entry['R'][] = $match['R'];
 					}
@@ -837,15 +835,15 @@ class CspTranslationFile {
 				}
 				$this->map[$match['msgid']] = $entry;				
 			}
-		}		
-	}
+		}
+		
+	} // END add_messages()
 
-	function parsing_add_messages($path, $sourcefile, $textdomain='') {	
-		require_once('class.parser.php');
-		$parser = new csp_l10n_parser($path, $textdomain, true, false);
-		$r = $parser->parseFile($sourcefile, $this->component_type);
-		$this->add_messages($r);
-	}
+	function parsing_add_messages( $path, $sourcefile, $textdomain='' ) {	
+		$parser = new TranslationToolkit_Parser( $path, $textdomain, true, false );
+		$r = $parser->parseFile( $sourcefile, $this->component_type );
+		$this->add_messages( $r );
+	} // END parsing_add_messages()
 	
 	function repair_illegal_single_multi_utilization() {
 		//find a solution for this crude examples (duplications po edit warnings):
@@ -854,9 +852,10 @@ class CspTranslationFile {
 		//plural string with identical singual strings have to be joined too
 		$single_to_remap = array();
 		$plural_to_join = array();
-		foreach($this->map as $key => $entry) {
+		
+		foreach( $this->map as $key => $entry ) {
 			$test = explode("\0", $key, 2);
-			if (is_array($test) && count($test) == 2) {
+			if ( is_array( $test ) && count( $test ) == 2 ) {
 				//check if we have that singular as single and remap it
 				if(isset($this->map[$test[0]])) {
 					$single_to_remap[$test[0]] = $key;
@@ -866,6 +865,7 @@ class CspTranslationFile {
 				$plural_to_join[$test[0]][] = $key;
 			}	
 		}
+		
 		foreach($single_to_remap as $single => $plural){
 			$e_single = $this->map[$single];
 			$e_plural = $this->map[$plural];
@@ -893,6 +893,7 @@ class CspTranslationFile {
 			//remove that single now
 			unset($this->map[$single]);
 		}
+		
 		foreach($plural_to_join as $key => $plurals) {
 			if (count($plurals) < 2) continue;
 			$target = array_shift($plurals);
@@ -923,9 +924,10 @@ class CspTranslationFile {
 			//remove the duplicated plural form now
 			unset($this->map[$plural]);
 		}
-	}
+		
+	} // END repair_illegal_single_multi_utilization()
 	
-	function parsing_finalize($textdomain, $prjidver) {
+	function parsing_finalize( $textdomain, $prjidver ) {
 		//if there is only one textdomain included and this is '' (empty string) replace all with the given textdomain
 		$ltd = array();
 		foreach($this->map as $key => $entry) {
@@ -947,52 +949,53 @@ class CspTranslationFile {
 		}
 		$this->repair_illegal_single_multi_utilization();
 		$this->_set_header_from_string("Project-Id-Version: $prjidver");
-	}
+	} // END parsing_finalize()
 	
-	function _convert_for_js($str) {
-		$search = array( '"\"', "\\", "\n", "\r", "\t", "\"");
-		$replace = array( '"\\\\"', '\\\\', '\\\\n', '\\\\r', '\\\\t', '\\\\\"');
+	function _convert_for_js( $str ) {
+		$search = array( '"\"', "\\", "\n", "\r", "\t", "\"" );
+		$replace = array( '"\\\\"', '\\\\', '\\\\n', '\\\\r', '\\\\t', '\\\\\"' );
 		$str = str_replace( $search, $replace, $str );
 
 		return $str;
-	}
+	} // END _convert_for_js(
 	
-	function _convert_js_input($str) {
-		$search = array('\\\\\\\"', '\\\\\"','\\\\n', '\\\\t','\\0', "\\'", '\\\\');
-		$replace = array('\"', '"', "\n", "\\t", "\0", "'", "\\");
+	function _convert_js_input( $str ) {
+		$search = array( '\\\\\\\"', '\\\\\"','\\\\n', '\\\\t','\\0', "\\'", '\\\\' );
+		$replace = array( '\"', '"', "\n", "\\t", "\0", "'", "\\" );
 		$str = str_replace( $search, $replace, $str );
+		
 		return $str;
-	}
+	} // END _convert_js_input()
 	
-	function echo_as_json($path, $file, $sys_locales, $api_type) {
-		$loc = $this->strings->_substr($file,strlen($file)-8,-3);
-		header('Content-Type: application/json; charset=utf-8');
-?>
-{
-	header : "<table id=\"po-hdr\" style=\"display:none;\"><?php
+	function echo_as_json( $path, $file, $sys_locales, $api_type ) {
+		$loc = $this->strings->_substr( $file, strlen( $file )-8, -3);
+		header( 'Content-Type: application/json; charset=utf-8' );
+		?>
+		{
+		header : "<table id=\"po-hdr\" style=\"display:none;\"><?php
 		foreach($this->header as $key => $value) {
 			echo "<tr><td class=\\\"po-hdr-key\\\">".$key."</td><td class=\\\"po-hdr-val\\\">".htmlspecialchars($value)."</td></tr>";
 		}?>",
-	destlang: "<?php echo ( isset($sys_locales[$loc]) && !empty($api_type) && $api_type != 'none' ? $sys_locales[$loc][$api_type.'-api'] : ''); ?>",
-	api_type: "<?php echo $api_type; ?>",
-	last_saved : "<?php $mo = $this->strings->_substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s','translation-toolkit'), filemtime($mo)); } else { _e('unknown','translation-toolkit'); } ?>",
-	plurals_num : <?php echo $this->nplurals; ?>,
-	plurals_func : "<?php echo $this->plural_func; ?>",
-	path : "<?php echo $path; ?>",
-	file : "<?php echo $file; ?>",
-	index : {
-		'total' : [],
-		'plurals' : [],
-		'open' : [],
-		'rem' : [],
-		'code' : [],
-		'ctx' : [],
-		'cur' : [],
-		'ltd' : [],
-		'trail' : []
-	},
-	content : [
-<?php
+		destlang: "<?php echo ( isset($sys_locales[$loc]) && !empty($api_type) && $api_type != 'none' ? $sys_locales[$loc][$api_type.'-api'] : ''); ?>",
+		api_type: "<?php echo $api_type; ?>",
+		last_saved : "<?php $mo = $this->strings->_substr($path.$file,0,-2)."mo"; if (file_exists($mo)) { echo date (__('m/d/Y H:i:s','translation-toolkit'), filemtime($mo)); } else { _e('unknown','translation-toolkit'); } ?>",
+		plurals_num : <?php echo $this->nplurals; ?>,
+		plurals_func : "<?php echo $this->plural_func; ?>",
+		path : "<?php echo $path; ?>",
+		file : "<?php echo $file; ?>",
+		index : {
+			'total' : [],
+			'plurals' : [],
+			'open' : [],
+			'rem' : [],
+			'code' : [],
+			'ctx' : [],
+			'cur' : [],
+			'ltd' : [],
+			'trail' : []
+		},
+		content : [
+		<?php
 		$num = count($this->map);
 		$c = 0;
 		$ltd = array();
@@ -1048,14 +1051,14 @@ class CspTranslationFile {
 				if (!in_array($d, $ltd)) $ltd[] = esc_js($d);
 			}
 		}
-?>	
-	],
-	textdomains : ["<?php sort($ltd); echo implode('","', array_reverse($ltd)); ?>"]
-}
-<?php		
+		?>	
+		],
+		textdomains : ["<?php sort($ltd); echo implode('","', array_reverse($ltd)); ?>"]
 	}
+	<?php		
+	} // END echo_as_json()
 
-	function update_entry($msgid, $msgstr) {	
+	function update_entry( $msgid, $msgstr ) {	
 		$msgid = $this->_convert_js_input($msgid);
 		if (array_key_exists($msgid, $this->map)) {
 			$this->map[$msgid]['T'] = $this->_convert_js_input($msgstr);
@@ -1069,7 +1072,6 @@ class CspTranslationFile {
 			return true;
 		}		
 		return false;
-	}
-}
-
-?>
+	} // END update_entry()
+	
+} // END class TranslationToolkit_TranslationFile

@@ -1,13 +1,26 @@
 <?php
+/**
+ * @author Translation Toolkit Contributors <https://github.com/wp-repository/translation-toolkit/graphs/contributors>
+ * @license GPLv2 <http://www.gnu.org/licenses/gpl-2.0.html>
+ * @package Translation Toolkit
+ */
 
-if (!defined('T_ML_COMMENT'))
-	    define('T_ML_COMMENT', T_COMMENT);
-else
-	    define('T_DOC_COMMENT', T_ML_COMMENT);
+//avoid direct calls to this file
+if ( ! function_exists( 'add_filter' ) ) {
+	header( 'Status: 403 Forbidden' );
+	header( 'HTTP/1.1 403 Forbidden' );
+	exit();
+}
 
-class csp_l10n_parser {
+if ( !defined( 'T_ML_COMMENT' ) ) {
+	define('T_ML_COMMENT', T_COMMENT);
+} else {
+	define('T_DOC_COMMENT', T_ML_COMMENT);
+}
+
+class TranslationToolkit_Parser {
 	
-	function csp_l10n_parser($basedir, $textdomain, $do_gettext = true, $do_domains=false) {
+	function __construct( $basedir, $textdomain, $do_gettext = true, $do_domains = false ) {
 		$domains = array(
 			'load_textdomain',
 			'load_theme_textdomain',
@@ -45,8 +58,13 @@ class csp_l10n_parser {
 		$this->l10n_functions = array();
 		$this->buildin_functions = array_merge($gettext, $escapements);
 		
-		if ($do_gettext) $this->l10n_functions = array_merge($this->l10n_functions, $gettext);
-		if ($do_domains) $this->l10n_functions = array_merge($this->l10n_functions, $domains);
+		if ( $do_gettext ) {
+			$this->l10n_functions = array_merge($this->l10n_functions, $gettext);
+		}
+		
+		if ( $do_domains ) {
+			$this->l10n_functions = array_merge($this->l10n_functions, $domains);
+		}
 		
 		$this->l10n_regular = '/('.implode('$|', $this->l10n_functions).'$)/';
 		$this->l10n_domains = '/('.implode('|',$domains).')/';
@@ -56,8 +74,8 @@ class csp_l10n_parser {
 		$this->is_new_kernel_translation = @file_exists(dirname(dirname(dirname(dirname(dirname(__FILE__))))).'/wp-admin/user/about.php');
 	}
 	
-	function parseFile($filename, $component_type) {
-		if (file_exists($filename)){
+	function parseFile( $filename, $component_type ) {
+		if ( file_exists( $filename ) ){
 			$this->filename = str_replace($this->basedir, '', $filename);
 			$content = file_get_contents($filename);
 			return $this->parseString($content, $component_type);
@@ -65,7 +83,7 @@ class csp_l10n_parser {
 		return false;
 	}
 	
-	function parseString($content, $component_type) {
+	function parseString( $content, $component_type ) {
 		$results = array(
 			'gettext' 	  => array(),
 			'not_gettext' => array(),
@@ -240,13 +258,20 @@ class csp_l10n_parser {
 			$line_number += substr_count($token, "\n");
 		}
 		return $results;
-	}
+	} // END parseString()
 	
-	function _detect_plugin_header($comment) {
+	/**
+	 * @TODO make private
+	 * @TODO rename to detect_plugin_header()
+	 *
+	 * @since 1.0.0
+	 */
+	function _detect_plugin_header( $comment ) { 
 		$result = array();
 				
-		if (($this->component_type != 'plugins') && ($this->component_type != 'plugins_mu'))
-			return $result;	
+		if ( ( $this->component_type != 'plugins' ) && ( $this->component_type != 'plugins_mu' ) ) {
+			return $result;
+		}
 
 		$default_headers = array(
 			'Name' 			=> 'Plugin Name',
@@ -256,18 +281,19 @@ class csp_l10n_parser {
 			'Author' 		=> 'Author',
 			'AuthorURI' 	=> 'Author URI',
 			'TextDomain' 	=> 'Text Domain',
-			'DomainPath' 	=> 'Domain Path'
+			'DomainPath' 	=> 'Domain Path',
 		);
 		
 		foreach ( $default_headers as $field => $regex ) {
 			preg_match( '/' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $comment, ${$field});
-			if ( !empty( ${$field} ) )
+			if ( !empty( ${$field} ) ) {
 				${$field} =   trim(preg_replace("/\s*(?:\*\/|\?>).*/", '', ${$field}[1]));
-			else
+			} else {
 				${$field} = '';
+			}
 		}
 		$data = compact( array_keys( $default_headers ) );
-		if (!empty($data['Name']) && !empty($data['TextDomain']) && !empty($data['DomainPath'])) {
+		if ( !empty( $data['Name'] ) && !empty( $data['TextDomain'] ) && !empty( $data['DomainPath'] ) ) {
 			//attach the header strings now
 			foreach ( array('Name', 'PluginURI', 'Description', 'Author', 'AuthorURI', 'Version') as $field ) {
 				$gt = $this->_build_gettext(
@@ -286,21 +312,36 @@ class csp_l10n_parser {
 		}
 		return $result;
 			
-	}
+	} // END _detect_plugin_header()
 	
-	function _ltd_validate($text)
-	{
-		$r = strip_tags($text);
-		if ($r != $text) return "{bug-detected}";
+	/**
+	 * @TODO make private
+	 * @TODO rename to ltd_validate()
+	 *
+	 * @since 1.0.0
+	 */
+	function _ltd_validate( $text )	{
+		$r = strip_tags( $text );
+		
+		if ( $r != $text ) {
+			return "{bug-detected}";
+		}
+		
 		return $text;
-	}
+	} // END _ltd_validate()
 	
-	function _build_gettext($line, $func, $args, $argc, $is_dev_func, $bad_argc) {
+	/**
+	 * @TODO make private
+	 * @TODO rename to build_gettext(()
+	 *
+	 * @since 1.0.0
+	 */
+	function _build_gettext( $line, $func, $args, $argc, $is_dev_func, $bad_argc ) {
 		$res = array(
 			'msgid' => '',
-			'R'		=> $this->filename.':'.$line,
+			'R'		=> $this->filename . ':' . $line,
 			'CC' 	=> array(),
-			'LTD'	=> ($is_dev_func ? $this->textdomain : 'default')
+			'LTD'	=> ( $is_dev_func ? $this->textdomain : 'default' )
 		);
 		
 		//check if we doing wordpress
@@ -513,18 +554,28 @@ class csp_l10n_parser {
 			$res['msgid'] = "continents-cities\04Center";
 			$res['CC'] = array('translators: this is an artificial split between the admin and continent text, because of different contextual usage.');
 		}
+		
 		return $res;
-	}
+		
+	} // END _build_gettext()
 	
-	function _build_non_gettext($line, $stage, $text) {
-		return array( 
+	/**
+	 * @TODO make private
+	 * @TODO rename to build_non_gettext()
+	 *
+	 * @since 1.0.0
+	 */
+	function _build_non_gettext( $line, $stage, $text ) {
+		
+		$array = array( 
 			'msgid' => $text,
-			'R' 	=> $this->filename.':'.$line, 
-			'CC' 	=> array($stage), 
+			'R' 	=> $this->filename . ':' . $line, 
+			'CC' 	=> array( $stage ), 
 			'LTD'	=> '{php-code}'
 		);
-	}
+		
+		return $array;
+		
+	} // END _build_non_gettext()
 
-}
-
-?>
+} // END class TranslationToolkit_parser
