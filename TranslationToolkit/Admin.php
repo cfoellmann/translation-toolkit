@@ -384,7 +384,6 @@ class TranslationToolkit_Admin {
 										<?php _e( 'try to create the WordPress language directory', 'translation-toolkit' ); ?>
 									</a>
 								</div>
-								<br/>
 								<div>
 									<?php _e( 'or create the missing directory using FTP Access as:', 'translation-toolkit' ); ?>
 									<?php echo str_replace( "\\", '/', WP_CONTENT_DIR ) . "/"; ?><strong style="color:#f00;">languages</strong>			
@@ -406,12 +405,9 @@ class TranslationToolkit_Admin {
 								
 							<?php } elseif ( $data['name'] == 'bbPress' && isset( $data['is_US_Version'] ) && $data['is_US_Version'] ) { ?>	
 								<div style="color:#f00;"><?php _e( "The original bbPress component doesn't contain a language directory.",'translation-toolkit'); ?></div>
-								<br/>
 								<div><a class="clickable button" onclick="csp_create_languange_path(this, '<?php echo $data['base_path'] . 'my-languages'; ?>' );"><?php _e( 'try to create the bbPress language directory', 'translation-toolkit' ); ?></a></div>
-								<br/>
 								<div>
 									<?php _e( 'or create the missing directory using FTP Access as:', 'translation-toolkit' ); ?>
-									<br/><br/>
 									<?php echo $data['base_path']; ?><strong style="color:#f00;">my-languages</strong>			
 								</div>
 								
@@ -578,10 +574,13 @@ class TranslationToolkit_Admin {
 		
 		
 		<div id="csp-wrap-editor" class="wrap" style="display:none">
-			<div class="icon32" id="icon-tools"><br/></div>
-			<h2><?php _e('Translate Language File', 'translation-toolkit'); ?>&nbsp;&nbsp;&nbsp;<a class="clickable button" onclick="window.location.reload()"><?php _e('back to overview page &raquo;', 'translation-toolkit') ?></a></h2>
+			<h2>
+				<?php _e( 'Translate Language File', 'translation-toolkit'); ?>
+				<a class="add-new-h2" href="#" onclick="window.location.reload()"><?php _e( 'back to overview page &raquo;', 'translation-toolkit' ); ?></a>
+			</h2>
 			<div id="csp-json-header">
-				<div class="po-header-toggle"><span><b><?php _e('Project-Id-Version:','translation-toolkit'); ?></b></span> <span id="prj-id-ver">---</span> | <strong><?php _e('File:', 'translation-toolkit'); ?></strong> <a onclick="csp_toggle_header(this,'po-hdr' );"><?php _e('unknown', 'translation-toolkit'); ?></a></div>
+				<div class="po-header-toggle">
+					<span><b><?php _e('Project-Id-Version:','translation-toolkit'); ?></b></span> <span id="prj-id-ver">---</span> | <strong><?php _e('File:', 'translation-toolkit'); ?></strong> <a onclick="csp_toggle_header(this,'po-hdr' );"><?php _e('unknown', 'translation-toolkit'); ?></a></div>
 			</div>
 			<div class="action-bar">
 				<p id="textdomain-error" class="hidden"><small><?php 
@@ -590,7 +589,7 @@ class TranslationToolkit_Admin {
 					_e('Expect, that any text you translate will not occure as long as the textdomain is mismatching!','translation-toolkit'); 
 					echo '<br/>';
 					_e('This is a coding issue at the source files you try to translate, please contact the original Author and explain this mismatch.','translation-toolkit'); 
-				?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="textdomain"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a></small></p>
+				?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e( 'What does that mean?', 'translation-toolkit' ); ?>" rel="textdomain"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a></small></p>
 				<p id="textdomain-warning" class="hidden"><small><?php 
 					_e('<strong>Warning</strong>: The actual loaded translation content contains mixed textdomains and is not pure translateable within one textdomain.','translation-toolkit'); 
 					echo '<br/>';
@@ -598,10 +597,22 @@ class TranslationToolkit_Admin {
 					echo '<br/>';
 					_e('The affected unknown textdomains are:','translation-toolkit'); 
 					echo '&nbsp;<span>&nbsp;</span>';		
-				?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="textdomain"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a></small></p>
-				<div class="alignleft"id="csp-mo-textdomain"><span><b><?php _e('Textdomain:','translation-toolkit'); ?></b>&nbsp;&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="textdomain"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a><span>&nbsp;&nbsp;<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select></div>
-				<div class="alignleft">&nbsp;&nbsp;<input id="csp-write-mo-file" class="button button-secondary" style="display:none" type="submit" value="<?php _e('generate mo-file', 'translation-toolkit'); ?>" onclick="csp_generate_mofile(this);" /></div>
-				<div class="alignleft" style="margin-left:10px;font-size:11px;padding-top:3px;"><?php _e('last written:','translation-toolkit');?>&nbsp;&nbsp;<span id="catalog-last-saved" ><?php _e('unknown','translation-toolkit'); ?></span><img id="csp-generate-mofile" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/'; ?>write-mofile.gif" /></div>
+				?>&nbsp;<a class="question-help" href="javascript:void(0);" title="<?php _e( 'What does that mean?', 'translation-toolkit' ); ?>" rel="textdomain"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a></small></p>
+				<div class="alignleft" id="csp-mo-textdomain">
+					<b><?php _e( 'Textdomain:', 'translation-toolkit' ); ?></b>
+						<a class="question-help" href="javascript:void(0);" title="<?php _e( 'What does that mean?', 'translation-toolkit' ); ?>" rel="textdomain">
+							<img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" />
+						</a>
+					<select id="csp-mo-textdomain-val" onchange="csp_change_textdomain_view(this.value);"></select>
+				</div>
+				<div class="alignleft">
+					<input id="csp-write-mo-file" class="button button-secondary" style="display:none" type="submit" value="<?php _e( 'generate mo-file', 'translation-toolkit' ); ?>" onclick="csp_generate_mofile(this);" />
+				</div>
+				<div class="alignleft">
+					<?php _e( 'last written:', 'translation-toolkit' ); ?>
+					<span id="catalog-last-saved" ><?php _e( 'unknown', 'translation-toolkit' ); ?></span>
+					<img id="csp-generate-mofile" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/'; ?>write-mofile.gif" />
+				</div>
 				<br class="clear" />
 			</div>
 			<ul class="subsubsub">
@@ -615,8 +626,9 @@ class TranslationToolkit_Admin {
 				<li style="display:none;"> | <span id="csp-filter-search" class="current"><?php _e('Search Result', 'translation-toolkit'); ?>  ( <span class="csp-flt-cnt">0</span> )</span></li>
 				<li style="display:none;"> | <span id="csp-filter-regexp" class="current"><?php _e('Expression Result', 'translation-toolkit'); ?>  ( <span class="csp-flt-cnt">0</span> )</span></li>
 			</ul>
-			<div class="tablenav">
-				<div class="alignleft">
+
+			<div class="tablenav top">
+				<div class="alignleft actions">
 					<div class="alignleft" style="padding-top: 5px;font-size:11px;"><strong><?php _e('Page Size', 'translation-toolkit'); ?>:&nbsp;</strong></div>
 					<select id="catalog-pagesize" name="catalog-pagesize" onchange="csp_change_pagesize(this.value);" class="alignleft" style="font-size:11px;" autocomplete="off">
 						<option value="10">10</option>
@@ -628,69 +640,106 @@ class TranslationToolkit_Admin {
 						<option value="200">200</option>
 					</select>
 				</div>
-				<div id="catalog-pages-top" class="tablenav-pages alignright">
-					<a href="#" class="prev page-numbers"><?php _e('&laquo; Previous', 'translation-toolkit'); ?></a>
-					<a href="#" class="page-numbers">1</a>
-					<a href="#" class="page-numbers">2</a>
-					<a href="#" class="page-numbers">3</a>
-					<span class="page-numbers current">4</span>
-					<a href="#" class="next page-numbers"><?php _e('Next &raquo;', 'translation-toolkit'); ?></a>
+				<div class="tablenav-pages">
+					<span class="displaying-num">X items</span>
+					<span class="pagination-links">
+						<a href="#" title="<?php _e( 'Go to the first page', 'translation-toolkit'); ?>" class="first-page"><?php _e('&laquo;', 'translation-toolkit'); ?></a>
+						<a href="#" title="<?php _e( 'Go to the previous page', 'translation-toolkit'); ?>" class="prev-page">‹</a>
+						<span class="paging-input">
+							<input class="current-page" type="text" size="1" value="1" name="paged" title="Current page">
+							of
+							<span class="total-pages">2</span>
+						</span>
+						<a href="#" title="<?php _e( 'Go to the next page', 'translation-toolkit'); ?>" class="next-page">›</a>
+						<a href="#" title="<?php _e( 'Go to the last page', 'translation-toolkit'); ?>" class="last-page"><?php _e('&raquo;', 'translation-toolkit'); ?></a>
+					</span>
 				</div>
-				<br class="clear" />
+				<br class="clear">
 			</div>
+			
 			<table class="widefat" cellspacing="0">
 				<thead>
 					<tr>
-						<th nowrap="nowrap"><span><?php _e('Infos','translation-toolkit'); ?></span></th>
-						<th width="50%">
-							<table>
-								<tr>
-									<th style="background:transparent;border-bottom:0px;padding:0px;"><?php _e('Original:','translation-toolkit'); ?></th>
-									<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
-										<input id="s_original" name="s_original" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
-										<br/>
-										<input id="ignorecase_key" name="ignorecase_key" type="checkbox" value="" onclick="csp_search_key('s_original')" /><label for="ignorecase_key" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
-									</th>
-									<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
-										<a class="clickable regexp" onclick="csp_search_regexp('s_original')"></a>
-									</th>
-								</tr>
-							</table>
+						<th nowrap="nowrap">
+							<span><?php _e( 'Infos', 'translation-toolkit' ); ?></span>
 						</th>
-						<th width="50%">
-							<table>
-								<tr>
-									<th style="background:transparent;border-bottom:0px;padding:0px;"><?php _e('Translation:','translation-toolkit'); ?></th>
-									<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
-										<input id="s_translation" name="s_translation" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
-										<br/>
-										<input id="ignorecase_val" name="ignorecase_val" type="checkbox" value="" onclick="csp_search_val('s_translation')" /><label for="ignorecase_val" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
-									</th>
-									<th style="background:transparent;border-bottom:0px;padding:0px;vertical-align:top;">
-										<a class="clickable regexp" onclick="csp_search_regexp('s_translation')"></a>
-									</th>
-								</tr>
-							</table>
+						<th width="45%">
+							<?php _e( 'Original:','translation-toolkit'); ?>
+							<input id="s_original" name="s_original" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
+							<input id="ignorecase_key" name="ignorecase_key" type="checkbox" value="" onclick="csp_search_key('s_original')" /><label for="ignorecase_key" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
+							<a class="clickable regexp" onclick="csp_search_regexp('s_original')"></a>
 						</th>
-						<th nowrap="nowrap"><span><?php _e('Actions','translation-toolkit'); ?></span></th>
+						<th width="45%">
+							<?php _e( 'Translation:', 'translation-toolkit' ); ?>
+							<input id="s_translation" name="s_translation" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
+							<input id="ignorecase_val" name="ignorecase_val" type="checkbox" value="" onclick="csp_search_val('s_translation')" /><label for="ignorecase_val" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
+							<a class="clickable regexp" onclick="csp_search_regexp('s_translation')"></a>
+						</th>
+						<th nowrap="nowrap">
+							<span><?php _e( 'Actions', 'translation-toolkit' ); ?></span>
+						</th>
 					</tr>
 				</thead>
+				<tfoot>
+					<tr>
+						<th nowrap="nowrap">
+							<span><?php _e( 'Infos', 'translation-toolkit' ); ?></span>
+						</th>
+						<th width="45%">
+							<?php _e( 'Original:','translation-toolkit'); ?>
+							<input id="s_original" name="s_original" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
+							<input id="ignorecase_key" name="ignorecase_key" type="checkbox" value="" onclick="csp_search_key('s_original')" /><label for="ignorecase_key" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
+							<a class="clickable regexp" onclick="csp_search_regexp('s_original')"></a>
+						</th>
+						<th width="45%">
+							<?php _e( 'Translation:', 'translation-toolkit' ); ?>
+							<input id="s_translation" name="s_translation" type="text" size="16" value="" onkeyup="csp_search_result(this)" style="margin-bottom:3px;" autocomplete="off" />
+							<input id="ignorecase_val" name="ignorecase_val" type="checkbox" value="" onclick="csp_search_val('s_translation')" /><label for="ignorecase_val" style="font-weight:normal;margin-top:-2px;"> <?php _e('non case-sensitive', 'translation-toolkit') ?></label>
+							<a class="clickable regexp" onclick="csp_search_regexp('s_translation')"></a>
+						</th>
+						<th nowrap="nowrap">
+							<span><?php _e( 'Actions', 'translation-toolkit' ); ?></span>
+						</th>
+					</tr>
+				</tfoot>
 				<tbody id="catalog-body">
 					<tr><td colspan="4" align="center"><img alt="" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/loading.gif'?>" /><br /><span style="color:#328AB2;"><?php _e('Please wait, file content presently being loaded ...','translation-toolkit'); ?></span></td></tr>
 				</tbody>
-			</table>	
+			</table>
+			
+			
+			<div class="tablenav bottom">
+				<div class="alignleft actions">
+					<a class="alignleft button" href="javascript:void(0);" onclick="window.scrollTo(0,0);"><?php _e( 'scroll to top', 'translation-toolkit' ); ?></a>
+				</div>
+				<div class="tablenav-pages">
+					<span class="displaying-num">X items</span>
+					<span class="pagination-links">
+						<a href="#" title="<?php _e( 'Go to the first page', 'translation-toolkit'); ?>" class="first-page"><?php _e('&laquo;', 'translation-toolkit'); ?></a>
+						<a href="#" title="<?php _e( 'Go to the previous page', 'translation-toolkit'); ?>" class="prev-page">‹</a>
+						<span class="paging-input">
+							1 of
+							<span class="total-pages">2</span>
+						</span>
+						<a href="#" title="<?php _e( 'Go to the next page', 'translation-toolkit'); ?>" class="next-page">›</a>
+						<a href="#" title="<?php _e( 'Go to the last page', 'translation-toolkit'); ?>" class="last-page"><?php _e('&raquo;', 'translation-toolkit'); ?></a>
+					</span>
+				</div>
+				<br class="clear">
+			</div>
+
 			<div class="tablenav">
-				<a class="alignleft button" href="javascript:void(0);" onclick="window.scrollTo(0,0);"><?php _e( 'scroll to top', 'translation-toolkit' ); ?></a>
 				<div id="catalog-pages-bottom" class="tablenav-pages">
-					<a href="#" class="prev page-numbers"><?php _e('&laquo; Previous', 'translation-toolkit'); ?></a>
+					<a href="#" class="prev page-numbers"><?php _e('&laquo;', 'translation-toolkit'); ?></a>
 					<a href="#" class="page-numbers">1</a>
 					<a href="#" class="page-numbers">2</a>
 					<a href="#" class="page-numbers">3</a>
 					<span class="page-numbers current">4</span>
-					<a href="#" class="next page-numbers"><?php _e('Next &raquo;', 'translation-toolkit'); ?></a>
+					<a href="#" class="next page-numbers"><?php _e('&raquo;', 'translation-toolkit'); ?></a>
 				</div>
 				<br class="clear" />
 			</div>
+			
 			<br class="clear" />
 		</div><!-- csp-wrap-editor closed -->
 		
@@ -699,8 +748,8 @@ class TranslationToolkit_Admin {
 			<div>
 				<h3 id="csp-dialog-header">
 					<img alt="" id="csp-dialog-icon" class="alignleft" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ); ?>images/gettext.gif" />
-					<span id="csp-dialog-caption" class="alignleft"><?php _e('Edit Catalog Entry','translation-toolkit'); ?></span>
-					<img alt="" id="csp-dialog-cancel" class="alignright clickable" title="<?php _e('close', 'translation-toolkit'); ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/close.gif'; ?>" onclick="csp_cancel_dialog();" />
+					<span id="csp-dialog-caption" class="alignleft"><?php _e( 'Edit Catalog Entry', 'translation-toolkit' ); ?></span>
+					<img alt="" id="csp-dialog-cancel" class="alignright clickable" title="<?php _e( 'close', 'translation-toolkit' ); ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/close.gif'; ?>" onclick="csp_cancel_dialog();" />
 					<br class="clear" />
 				</h3>	
 				<div id="csp-dialog-body"></div>
