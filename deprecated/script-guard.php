@@ -158,6 +158,40 @@ function csp_self_script_protection_footer() {
 		}
 	});
 </script>
+
+<style type="text/css">
+.self-protection {
+	background: #ffebe8 url('../images/self-protection.png') 5px 5px no-repeat;
+	padding: 8px 20px;
+	padding-left: 40px;
+	border: solid 1px #666;
+}
+
+#self-protection-details {
+	background-color: #fffad8;
+	padding: 5px;
+	border: solid 1px #666;
+}
+
+#self-protection-details ol {
+	list-style-type: circle;
+	margin-left: 80px;
+}
+
+#self-protection-details ol li {
+	font-size: 10px;
+	margin-bottom: 0;
+}
+
+#self-protection-details > div {
+	padding: 5px
+}
+
+#self-protection-details > div img {
+	margin-right: 10px
+}
+
+</style>
 <?php	
 }
 

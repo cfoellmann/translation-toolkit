@@ -94,6 +94,70 @@ exit();
 /* ]]> */
 </script>
 
+<style type="text/css">
+
+#explain-apis {
+	cursor: help
+}
+
+p.translation-apis label {
+	margin-right: 25px
+}
+
+p.translation-apis a {
+	text-decoration: none
+}
+
+p.translation-apis img {
+	margin-right: 5px
+}
+
+p.translation-apis input {
+	margin-right: 5px
+}
+
+p.translation-apis {
+	overflow: hidden;
+	border-top: solid 1px #cfcfcf;
+	border-bottom: 1px solid #cfcfcf;
+	padding: 5px 0;
+}
+
+div.translation-apis-info {
+	border-bottom: 1px solid #cfcfcf;
+	padding: 5px 0;
+	display: none;
+}
+
+div.translation-apis-info h5 {
+	margin-top: 0px;
+	margin-bottom: 0.7em;
+	font-weight: bold;
+	font-size: 11px;
+}
+
+div.translation-apis-info p {
+	margin-left: 20px
+}
+
+div.translation-apis-info textarea {
+	font-family: courier,monotype;
+	width: 99%;
+	background-color: #dfdfdf;
+}
+
+div.translation-apis-info textarea.google {
+	height: 24px
+}
+
+div.translation-apis-info textarea.microsoft {
+	height: 58px
+}
+td.lang-info-api {
+	padding-right: 5px !important
+}
+</style>
+
 <p class="translation-apis">
 	<label class="alignleft"><strong><?php _e('Translation Service-APIs:','translation-toolkit'); ?></strong></label> 
 	<img class="alignleft" alt="" title="API: not used" src="<?php echo plugin_dir_path( TranslationToolkit::get_file() ) . "/images/off.png"; ?>" /><input id="translate-api-none" class="translate-api-none alignleft" name="translate-api" value="none" type="radio" autocomplete="off" <?php checked('none', $api_type); ?>/> <label class="alignleft" for="translate-api-none"><?php _e('None','translation-toolkit'); ?></label>
