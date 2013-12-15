@@ -40,8 +40,19 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
-// temporary includes
-require_once( dirname(__FILE__) . '/deprecated.php' );
+// @TODO Implement differently
+//if ( function_exists( 'csp_po_install_plugin' ) ) {
+//	//rewrite and extend the error messages displayed at failed activation
+//	//fall trough, if it's a real code bug forcing the activation error to get the appropriated message instead
+//	if ( isset($_GET['action']) && isset($_GET['plugin']) && ($_GET['action'] == 'error_scrape') && ($_GET['plugin'] == plugin_basename(__FILE__) ) ) {
+//		if ( !function_exists('token_get_all') ) {
+//			echo "<table>";
+//			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__('required', 'translation-toolkit')."</td><td> | ".__('actual', 'translation-toolkit')."</td></tr>";			
+//			echo "<tr style=\"font-size: 12px;\"><td>PHP Tokenizer Module:</td><td align=\"center\"><strong>active</strong></td><td align=\"center\"><span style=\"color:#f00;\">not installed</span></td></tr>";			
+//			echo "</table>";
+//		}
+//	}
+//}
 
 /** Register autoloader */
 spl_autoload_register( 'TranslationToolkit::autoload' );

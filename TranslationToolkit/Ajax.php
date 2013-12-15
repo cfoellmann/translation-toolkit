@@ -200,23 +200,23 @@ class TranslationToolkit_Ajax {
 				$abs_root.'/xmlrpc.php',
 				str_replace( "\\", "/", WP_PLUGIN_DIR ) . '/akismet/akismet.php'
 			);
-			rscandir_php($abs_root.'/wp-admin/', $excludes, $files);
-			rscandir_php($abs_root.'/wp-includes/', $excludes, $files);
+			TranslationToolkit_Helpers::rscandir_php($abs_root.'/wp-admin/', $excludes, $files);
+			TranslationToolkit_Helpers::rscandir_php($abs_root.'/wp-includes/', $excludes, $files);
 			//do not longer rescan old themes prior hosted the the main localization file starting from WP 3.0!
 		} elseif ( $_POST['type'] == 'plugins_mu' ) {
 			$files[] = strip_tags( $_POST['simplefilename'] );
 		} elseif ( $_POST['textdomain'] == 'buddypress' ) {
 			$files = array();
 			$excludes = array(strip_tags($_POST['path']).'bp-forums/bbpress' );
-			rscandir_php(strip_tags($_POST['path']), $excludes, $files);
+			TranslationToolkit_Helpers::rscandir_php(strip_tags($_POST['path']), $excludes, $files);
 		}
 		else{
 			$files = array();
 			$excludes = array();
 			if (isset($_POST['simplefilename']) && !empty($_POST['simplefilename'])) { $files[] = strip_tags($_POST['simplefilename']); }
-			else { rscandir_php(strip_tags($_POST['path']), $excludes, $files); }
+			else { TranslationToolkit_Helpers::rscandir_php(strip_tags($_POST['path']), $excludes, $files); }
 			if ($_POST['type'] == 'themes' && isset($_POST['themetemplate']) && !empty($_POST['themetemplate'])) {
-				rscandir_php(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['themetemplate']).'/',$excludes, $files);
+				TranslationToolkit_Helpers::rscandir_php(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['themetemplate']).'/',$excludes, $files);
 			}
 		}
 		$country_www = isset($sys_locales[$_POST['language']]) ? $sys_locales[$_POST['language']]['country-www'] : 'unknown';
@@ -454,7 +454,7 @@ class TranslationToolkit_Ajax {
 		$plurals = TranslationToolkit_Locale::plurals();
 		//source|dest|basepath|textdomain|molist
 		$tmp = array();
-		$files = rscandir(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['source']).'/', "/(\.po|\.mo)$/", $tmp);
+		$files = TranslationToolkit_Helpers::rscandir(str_replace("\\","/",WP_CONTENT_DIR).'/themes/'.strip_tags($_POST['source']).'/', "/(\.po|\.mo)$/", $tmp);
 		foreach( $files as $file ) {
 			$pofile = new TranslationToolkit_FileSystem();
 			$target = strip_tags($_POST['basepath']).basename($file);
@@ -518,7 +518,7 @@ class TranslationToolkit_Ajax {
 			type: '<?php echo strip_tags($_POST['type']); ?>',
 			simplefilename: '<?php echo strip_tags($_POST['simplefilename']); ?>',
 			transtemplate: '<?php echo strip_tags($_POST['transtemplate']); ?>',
-			permissions: '<?php echo date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename); ?>',
+			permissions: '<?php echo date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". TranslationToolkit_Helpers::file_permissions($filename); ?>',
 			denyscan: <?php echo strip_tags($_POST['denyscan']); ?>,
 			google: "<?php echo $sys_locales[$_POST['language']]['google-api'] ? 'yes' : 'no'; ?>",
 			microsoft: "<?php echo $sys_locales[$_POST['language']]['microsoft-api'] ? 'yes' : 'no'; ?>"
@@ -662,7 +662,7 @@ class TranslationToolkit_Ajax {
 			}
 			if ( $pofile->write_pofile( $_POST['pofile'], $last ) ) {
 				header('Content-Type: application/json' );
-				echo '{ title: "'.date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($_POST['pofile']))." ".file_permissions($_POST['pofile']).'" }';
+				echo '{ title: "'.date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($_POST['pofile']))." ". TranslationToolkit_Helpers::file_permissions($_POST['pofile']).'" }';
 			} else {
 				header('Status: 404 Not Found' );
 				header('HTTP/1.1 404 Not Found' );
@@ -691,7 +691,7 @@ class TranslationToolkit_Ajax {
 		$transfile->change_permission( $filename );
 
 		header('Content-Type: application/json' );
-		echo '{ title: "'.date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename).'" }';
+		echo '{ title: "'.date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". TranslationToolkit_Helpers::file_permissions($filename).'" }';
 		exit();
 	}
 	

@@ -263,7 +263,7 @@ class TranslationToolkit_Helpers {
 		$data['is_US_Version'] = !is_dir( WP_LANG_DIR );
 		
 		if ( !$data['is_US_Version'] ) {
-			$files = rscandir( str_replace( "\\","/", WP_LANG_DIR ).'/', "/(.\mo|\.po|\.pot)$/", $tmp);
+			$files = self::rscandir( str_replace( "\\","/", WP_LANG_DIR ).'/', "/(.\mo|\.po|\.pot)$/", $tmp);
 			$data['translation_template'] = self::find_translation_template( $files );
 			
 			foreach( $files as $filename ) {
@@ -272,7 +272,7 @@ class TranslationToolkit_Helpers {
 				if ( empty( $hits[1] ) === false ) {
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".( is_readable( $filename ) ? 'r' : '' ) . ( is_writable( $filename ) ? 'w' : '' ),
-						'stamp' => date( __( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime( $filename ) ) . " " . file_permissions( $filename )
+						'stamp' => date( __( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime( $filename ) ) . " " . self::file_permissions( $filename )
 					);
 					$data['special_path'] = '';
 				}
@@ -319,7 +319,7 @@ class TranslationToolkit_Helpers {
 		$data['special_path'] = 'bp-languages';
 		$data['languages'] = array();
 		$tmp = array(); 
-		$files = lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
+		$files = self::lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
 		$data['translation_template'] = self::find_translation_template( $files );
 		foreach($files as $filename) {
 			$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
@@ -327,7 +327,7 @@ class TranslationToolkit_Helpers {
 			if (empty($hits[2]) === false) {				
 				$data['languages'][$hits[1]][$hits[2]] = array(
 					'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-					'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+					'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". self::file_permissions($filename)
 				);
 			}
 		}
@@ -368,7 +368,7 @@ class TranslationToolkit_Helpers {
 		$data['is_US_Version'] = !is_dir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-forums/bbpress/my-languages' );
 		if (!$data['is_US_Version']) {	
 			$tmp = array(); 	
-			$files = lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-forums/bbpress/my-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
+			$files = self::lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-forums/bbpress/my-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
 			$data['translation_template'] = self::find_translation_template($files);
 			foreach($files as $filename) {
 				$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
@@ -376,7 +376,7 @@ class TranslationToolkit_Helpers {
 				if (empty($hits[2]) === false) {				
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-						'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+						'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". self::file_permissions($filename)
 					);
 				}
 			}
@@ -423,7 +423,7 @@ class TranslationToolkit_Helpers {
 		}
 		else{
 			$tmp = array();
-			$files = rscandir(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug)."/", "/.(php|phtml)$/", $tmp);
+			$files = self::rscandir(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug)."/", "/.(php|phtml)$/", $tmp);
 		}
 		$const_list = array();
 		foreach($files as $file) {	
@@ -501,8 +501,8 @@ class TranslationToolkit_Helpers {
 
 		$data['languages'] = array();
 		if($data['gettext_ready']){
-			if ($data['is-simple']) { $tmp = array(); $files = lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
-			else { 	$tmp = array(); $files = rscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
+			if ($data['is-simple']) { $tmp = array(); $files = self::lscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
+			else { 	$tmp = array(); $files = self::rscandir(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); }
 			$data['translation_template'] = self::find_translation_template($files);
 
 			if ($data['is-simple']) { //simple plugin case
@@ -513,7 +513,7 @@ class TranslationToolkit_Helpers {
 					if (empty($hits[2]) === false) {				
 						$data['languages'][$hits[1]][$hits[2]] = array(
 							'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-							'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+							'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". self::file_permissions($filename)
 						);
 						$data['special_path'] = '';
 					}
@@ -531,7 +531,7 @@ class TranslationToolkit_Helpers {
 
 							$data['languages'][$hits[2]][$hits[3]] = array(
 								'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". self::file_permissions($filename)
 							);
 							$data['special_path'] = '';
 						}
@@ -550,7 +550,7 @@ class TranslationToolkit_Helpers {
 						{
 							$data['languages'][$hits[2]][$hits[3]] = array(
 								'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". self::file_permissions($filename)
 							);
 						}
 						$data['special_path'] = ltrim($hits[1], "/");
@@ -570,7 +570,7 @@ class TranslationToolkit_Helpers {
 
 							$data['languages'][$hits[3]][$hits[4]] = array(
 								'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+								'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".self::file_permissions($filename)
 							);
 							$data['special_path'] = ltrim($hits[1], "/");
 						}
@@ -578,7 +578,7 @@ class TranslationToolkit_Helpers {
 				}
 			}
 			if (!$data['is-simple'] && ($data['special_path'] == '') && (count($data['languages']) == 0)) {
-				$data['is-path-unclear'] = has_subdirs(str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/' );
+				$data['is-path-unclear'] = self::has_subdirs( str_replace("\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/' );
 				if ($data['is-path-unclear'] && (count($files) > 0)) {
 					$file = str_replace(str_replace("\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $files[0]);
 					//bugfix: uppercase folders supported
@@ -676,7 +676,7 @@ class TranslationToolkit_Helpers {
 
 		$data['languages'] = array();
 		if($data['gettext_ready']){
-			$tmp = array(); $files = lscandir(str_replace("\\","/",dirname(WPMU_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); 		
+			$tmp = array(); $files = self::lscandir(str_replace("\\","/",dirname(WPMU_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); 		
 			$data['translation_template'] = self::find_translation_template( $files );
 			foreach($files as $filename) {
 				$file = str_replace(str_replace("\\","/",WPMU_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
@@ -684,7 +684,7 @@ class TranslationToolkit_Helpers {
 				if (empty($hits[2]) === false) {				
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-						'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+						'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". self::file_permissions($filename)
 					);
 					$data['special_path'] = '';
 				}
@@ -748,7 +748,7 @@ class TranslationToolkit_Helpers {
 		$files = array();
 		$const_list = array();
 		$tmp = array();
-		$files = rscandir($data["base_path"], "/\.(php|phtml)$/", $tmp);
+		$files = self::rscandir($data["base_path"], "/\.(php|phtml)$/", $tmp);
 		foreach($files as $themefile) {
 			$main = file_get_contents($themefile);
 			if (
@@ -777,7 +777,7 @@ class TranslationToolkit_Helpers {
 
 				$dn = $data["base_path"];
 				$tmp = array();
-				$lng_files = rscandir($dn, "/(\.mo|\.po|\.pot)$/", $tmp);
+				$lng_files = self::rscandir($dn, "/(\.mo|\.po|\.pot)$/", $tmp);
 				$data['translation_template'] = self::find_translation_template($lng_files);
 				$sub_dirs = array();
 				$naming_convention_error = false;
@@ -798,7 +798,7 @@ class TranslationToolkit_Helpers {
 					}elseif (empty($hits[2]) === false) {
 						$data['languages'][$hits[2]][$hits[3]] = array(
 							'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
-							'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ".file_permissions($filename)
+							'stamp' => date(__('m/d/Y H:i:s','translation-toolkit'), filemtime($filename))." ". self::file_permissions($filename)
 						);
 						$data['filename'] = '';
 						$sd = dirname(str_replace($dn, '', $filename));
@@ -815,7 +815,7 @@ class TranslationToolkit_Helpers {
 				global $wp_version;
 				if (version_compare($wp_version, '2.7', '>=')) {
 					if (count($data['languages']) == 0) {
-						$data['is-path-unclear'] = has_subdirs($dn);
+						$data['is-path-unclear'] = self::has_subdirs($dn);
 						if ($data['is-path-unclear'] && (count($lng_files) > 0)) {
 							foreach($lng_files as $file) {
 								$f = str_replace($dn, '', $file);
@@ -889,4 +889,82 @@ class TranslationToolkit_Helpers {
 		
 	} // END get_theme_capabilities()
 	
+	 static function has_subdirs( $base='' ) {
+		if ( !is_dir($base) || !is_readable($base) ) {
+			return $false;
+		}
+		$array = array_diff( scandir( $base ), array( '.', '..' ) );
+		foreach( $array as $value ) { 
+			if ( is_dir( $base . $value ) ) {
+				return true;
+			}
+		};
+		return false;
+	}
+
+	static function lscandir( $base='', $reg='', &$data ) {
+		if (!is_dir($base) || !is_readable($base)) return $data;
+		$array = array_diff(scandir($base), array('.', '..')); 
+		foreach($array as $value) : 
+			if (is_file($base.$value) && preg_match($reg, $value) ) : 
+				$data[] = str_replace("\\","/",$base.$value); 
+			endif;
+		endforeach;
+		
+		return $data;
+	}
+
+	static function rscandir( $base='', $reg='', &$data ) {
+		if (!is_dir($base) || !is_readable($base)) return $data;
+		$array = array_diff(scandir($base), array('.', '..')); 
+		foreach($array as $value) : 
+			if (is_dir($base.$value)) : 
+				$data = self::rscandir($base.$value.'/', $reg, $data); 
+			elseif (is_file($base.$value) && preg_match($reg, $value) ) : 
+				$data[] = str_replace("\\","/",$base.$value); 
+			endif;
+		endforeach;
+		
+		return $data; 
+	}
+
+	static function rscanpath( $base='', &$data ) {
+		if (!is_dir($base) || !is_readable($base)) {
+			return $data;
+		}
+		$array = array_diff(scandir($base), array('.', '..')); 
+		foreach($array as $value) : 
+			if (is_dir($base.$value)) : 
+				$data[] = str_replace("\\","/",$base.$value);
+				$data = self::rscanpath($base.$value.'/', $data); 
+			endif;
+		endforeach;
+		
+		return $data; 
+	}
+
+	static function rscandir_php( $base='', &$exclude_dirs, &$data ) {
+		if (!is_dir($base) || !is_readable($base)) {
+			return $data;
+		}
+		$array = array_diff(scandir($base), array('.', '..')); 
+		foreach($array as $value) {
+			if (is_dir($base.$value)) { 
+				if (!in_array($base.$value, $exclude_dirs)) {
+					$data = self::rscandir_php($base.$value.'/', $exclude_dirs, $data);
+				}
+			} elseif (is_file($base.$value) && preg_match('/\.(php|phtml)$/', $value) ) { 
+				$data[] = str_replace("\\","/",$base.$value); 
+			}
+		}
+		
+		return $data; 
+	}		
+
+	static function file_permissions( $filename ) {
+		static $R = array("---","--x","-w-","-wx","r--","r-x","rw-","rwx");
+		$perm_o	= substr(decoct(fileperms( $filename )),3);
+		return "[".$R[(int)$perm_o[0]] . '|' . $R[(int)$perm_o[1]] . '|' . $R[(int)$perm_o[2]]."]";
+	}
+
 } // END class TranslationToolkit_Helpers

@@ -394,7 +394,7 @@ class TranslationToolkit_Admin {
 								<ul>
 								<?php 
 									$tmp = array(); 
-									$dirs = rscanpath( $data['base_path'], $tmp );
+									$dirs = TranslationToolkit_Helpers::rscanpath( $data['base_path'], $tmp );
 									$dir = $data['base_path'];
 									echo '<li><a class="clickable pot-folder" onclick="csp_create_pot_indicator(this,\''.$dir.$data['base_file'].'xx_XX.pot\' );">' . str_replace( str_replace( "\\", "/", WP_PLUGIN_DIR ), '', $dir ) . "</a></li>";
 									foreach( $dirs as $dir ) { 
