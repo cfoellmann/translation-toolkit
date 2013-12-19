@@ -189,14 +189,14 @@ class TranslationToolkit_Admin {
 				'callback' => array( 'TranslationToolkit_Help', 'helptab_workonchildthemes' ),
 			)
 		);
-		$screen->add_help_tab(
-			array(
-				'title' => __( 'About', 'translation-toolkit' ),
-				'id' => 'about',
-				'content' => '',
-				'callback' => array( 'TranslationToolkit_Help', 'helptab_about' ),
-			)
-		);
+//		$screen->add_help_tab(
+//			array(
+//				'title' => __( 'About', 'translation-toolkit' ),
+//				'id' => 'about',
+//				'content' => '',
+//				'callback' => array( 'TranslationToolkit_Help', 'helptab_about' ),
+//			)
+//		);
 		
 	} // END load_assets()
 	
@@ -240,14 +240,14 @@ class TranslationToolkit_Admin {
 			<table class="wp-list-table widefat plugins" cellspacing="0">
 				<thead>
 					<tr>
-						<th scope="col"><?php _e( 'Type', 'translation-toolkit' ); ?></th>
+						<th scope="col" class="tt-item-icon"><?php _e( 'Type', 'translation-toolkit' ); ?></th>
 						<th scope="col"><?php _e( 'Description', 'translation-toolkit' ); ?></th>
 						<th scope="col"><?php _e( 'Languages', 'translation-toolkit' ); ?></th>
 					</tr>
 				</thead>
 				<tfoot>
 					<tr>
-						<th scope="col"><?php _e( 'Type', 'translation-toolkit' ); ?></th>
+						<th scope="col" class="tt-item-icon"><?php _e( 'Type', 'translation-toolkit' ); ?></th>
 						<th scope="col"><?php _e( 'Description', 'translation-toolkit' ); ?></th>
 						<th scope="col"><?php _e( 'Languages', 'translation-toolkit' ); ?></th>
 					</tr>
@@ -263,8 +263,8 @@ class TranslationToolkit_Admin {
 
 					foreach ( $rows as $data ) {
 					?>
-					<tr class="<?php if ( __( 'activated', 'translation-toolkit' ) == $data['status'] ) { echo 'active'; } else { echo 'inactive'; } // @todo ?>">
-						<th align="center" class="check-column">
+					<tr class="tt-item <?php if ( __( 'activated', 'translation-toolkit' ) == $data['status'] ) { echo 'active'; } else { echo 'inactive'; } // @todo ?>">
+						<th class="check-column tt-item-icon">
 							<img alt="" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/' . $data['img_type'] . '.gif'; ?>" />
 							<div><strong><?php echo $data['type-desc']; ?></strong></div>
 						</th>

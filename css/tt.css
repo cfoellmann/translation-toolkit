@@ -19,6 +19,14 @@
 	background: url('../images/folder.gif') no-repeat 0 2px;
 }
 
+th.tt-item-icon {
+	text-align: center !important;
+	width: 64px;
+}
+.tt-item .row-actions * {
+	white-space: normal;
+}
+
 .csp-filetype-po,
 .csp-filetype-po-r,
 .csp-filetype-po-rw,

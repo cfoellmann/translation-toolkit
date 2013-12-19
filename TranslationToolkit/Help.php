@@ -234,7 +234,7 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e( 'First of all you have to modify your Child Themes <em>functions.php</em> file and call the appropriated load method as shown below. Assume the textdomain is defined at the Main Theme as <b>supertheme</b> the load function should look like:', 'translation-toolkit' ); ?>
 		</p>
-		<pre>load_child_theme_textdomain('supertheme', get_stylesheet_directory().'/languages' );</pre>
+			<code>load_child_theme_textdomain('supertheme', get_stylesheet_directory().'/languages' );</code>
 		<p>
 			<?php _e( 'The path has been defined as subdirectory within the Child Themes directory but you can skip the directory parameter and place the language files at the Child Themes main folder.', 'translation-toolkit' ); ?>
 		</p>
