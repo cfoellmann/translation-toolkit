@@ -76,7 +76,7 @@ function csp_php_error_handler($errno, $errstr, $errfile, $errline) {
 		 E_STRICT				=> 'STRICT'
     );  
   
-    if (array_key_exists($errno, $errorType)) {  
+    if ( array_key_exists($errno, $errorType)) {  
         $errname = $errorType[$errno];  
     } else {  
         $errname = 'UNKNOWN ERROR';  

@@ -20,7 +20,13 @@ if ( !defined( 'T_ML_COMMENT' ) ) {
 
 class TranslationToolkit_Parser {
 	
+	/**
+	 * Constructor. Hooks all interactions to initialize the class.
+	 *
+	 * @since 1.0
+	 */
 	function __construct( $basedir, $textdomain, $do_gettext = true, $do_domains = false ) {
+		
 		$domains = array(
 			'load_textdomain',
 			'load_theme_textdomain',
@@ -72,18 +78,33 @@ class TranslationToolkit_Parser {
 		$this->regexp_wp_msfiles = "/(ms-.*|.*\/ms-.*|.*\/my-.*|wp-activate\.php|wp-signup\.php|wp-admin\/network\.php|wp-admin\/includes\/ms\.php|wp-admin\/network\/.*\.php|wp-admin\/includes\/class-wp-ms.*)/";
 		
 		$this->is_new_kernel_translation = @file_exists(dirname(dirname(dirname(dirname(dirname(__FILE__))))).'/wp-admin/user/about.php');
+		
 	}
 	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	function parseFile( $filename, $component_type ) {
+		
 		if ( file_exists( $filename ) ){
 			$this->filename = str_replace($this->basedir, '', $filename);
 			$content = file_get_contents($filename);
 			return $this->parseString($content, $component_type);
 		}
+		
 		return false;
-	}
+		
+	} // END parseFile()
 	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	function parseString( $content, $component_type ) {
+		
 		$results = array(
 			'gettext' 	  => array(),
 			'not_gettext' => array(),
@@ -136,19 +157,19 @@ class TranslationToolkit_Parser {
 					if ($in_func && $args_started) {
 						if ($text{0} == '"') {
 							$text = substr($text, 1, strlen($text)-2);
-							$text = str_replace('\"', '"', $text);
-							$text = str_replace("\\$", "$", $text);
-							$text = str_replace("\r\n", "\n", $text);
+							$text = str_replace( '\"', '"', $text);
+							$text = str_replace( "\\$", "$", $text);
+							$text = str_replace( "\r\n", "\n", $text);
 							$token = $text;
-							$text = str_replace("\\n", "\n", $text);
+							$text = str_replace( "\\n", "\n", $text);
 						}
 						else{
 							$text = substr($text, 1, strlen($text)-2);
-							$text = str_replace("\\'", "'", $text);
-							$text = str_replace("\\$", "$", $text);
-							$text = str_replace("\r\n", "\n", $text);
-							$text = str_replace("\\n", "\n", $text);
-							$text = str_replace("\\\\", "\\", $text);
+							$text = str_replace( "\\'", "'", $text);
+							$text = str_replace( "\\$", "$", $text);
+							$text = str_replace( "\r\n", "\n", $text);
+							$text = str_replace( "\\n", "\n", $text);
+							$text = str_replace( "\\\\", "\\", $text);
 							$token = $text;
 						}
 						if(isset($cur_args[$cur_argc])){
@@ -161,14 +182,14 @@ class TranslationToolkit_Parser {
 					}elseif($in_not_gettext) {
 						if ($text{0} == '"') {
 							$text = trim($text, '"');
-							$text = str_replace('\"', '"', $text);
+							$text = str_replace( '\"', '"', $text);
 						}
 						else{
 							$text = trim($text, "'");
-							$text = str_replace("\\'", "'", $text);
+							$text = str_replace( "\\'", "'", $text);
 						}
-						$text = str_replace("\\$", "$", $text);
-						$text = str_replace("\r\n", "\n", $text);						
+						$text = str_replace( "\\$", "$", $text);
+						$text = str_replace( "\r\n", "\n", $text);						
 						$results['not_gettext'][] = $this->_build_non_gettext($line_number, $cur_not_gettext, $text);
 						$cur_not_gettext = false;
 						$token = $text;
@@ -185,7 +206,7 @@ class TranslationToolkit_Parser {
 					$token = $text;
 				} elseif (T_ML_COMMENT == $id || T_COMMENT == $id || T_DOC_COMMENT == $id) {
 					$header = $this->_detect_plugin_header($text);
-					if (count($header) > 0) {
+					if (count( $header) > 0) {
 						foreach($header as $gt){
 							$results['gettext'][] = $gt;
 						}
@@ -214,7 +235,7 @@ class TranslationToolkit_Parser {
 			} elseif (')' == $token) {
 				--$parens_balance;
 				if ($in_func && 0 == $parens_balance) {				
-					if (count($cur_args) && isset($cur_args[0])) {
+					if (count( $cur_args) && isset($cur_args[0])) {
 						//skip those, where all args are variables
 						$is_dev_func = !in_array($cur_full_func, $this->buildin_functions);
 						$gt = $this->_build_gettext($cur_match_line, $cur_func, $cur_args, $cur_argc, $is_dev_func, $bad_argc);
@@ -255,14 +276,16 @@ class TranslationToolkit_Parser {
 					*/
 				}
 			}			
-			$line_number += substr_count($token, "\n");
+			$line_number += substr_count( $token, "\n");
 		}
+		
 		return $results;
+		
 	} // END parseString()
 	
 	/**
-	 * @TODO make private
-	 * @TODO rename to detect_plugin_header()
+	 * @todo make private
+	 * @todo rename to detect_plugin_header()
 	 *
 	 * @since 1.0.0
 	 */
@@ -315,8 +338,8 @@ class TranslationToolkit_Parser {
 	} // END _detect_plugin_header()
 	
 	/**
-	 * @TODO make private
-	 * @TODO rename to ltd_validate()
+	 * @todo make private
+	 * @todo rename to ltd_validate()
 	 *
 	 * @since 1.0.0
 	 */
@@ -331,8 +354,8 @@ class TranslationToolkit_Parser {
 	} // END _ltd_validate()
 	
 	/**
-	 * @TODO make private
-	 * @TODO rename to build_gettext(()
+	 * @todo make private
+	 * @todo rename to build_gettext(()
 	 *
 	 * @since 1.0.0
 	 */
@@ -560,8 +583,8 @@ class TranslationToolkit_Parser {
 	} // END _build_gettext()
 	
 	/**
-	 * @TODO make private
-	 * @TODO rename to build_non_gettext()
+	 * @todo make private
+	 * @todo rename to build_non_gettext()
 	 *
 	 * @since 1.0.0
 	 */

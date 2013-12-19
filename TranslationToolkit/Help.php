@@ -44,8 +44,14 @@ class TranslationToolkit_Help {
 		self::$instance = $this;
 		
 	} // END __construct()
-
+	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	static function helptab_about() { ?>
+
 		<p>
 			<strong>Codestyling Localization </strong> - <em>"<?php _e( '... translate your WordPress, Plugins and Themes', 'translation-toolkit' ); ?>"</em>
 		</p>
@@ -56,12 +62,19 @@ class TranslationToolkit_Help {
 			<small class="alignright" style="position:relative; margin-top: -30px; color: #aaa;">&copy; 2008 - 2012 by Heiko Rabe</small>
 			<a href="http://wordpress.org/extend/plugins/codestyling-localization/" target="_blank">Plugin Directory</a> | 
 			<a href="http://wordpress.org/extend/plugins/codestyling-localization/changelog/" target="_blank">Change Logs</a> | 
-			<a class="alignright" href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank"><?php _e( 'Dashboard in your Language','translation-toolkit' );?></a>
+			<a class="alignright" href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank"><?php _e( 'Dashboard in your Language', 'translation-toolkit' ); ?></a>
 		</p>
+		
 	<?php
-	}
-
+	} // END helptab_about()
+	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	static function helptab_low_memory() {	?>
+		
 		<p>
 			<strong><?php _e( 'PHP Memory Limit Problems', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -72,42 +85,58 @@ class TranslationToolkit_Help {
 		<?php _e( 'It could be, that your provider confirms, that you have enough PHP memory for your installation but it is not. You can detect your real available memory limit using the plugin <a href="http://wordpress.org/extend/plugins/wp-system-health/" target="_blank">WP System Health</a>. It has a build in feature (called <em>Test Suite</em>) to evaluate correctly the memory limit the server will permit.', 'translation-toolkit' ); ?>
 		</p>
 		<p>
-			<input id="enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if (CSL_LOW_MEMORY) echo 'checked="checked"'; ?>>
-			<label for="enable_low_memory_mode"><?php _e('enable low memory mode', 'translation-toolkit'); ?></label>
+			<input id="enable_low_memory_mode" type="checkbox" name="enable_low_memory_mode" value="1" <?php if ( get_option( 'translation-toolkit.low-memory' ) == 1 ) { echo 'checked="checked"'; } ?>>
+			<label for="enable_low_memory_mode"><?php _e( 'enable low memory mode', 'translation-toolkit' ); ?></label>
 			<img id="enable_low_memory_mode_indicator" style="display:none;" alt="" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/loading-small.gif'; ?>" />
-			&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?",'translation-toolkit') ?>" rel="lowmemory"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" /></a>
+			<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e( 'What does that mean?', 'translation-toolkit' ); ?>" rel="lowmemory">
+				<img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" />
+			</a>
 		</p>
+		
 		<?php
-	}
-
+	} // END helptab_low_memory()
+	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	static function helptab_compatibility() { ?>
+		
 		<p>
 			<strong><?php _e( 'Compatibility - Hints and Errors', 'translation-toolkit' ); ?></strong>
 		</p>
 		<p> 
-			<?php _e("If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins.",'translation-toolkit' ); ?> 
-			<?php _e("There are several reason for such reports, but in each of this cases only the original author can solve it:",'translation-toolkit' ); ?>
+			<?php _e("If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins.", 'translation-toolkit' ); ?> 
+			<?php _e("There are several reason for such reports, but in each of this cases only the original author can solve it:", 'translation-toolkit' ); ?>
 		</p>
 		<p>
 			<ul>
 				<li>
-				<?php _e("Loading of translation files will be performed beside the WordPress standard functionality.",'translation-toolkit' ); ?>
+				<?php _e("Loading of translation files will be performed beside the WordPress standard functionality.", 'translation-toolkit' ); ?>
 				</li>
 				<li>
-				<?php _e("Textdomains can not be parsed from source files because of used coding syntax.",'translation-toolkit' ); ?>
+				<?php _e("Textdomains can not be parsed from source files because of used coding syntax.", 'translation-toolkit' ); ?>
 				</li>
 				<li>
-				<?php _e("Component seems to be translatable but doesn't use a translation file load call.",'translation-toolkit' ); ?>
+				<?php _e("Component seems to be translatable but doesn't use a translation file load call.", 'translation-toolkit' ); ?>
 				</li>
 			</ul>
 		</p>
 		<p>
-			<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.",'translation-toolkit' ); ?>
+			<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.", 'translation-toolkit' ); ?>
 		</p>
+		
 	<?php
-	}
-
+	} // END helptab_compatibility()
+	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	static function helptab_textdomain() { ?>
+		
 		<p>
 			<strong><?php _e( 'What is a textdomain?', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -115,10 +144,10 @@ class TranslationToolkit_Help {
 			<?php _e( 'Textdomains are used to specified the context for the translation file to be loaded and processed. If a component tries to load a translation file using a textdomain, all texts assigned to this domain gets translated during page creation.', 'translation-toolkit' ); ?>
 		</p>
 		<p>
-			<?php _e( 'The extended feature for textdomain separation shows at dropdown box <i>Textdomain</i> the pre-selected primary textdomain.','translation-toolkit' ); ?><br/>
-			<?php _e( 'All other additional contained textdomains occur at the source but will not be used, if not explicitely supported by this component!','translation-toolkit' ); ?><br/>
-			<?php _e( 'Please contact the author, if some of the non primary textdomain based phrases will not show up translated at the required position!','translation-toolkit' ); ?><br/>
-			<?php _e( 'The Textdomain <i><b>default</b></i> always stands for the WordPress main language file, this could be either intentionally or accidentally!','translation-toolkit' ); ?><br/>
+			<?php _e( 'The extended feature for textdomain separation shows at dropdown box <i>Textdomain</i> the pre-selected primary textdomain.', 'translation-toolkit' ); ?><br/>
+			<?php _e( 'All other additional contained textdomains occur at the source but will not be used, if not explicitely supported by this component!', 'translation-toolkit' ); ?><br/>
+			<?php _e( 'Please contact the author, if some of the non primary textdomain based phrases will not show up translated at the required position!', 'translation-toolkit' ); ?><br/>
+			<?php _e( 'The Textdomain <i><b>default</b></i> always stands for the WordPress main language file, this could be either intentionally or accidentally!', 'translation-toolkit' ); ?><br/>
 		</p>
 		<p>
 			<strong><?php _e( 'Warning Messages', 'translation-toolkit' ); ?></strong>
@@ -131,12 +160,19 @@ class TranslationToolkit_Help {
 			<?php _e( 'Warnings at the editors view will show up, if the component is using badly coded textdomains. This could be either by integration of other plugins code or accidentally by typing mistakes.', 'translation-toolkit' ); ?>
 		</p>
 		<p>
-			<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.",'translation-toolkit' ); ?>
+			<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.", 'translation-toolkit' ); ?>
 		</p>
+		
 	<?php
-	}
-
+	} // END helptab_textdomain()
+	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	static function helptab_filepermissions() { ?>
+		
 		<p>
 			<strong><?php _e( 'File Permission and Access Rights', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -149,10 +185,17 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e( 'You can define the necessary constants at your <em>wp-config.php</em> file as described at the <a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants" target="_blank">WordPress Codex Page - Upgrade Constants</a> to get it working at your installation without recurrently occuring credential requests. If your constants are properly defined, this plugin will work smoothly and the WordPress Automatic Updates will work without any further question about FTP User Credentials too.', 'translation-toolkit' ); ?>
 		</p>
+		
 	<?php
-	}
-
+	} // END helptab_filepermissions()
+	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	static function helptab_translationformat() { ?>
+		
 		<p>
 			<strong><?php _e( 'Extended Translation File Format', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -169,9 +212,16 @@ class TranslationToolkit_Help {
 			<?php _e( 'Just go back the the overview page, search your affected plugin/theme and re-scan the translation content. Afterwards it will be possible to open the translation file for editing.', 'translation-toolkit' ); ?>
 		</p>
 	<?php
-	}
-
+	
+	} // END helptab_translationformat()
+	
+	/**
+	 * @todo
+	 *
+	 * @since 1.0.0
+	 */
 	static function helptab_workonchildthemes() { ?>
+		
 		<p>
 			<strong><?php _e( 'Working with Child Theme Translations', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -184,7 +234,7 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e( 'First of all you have to modify your Child Themes <em>functions.php</em> file and call the appropriated load method as shown below. Assume the textdomain is defined at the Main Theme as <b>supertheme</b> the load function should look like:', 'translation-toolkit' ); ?>
 		</p>
-		<p><pre>load_child_theme_textdomain('supertheme', get_stylesheet_directory().'/languages' );</pre></p>
+		<pre>load_child_theme_textdomain('supertheme', get_stylesheet_directory().'/languages' );</pre>
 		<p>
 			<?php _e( 'The path has been defined as subdirectory within the Child Themes directory but you can skip the directory parameter and place the language files at the Child Themes main folder.', 'translation-toolkit' ); ?>
 		</p>
@@ -194,7 +244,8 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e( 'Scanning a Child Theme always includes the files from Main Theme too. So you always get the mixed translation from Main and Child Theme. Doing a Synchronization with the Main Theme will preserve the texts from Child Theme and will attach new texts from Main Theme only.', 'translation-toolkit' ); ?>
 		</p>
+		
 	<?php
-	}
+	} // END helptab_workonchildthemes()
 	
 } // END class TranslationToolkit_AdminHelp

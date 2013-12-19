@@ -15,7 +15,7 @@ if ( !function_exists( 'add_filter' ) ) {
 class TranslationToolkit_Locale {
 	
 	/**
-	 * @TODO
+	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
@@ -98,7 +98,7 @@ class TranslationToolkit_Locale {
 	}// END l10n_langs()
 	
 	/**
-	 * @TODO
+	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
@@ -181,7 +181,7 @@ class TranslationToolkit_Locale {
 	}// END login_label()
 	
 	/**
-	 * @TODO
+	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
@@ -265,7 +265,7 @@ class TranslationToolkit_Locale {
 	}// END plurals()
 	
 	/**
-	 * @TODO
+	 * @todo
 	 *
 	 * @since 1.0.0
 	 */

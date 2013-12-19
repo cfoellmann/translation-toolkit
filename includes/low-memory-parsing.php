@@ -1,7 +1,7 @@
 <?php
 //simple safety check
-$a = str_replace("\\", '/', dirname(__FILE__));
-$b = str_replace("\\", '/', dirname($_POST['file']));
+$a = str_replace( "\\", '/', dirname(__FILE__));
+$b = str_replace( "\\", '/', dirname($_POST['file']));
 $da = implode('/',array_slice(explode('/', $a),0,-4));
 $idx = strpos($b,$da);
 

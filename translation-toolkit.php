@@ -2,7 +2,7 @@
 /*
 Plugin Name: Translation Toolkit
 Plugin URI: https://github.com/wp-repository/translation-toolkit/
-Description: @TODO
+Description: @todo
 Version: 0.1-beta
 Author: Project Contributors
 Author URI: https://github.com/wp-repository/translation-toolkit/graphs/contributors
@@ -40,14 +40,14 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
-// @TODO Implement differently
+// @todo Implement differently
 //if ( function_exists( 'csp_po_install_plugin' ) ) {
 //	//rewrite and extend the error messages displayed at failed activation
 //	//fall trough, if it's a real code bug forcing the activation error to get the appropriated message instead
 //	if ( isset($_GET['action']) && isset($_GET['plugin']) && ($_GET['action'] == 'error_scrape') && ($_GET['plugin'] == plugin_basename(__FILE__) ) ) {
 //		if ( !function_exists('token_get_all') ) {
 //			echo "<table>";
-//			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__('required', 'translation-toolkit')."</td><td> | ".__('actual', 'translation-toolkit')."</td></tr>";			
+//			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__( 'required', 'translation-toolkit' )."</td><td> | ".__( 'actual', 'translation-toolkit' )."</td></tr>";			
 //			echo "<tr style=\"font-size: 12px;\"><td>PHP Tokenizer Module:</td><td align=\"center\"><strong>active</strong></td><td align=\"center\"><span style=\"color:#f00;\">not installed</span></td></tr>";			
 //			echo "</table>";
 //		}
@@ -88,9 +88,9 @@ class TranslationToolkit {
 	private static $file = __FILE__;
 	
 	/**
-	 * @TODO
+	 * Constructor. Hooks all interactions to initialize the class.
 	 *
-	 * @since 1.0.0
+	 * @since 1.0
 	 */
 	public function __construct() {
 
@@ -100,13 +100,13 @@ class TranslationToolkit {
 		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
 
 		// initialize config and data on activation
-		register_activation_hook( __FILE__, array( 'Translation_Toolkit', 'activate_plugin' ) );
+		register_activation_hook( __FILE__, array( 'Translation_Toolkit', 'activate_plugin' ) ); // @todo FIX THIS
 		register_deactivation_hook( __FILE__, array( 'Translation_Toolkit', 'deactivate_plugin' ) );
 
 	} // END __construct()
 
 	/**
-	 * @TODO
+	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
@@ -178,11 +178,13 @@ class TranslationToolkit {
 	}
 	
 	/**
-	 * Desc.
+	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function activate_plugin() {
+		
+		get_option( 'translation-toolkit.low-memory', 1 );
 		
 		if ( !function_exists( 'token_get_all' ) ) {
 			$current = get_option( 'active_plugins' );
@@ -194,7 +196,7 @@ class TranslationToolkit {
 	} // END activate_plugin()
 	
 	/**
-	 * Desc.
+	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
@@ -213,7 +215,7 @@ class CspStringsAreAscii {
 	function _strpos($haystack, $needle, $offset = null) { return strpos($haystack, $needle, $offset); }
 	function _substr($string, $offset, $length = null) { return (is_null($length) ? substr($string, $offset) : substr($string, $offset, $length)); }
 	function _str_split($string, $chunkSize) { return str_split($string, $chunkSize); }
-	function _substr_count($haystack, $needle) { return substr_count($haystack, $needle); }
+	function _substr_count( $haystack, $needle) { return substr_count( $haystack, $needle); }
 	function _seems_utf8($string) { return seems_utf8($string); }
 	function _utf8_encode($string) { return utf8_encode($string); }
 }
@@ -231,7 +233,7 @@ class CspStringsAreMultibyte {
 		}
 		return $out; 
 	}
-	function _substr_count($haystack, $needle) { return mb_substr_count($haystack, $needle, 'ascii'); }
+	function _substr_count( $haystack, $needle) { return mb_substr_count( $haystack, $needle, 'ascii'); }
 	function _seems_utf8($string) { return mb_check_encoding($string, 'UTF-8'); }
 	function _utf8_encode($string) { return mb_convert_encoding($string, 'UTF-8'); }
 }
