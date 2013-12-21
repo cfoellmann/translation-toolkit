@@ -86,7 +86,7 @@ class TranslationToolkit_Ajax {
 				<td><?php echo date("Y-m-d H:iO"); ?><input type="hidden" id="csp-dialog-timestamp" value="<?php echo date("Y-m-d H:iO"); ?>" /></td>
 			</tr>
 			<tr>
-				<td style="vertical-align:middle; ?><strong><?php _e( 'Last-Translator', 'translation-toolkit' ); ?>:</strong></td>
+				<td style="vertical-align:middle; "><strong><?php _e( 'Last-Translator', 'translation-toolkit' ); ?>:</strong></td>
 				<td><input style="width:330px;" type="text" id="csp-dialog-translator" value="<?php $myself = wp_get_current_user(); echo "$myself->user_nicename &lt;$myself->user_email&gt;"; ?>" /></td>
 			</tr>
 			<tr>
