@@ -16,7 +16,7 @@
 	<h3 class="nav-tab-wrapper">
 		<?php
 		foreach ( $tt_tabs['translation-toolkit'] as $id => $tab ) {
-			$class = ( $id == $_GET['tab'] ) ? ' nav-tab-active' : '';
+			$class = ( $id == ( isset( $_GET['tab'] ) ? $_GET['tab'] : 'all' ) ? ' nav-tab-active' : '';
 			echo '<a href="' . add_query_arg( array( 'page' => 'translation-toolkit', 'tab' => $id  ), admin_url( apply_filters( 'tt_page_parent', 'tools.php' ) ) ) . '" class="nav-tab' . $class . '">' . esc_html( $tab['label'] ) . '</a>';
 		}
 		?>
