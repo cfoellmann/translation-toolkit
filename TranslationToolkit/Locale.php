@@ -13,14 +13,14 @@ if ( !function_exists( 'add_filter' ) ) {
 }
 
 class TranslationToolkit_Locale {
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function langs() {
-		
+
 		$langs = apply_filters(
 			'tt_langs',
 			array(
@@ -92,18 +92,18 @@ class TranslationToolkit_Locale {
 				'zu' => array('zu_ZU'),
 			)
 		);
-		
+
 		return $l10n_langs;
-		
+
 	}// END l10n_langs()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function login_label() {
-		
+
 		$login_label = apply_filters(
 			'tt_login_label',
 			array(
@@ -175,18 +175,18 @@ class TranslationToolkit_Locale {
 				'zu' => "Language",
 			)
 		);
-		
+
 		return $login_label;
-		
+
 	}// END login_label()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function plurals() {
-		
+
 		//based on http://translate.sourceforge.net/wiki/l10n/pluralforms
 		$plurals = apply_filters(
 			'tt_plurals',
@@ -259,18 +259,18 @@ class TranslationToolkit_Locale {
 				'zu' => "nplurals=2; plural=n != 1;",
 			)
 		);
-		
+
 		return $plurals;
-		
+
 	}// END plurals()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function sys_locales() {
-		
+
 		$sys_locales = apply_filters(
 			'tt_sys_locales',
 			array(
@@ -764,7 +764,7 @@ class TranslationToolkit_Locale {
 					'ms-cp' => 'CP1252',
 					'google-api' => 'eo',
 					'microsoft-api' => ''
-				),	
+				),
 				'es_AR' => array (
 					'country' => "Argentina",
 					'country-www' => 'ar',
@@ -1775,9 +1775,9 @@ class TranslationToolkit_Locale {
 				),
 			)
 		);
-		
+
 		return $sys_locales;
-		
+
 	}// END sys_locales()
 
 } // END class TranslationToolkit_Locale
