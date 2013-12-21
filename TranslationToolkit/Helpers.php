@@ -13,7 +13,7 @@ if ( !function_exists( 'add_filter' ) ) {
 }
 
 class TranslationToolkit_Helpers {
-	
+
 	/**
 	 * Holds a copy of the object for easy reference.
 	 *
@@ -42,29 +42,29 @@ class TranslationToolkit_Helpers {
 	public function __construct() {
 
 		self::$instance = $this;
-		
+
 	} // END __construct()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function check_security() {
-		
+
 		if ( !is_user_logged_in() || !current_user_can( apply_filters( 'tt_settings_cap', 'manage_options' ) ) ) {
 			wp_die( __( 'You do not have permission to manage translation files.', 'translation-toolkit' ) );
 		}
-		
+
 	} // END check_security()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function check_filesystem() {
-		
+
 		//file system investigation
 		if ( function_exists( 'get_filesystem_method' ) ) {
 			$fsm = get_filesystem_method( array() );
@@ -72,57 +72,57 @@ class TranslationToolkit_Helpers {
 		} else {
 			define( "CSL_FILESYSTEM_DIRECT", true );
 		}
-		
+
 	} // END check_filesystem()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function find_translation_template( &$files ) {
-		
+
 		$result = null;
 		foreach( $files as $tt ) {
 			if ( preg_match( '/\.pot$/', $tt ) ) {
 				$result = $tt;
 			}
 		}
-		
+
 		return $result;
-		
+
 	} // END find_translation_template()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function convert_js_input_for_source( $str ) {
-		
+
 		$search = array( '\\\\\"', '\\\\n', '\\\\t', '\\\\$', '\\0', "\\'", '\\\\' );
 		$replace = array( '"', "\n", "\\t", "\\$", "\0", "'", "\\" );
 		$str = str_replace( $search, $replace, $str );
-		
+
 		return $str;
-		
+
 	} // END convert_js_input_for_source()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function get_packages( $type ) {
-		
+
 		$res = array();
 		$do_compat_filter = ( $type == 'compat' );
 		$do_security_filter = ( $type == 'security' );
-		
+
 		if ( $do_compat_filter || $do_security_filter ) {
 			$type = '';
 		}
-		
+
 		if ( empty( $type ) || ( $type == 'all' ) || ( $type == 'wordpress' ) ) {
 			if ( !$do_compat_filter && !$do_security_filter ) {
 				$res[] = self::get_wordpress_capabilities();
@@ -131,18 +131,18 @@ class TranslationToolkit_Helpers {
 		if ( empty( $type ) || ( $type == 'all' ) || ( $type == 'plugins' ) ) {
 			//WARNING: Plugin handling is not well coded by WordPress core
 			$err = error_reporting(0);
-			$plugs = get_plugins(); 
+			$plugs = get_plugins();
 			error_reporting($err);
 			$textdomains = array();
-			
-			foreach( $plugs as $key => $value ) { 
+
+			foreach( $plugs as $key => $value ) {
 				$data = null;
 				if ( dirname( $key ) == 'buddypress' ) {
-					
+
 					if ( $do_compat_filter || $do_security_filter ) {
 						continue;
 					}
-					
+
 					$data = self::get_buddypress_capabilities( $key, $value );
 					$res[] = $data;
 					$data = self::get_bbpress_on_buddypress_capabilities( $key, $value );
@@ -166,7 +166,7 @@ class TranslationToolkit_Helpers {
 				}
 			} // END foreach( $plugs as $key => $value )
 		}
-		
+
 		if ( is_multisite() ) {
 			if ( empty( $type ) || ( $type == 'all' ) || ( $type == 'plugins-mu' ) ) {
 				$plugs = array();
@@ -179,20 +179,20 @@ class TranslationToolkit_Helpers {
 							}
 						}
 					}
-				}		
-				foreach( $plugs as $key => $value ) { 
+				}
+				foreach( $plugs as $key => $value ) {
 					$data = self::get_plugin_mu_capabilities( $key, $value );
-					
+
 					if ( !$data['gettext_ready'] ) {
 						continue;
 					}
-					
+
 					if ( $do_compat_filter && !isset( $data['dev-hints']) ) {
 						continue;
 					} elseif ( $do_security_filter && !isset( $data['dev-security'] ) ) {
 						continue;
 					}
-					
+
 					if ( in_array($data['textdomain'], $textdomains) ) {
 						for ( $i=0; $i<count( $res ); $i++ ) {
 							if ( $data['textdomain'] == $res[$i]['textdomain'] ) {
@@ -212,33 +212,33 @@ class TranslationToolkit_Helpers {
 				}
 			}
 		}
-		
+
 		if ( empty( $type ) || ( $type == 'all' ) || ( $type == 'themes' ) ) {
 			$themes = wp_get_themes();
 			//WARNING: Theme handling is not well coded by WordPress core
 			$err = error_reporting(0);
 			$ct = wp_get_theme();
 			error_reporting($err);
-			foreach($themes as $key => $value) { 
+			foreach($themes as $key => $value) {
 				$data = self::get_theme_capabilities($key, $value, $ct);
 				if (!$data['gettext_ready']) continue;
 				if ($do_compat_filter && !isset($data['dev-hints'])) continue;
 				elseif ($do_security_filter && !isset($data['dev-security'])) continue;
 				$res[] = $data;
-			}	
+			}
 		}
-		
+
 		return $res;
-		
+
 	} // END get_packages()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
-	 */		
+	 */
 	static function get_wordpress_capabilities() {
-		
+
 		$data = array();
 		$data['dev-hints'] = null;
 		$data['deny_scanning'] = false;
@@ -272,7 +272,7 @@ class TranslationToolkit_Helpers {
 		if ( !$data['is_US_Version'] ) {
 			$files = self::rscandir( str_replace( "\\","/", WP_LANG_DIR ).'/', "/(.\mo|\.po|\.pot)$/", $tmp);
 			$data['translation_template'] = self::find_translation_template( $files );
-			
+
 			foreach( $files as $filename ) {
 				$file = str_replace( str_replace( "\\" , "/", WP_LANG_DIR ) . '/', '', $filename );
 				preg_match( "/^([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits );
@@ -284,28 +284,28 @@ class TranslationToolkit_Helpers {
 					$data['special_path'] = '';
 				}
 			}
-			
+
 			$data['base_file'] = (empty($data['special_path']) ? '' : $data['special_path'].'/') . $data['filename'].'/';
 		}
-		
+
 		return $data;
-		
+
 	} // END get_wordpress_capabilities()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
-	 */		
+	 */
 	static function get_buddypress_capabilities( $plug, $values ) {
-		
+
 		$data = array();
 		$data['dev-hints'] = null;
 		$data['deny_scanning'] = false;
 		$data['locale'] = get_locale();
-		$data['type'] = 'plugins';	
-		$data['img_type'] = 'buddypress';	
-		$data['type-desc'] = __( 'BuddyPress', 'translation-toolkit' );	
+		$data['type'] = 'plugins';
+		$data['img_type'] = 'buddypress';
+		$data['type-desc'] = __( 'BuddyPress', 'translation-toolkit' );
 		$data['name'] = $values['Name'];
 		if ( isset( $values['AuthorURI'] ) ) {
 			$data['author'] = '<a href="' . $values['AuthorURI'] . '">' . $values['Author'] . '</a>';
@@ -321,18 +321,18 @@ class TranslationToolkit_Helpers {
 		$data['is-simple'] = false;
 		$data['simple-filename'] = '';
 		$data['is-path-unclear'] = false;
-		$data['gettext_ready'] = true;	
+		$data['gettext_ready'] = true;
 		$data['translation_template'] = null;
 		$data['textdomain'] = array('identifier' => 'buddypress', 'is_const' => false );
 		$data['special_path'] = 'bp-languages';
 		$data['languages'] = array();
-		$tmp = array(); 
-		$files = self::lscandir(str_replace( "\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
+		$tmp = array();
+		$files = self::lscandir(str_replace( "\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-languages/', "/(\.mo|\.po|\.pot)$/", $tmp);
 		$data['translation_template'] = self::find_translation_template( $files );
 		foreach($files as $filename) {
 			$file = str_replace(str_replace( "\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
-			preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);		
-			if (empty($hits[2]) === false) {				
+			preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);
+			if (empty($hits[2]) === false) {
 				$data['languages'][$hits[1]][$hits[2]] = array(
 					'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
 					'stamp' => date(__( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime($filename))." ". self::file_permissions($filename)
@@ -340,25 +340,25 @@ class TranslationToolkit_Helpers {
 			}
 		}
 		$data['base_file'] = (empty($data['special_path']) ? $data['filename'] : $data['special_path']."/".$data['filename']).'-';
-		
+
 		return $data;
-		
+
 	} // END get_buddypress_capabilities()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
-	 */	
+	 */
 	static function get_bbpress_on_buddypress_capabilities( $plug, $values ) {
-		
+
 		$data = array();
 		$data['dev-hints'] = null;
 		$data['deny_scanning'] = false;
 		$data['locale'] = get_locale();
-		$data['type'] = 'plugins';	
-		$data['img_type'] = 'buddypress-bbpress';	
-		$data['type-desc'] = __( 'bbPress', 'translation-toolkit' );	
+		$data['type'] = 'plugins';
+		$data['img_type'] = 'buddypress-bbpress';
+		$data['type-desc'] = __( 'bbPress', 'translation-toolkit' );
 		$data['name'] = "bbPress";
 		$data['author'] = "<a href='http://bbpress.org/'>bbPress.org</a>";
 		$data['version'] = '-n.a.-';
@@ -373,20 +373,20 @@ class TranslationToolkit_Helpers {
 		$data['is-simple'] = false;
 		$data['simple-filename'] = '';
 		$data['is-path-unclear'] = false;
-		$data['gettext_ready'] = true;	
+		$data['gettext_ready'] = true;
 		$data['translation_template'] = null;
 		$data['textdomain'] = array('identifier' => 'default', 'is_const' => false );
 		$data['special_path'] = 'my-languages';
 		$data['languages'] = array();
 		$data['is_US_Version'] = !is_dir(str_replace( "\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-forums/bbpress/my-languages' );
-		if ( !$data['is_US_Version'] ) {	
-			$tmp = array(); 	
-			$files = self::lscandir(str_replace( "\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-forums/bbpress/my-languages/', "/(\.mo|\.po|\.pot)$/", $tmp); 
+		if ( !$data['is_US_Version'] ) {
+			$tmp = array();
+			$files = self::lscandir(str_replace( "\\","/",dirname(WP_PLUGIN_DIR.'/'.$plug)).'/bp-forums/bbpress/my-languages/', "/(\.mo|\.po|\.pot)$/", $tmp);
 			$data['translation_template'] = self::find_translation_template($files);
 			foreach($files as $filename) {
 				$file = str_replace(str_replace( "\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
-				preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);		
-				if (empty($hits[2]) === false) {				
+				preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);
+				if (empty($hits[2]) === false) {
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
 						'stamp' => date(__( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime($filename))." ". self::file_permissions($filename)
@@ -395,26 +395,26 @@ class TranslationToolkit_Helpers {
 			}
 		}
 		$data['base_file'] = (empty($data['special_path']) ? $data['filename'] : $data['special_path']."/");
-		
+
 		return $data;
-		
+
 	} // END get_bbpress_on_buddypress_capabilities
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
-	 */	
+	 */
 	static function get_plugin_capabilities( $plug, $values ) {
-		
+
 		$data = array();
 		$data['dev-hints'] 		= null;
 		$data['dev-security'] 	= null;
 		$data['deny_scanning'] 	= false;
 		$data['locale'] = get_locale();
-		$data['type'] = 'plugins';	
-		$data['img_type'] = 'plugins';	
-		$data['type-desc'] = __( 'Plugin', 'translation-toolkit' );	
+		$data['type'] = 'plugins';
+		$data['img_type'] = 'plugins';
+		$data['type-desc'] = __( 'Plugin', 'translation-toolkit' );
 		$data['name'] = $values['Name'];
 		if ( isset( $values['AuthorURI'] ) ) {
 			$data['author'] = '<a href="' . $values['AuthorURI'] . '">' . $values['Author'] . '</a>';
@@ -441,7 +441,7 @@ class TranslationToolkit_Helpers {
 			$files = self::rscandir(str_replace( "\\","/",WP_PLUGIN_DIR).'/'.dirname($plug)."/", "/.(php|phtml)$/", $tmp);
 		}
 		$const_list = array();
-		foreach( $files as $file ) {	
+		foreach( $files as $file ) {
 			$content = file_get_contents($file);
 			if (preg_match("/[^_^!]load_(|plugin_)textdomain\s*\(\s*(\'|\"|)([\w\d\-_]+|[A-Z\d\-_]+)(\'|\"|)\s*(,|\))\s*([^;]+)\)/", $content, $hits)) {
 				$data['textdomain'] = array('identifier' => $hits[3], 'is_const' => empty($hits[2]) );
@@ -453,7 +453,7 @@ class TranslationToolkit_Helpers {
 				//TODO: let's think about it in future to find a better solution.
 				$data['textdomain'] = array('identifier' => substr(basename($plug),0,-4), 'is_const' => false );
 				$data['gettext_ready'] = true;
-				$data['php-path-string'] = '';	
+				$data['php-path-string'] = '';
 			}
 			if (isset($hits[1]) && $hits[1] != 'plugin_') 	$data['dev-hints'] = __("<strong>Loading Issue: </strong>Author is using <em>load_textdomain</em> instead of <em>load_plugin_textdomain</em> function. This may break behavior of WordPress, because some filters and actions won't be executed anymore. Please contact the Author about that.", 'translation-toolkit' );
 			if ($data['gettext_ready'] && !$data['textdomain']['is_const']) break; //make it short :-)
@@ -481,7 +481,7 @@ class TranslationToolkit_Helpers {
 				$data['textdomain']['identifier'] = str_replace( '.php', '', basename($plug));
 				//var_dump(str_replace( '.php', '', basename($plug)));
 			}
-		}		
+		}
 
 		if ( !$data['gettext_ready'] ) {
 			//lets check, if the plugin is a encrypted one could be translated or an unknow but with defined textdomain
@@ -525,7 +525,7 @@ class TranslationToolkit_Helpers {
 				foreach($files as $filename) {
 					$file = str_replace(str_replace( "\\","/",WP_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
 					preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
-					if (empty($hits[2]) === false) {				
+					if (empty($hits[2]) === false) {
 						$data['languages'][$hits[1]][$hits[2]] = array(
 							'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
 							'stamp' => date(__( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime($filename))." ". self::file_permissions($filename)
@@ -538,7 +538,7 @@ class TranslationToolkit_Helpers {
 					foreach($files as $filename) {
 						//bugfix: uppercase filenames supported
 						preg_match("/([A-Za-z0-9\-_]+)-([a-z][a-z]_[A-Z][A-Z])\.(mo|po)$/", $file, $hits);
-						if (empty($hits[2]) === false) {				
+						if (empty($hits[2]) === false) {
 							$data['filename'] = $hits[1];
 							$data['textdomain']['identifier'] = $hits[1];
 							$data['img_type'] = 'plugins_maybe';
@@ -589,7 +589,7 @@ class TranslationToolkit_Helpers {
 							);
 							$data['special_path'] = ltrim($hits[1], "/");
 						}
-					}			
+					}
 				}
 			}
 			if (!$data['is-simple'] && ($data['special_path'] == '') && (count( $data['languages']) == 0)) {
@@ -606,36 +606,36 @@ class TranslationToolkit_Helpers {
 			if ($data['is-path-unclear'] && isset($values['DomainPath']) && is_dir(dirname(WP_PLUGIN_DIR.'/'.$plug).'/'.trim($values['DomainPath'], "\\/")) )
 			{
 				$data['is-path-unclear'] = false;
-				$data['special_path'] = trim($values['DomainPath'], "\\/");		
+				$data['special_path'] = trim($values['DomainPath'], "\\/");
 			}
 
 			//DEBUG:  $data['php-path-string']  will contain real path part like: "false,'codestyling-localization'" | "'wp-content/plugins/' . NGGFOLDER . '/lang'" | "GENGO_LANGUAGES_DIR" | "$moFile"
 			//this may be part of later excessive parsing to find correct lang file path even if no lang files exist as hint or implementation of directory selector, if 0 languages contained
 			//if any lang files may be contained the qualified sub path will be extracted out of
-			//will be handled in case of  $data['is-path-unclear'] == true by display of treeview at file creation dialog 
+			//will be handled in case of  $data['is-path-unclear'] == true by display of treeview at file creation dialog
 			//var_dump($data['php-path-string']);
 
 		}
 		$data['base_file'] = (empty($data['special_path']) ? $data['filename'] : $data['special_path']."/".$data['filename']).'-';
-		
+
 		return $data;
-		
+
 	} // END get_plugin_capabilities()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
-	 */	
+	 */
 	static function get_plugin_mu_capabilities( $plug, $values ) {
-		
+
 		$data = array();
 		$data['dev-hints'] = null;
 		$data['deny_scanning'] = false;
 		$data['locale'] = get_locale();
-		$data['type'] = 'plugins-mu';	
-		$data['img_type'] = 'plugins-mu';	
-		$data['type-desc'] = __( 'μ Plugin', 'translation-toolkit' );	
+		$data['type'] = 'plugins-mu';
+		$data['img_type'] = 'plugins-mu';
+		$data['type-desc'] = __( 'μ Plugin', 'translation-toolkit' );
 		$data['name'] = $values['Name'];
 		if ( isset( $values['AuthorURI'] ) ) {
 			$data['author'] = '<a href="' . $values['AuthorURI'] . '">' . $values['Author'] . '</a>';
@@ -649,7 +649,7 @@ class TranslationToolkit_Helpers {
 		$data['special_path'] = '';
 		$data['filename'] = "";
 		$data['is-simple'] = true;
-		$data['simple-filename'] = str_replace( "\\","/",WPMU_PLUGIN_DIR.'/'.$plug); 
+		$data['simple-filename'] = str_replace( "\\","/",WPMU_PLUGIN_DIR.'/'.$plug);
 		$data['is-path-unclear'] = false;
 		$data['gettext_ready'] = false;
 		$data['translation_template'] = null;
@@ -666,7 +666,7 @@ class TranslationToolkit_Helpers {
 			//TODO: let's think about it in future to find a better solution.
 			$data['textdomain'] = array('identifier' => substr(basename($plug),0,-4), 'is_const' => false );
 			$data['gettext_ready'] = true;
-			$data['php-path-string'] = '';			
+			$data['php-path-string'] = '';
 		}
 		if (!($data['gettext_ready'] && !$data['textdomain']['is_const'])) {
 			if (preg_match_all("/define\s*\(([^\)]+)\)/" , $content, $hits)) {
@@ -691,12 +691,12 @@ class TranslationToolkit_Helpers {
 
 		$data['languages'] = array();
 		if ($data['gettext_ready']){
-			$tmp = array(); $files = self::lscandir(str_replace( "\\","/",dirname(WPMU_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp); 		
+			$tmp = array(); $files = self::lscandir(str_replace( "\\","/",dirname(WPMU_PLUGIN_DIR.'/'.$plug)).'/', "/(\.mo|\.po|\.pot)$/", $tmp);
 			$data['translation_template'] = self::find_translation_template( $files );
 			foreach($files as $filename) {
 				$file = str_replace(str_replace( "\\","/",WPMU_PLUGIN_DIR).'/'.dirname($plug), '', $filename);
-				preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);		
-				if (empty($hits[2]) === false) {				
+				preg_match("/".$data['filename']."-([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $file, $hits);
+				if (empty($hits[2]) === false) {
 					$data['languages'][$hits[1]][$hits[2]] = array(
 						'class' => "-".(is_readable($filename) ? 'r' : '').(is_writable($filename) ? 'w' : ''),
 						'stamp' => date(__( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime($filename))." ". self::file_permissions($filename)
@@ -706,18 +706,18 @@ class TranslationToolkit_Helpers {
 			}
 		}
 		$data['base_file'] = (empty($data['special_path']) ? $data['filename'] : $data['special_path']."/".$data['filename']).'-';
-		
+
 		return $data;
-		
+
 	} // END get_plugin_mu_capabilities()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function get_theme_capabilities( $theme, $values, $active ) {
-		
+
 		$data = array();
 		$data['dev-hints'] = null;
 		$data['deny_scanning'] = false;
@@ -741,15 +741,15 @@ class TranslationToolkit_Helpers {
 		}
 		$fc = explode('/',untrailingslashit($data['base_path']));
 		$folder_filesys = end($fc);
-		$folder_data = $values['Template']; 
+		$folder_data = $values['Template'];
 		$is_child_theme = $folder_filesys != $folder_data;
 		$data['theme-self'] = $folder_filesys;
 		$data['theme-template'] = $folder_data;
 
 		$data['locale'] = get_locale();
 		$data['type'] = 'themes';
-		$data['img_type'] = ($is_child_theme ? 'childthemes' : 'themes' );	
-		$data['type-desc'] = ($is_child_theme ? __( 'Childtheme', 'translation-toolkit' ) : __( 'Theme', 'translation-toolkit' ));	
+		$data['img_type'] = ($is_child_theme ? 'childthemes' : 'themes' );
+		$data['type-desc'] = ($is_child_theme ? __( 'Childtheme', 'translation-toolkit' ) : __( 'Theme', 'translation-toolkit' ));
 		$data['name'] = $values['Name'];
 		$data['author'] = $values['Author'];
 		$data['version'] = $values['Version'];
@@ -777,7 +777,7 @@ class TranslationToolkit_Helpers {
 			if (
 				preg_match("/[^_^!]load_(child_theme_|theme_|)textdomain\s*\(\s*(\'|\"|)([\w\d\-_]+|[A-Z\d\-_]+)(\'|\"|)\s*(,|\))/", $main, $hits)
 				||
-				preg_match("/[^_^!]load_(child_theme_|theme_|)textdomain\s*\(\s*/", $main, $hits)			
+				preg_match("/[^_^!]load_(child_theme_|theme_|)textdomain\s*\(\s*/", $main, $hits)
 			) {
 				if (isset($hits[1]) && $hits[1] != 'child_theme_' && $hits[1] != 'theme_') 	$data['dev-hints'] = __("<strong>Loading Issue: </strong>Author is using <em>load_textdomain</em> instead of <em>load_theme_textdomain</em> or <em>load_child_theme_textdomain</em> function. This may break behavior of WordPress, because some filters and actions won't be executed anymore. Please contact the Author about that.", 'translation-toolkit' );
 
@@ -786,7 +786,7 @@ class TranslationToolkit_Helpers {
 					unset($hits[3]);
 					if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
 					$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to load the textdomain. It will be assumed to be equal to theme name now.", 'translation-toolkit' );
-				}			
+				}
 				//make it short
 				$data['gettext_ready'] = true;
 				if ($data['gettext_ready']) {
@@ -869,7 +869,7 @@ class TranslationToolkit_Helpers {
 		$data['base_file'] = (empty($data['special_path']) ? '' : $data['special_path']."/");
 
 		$constant_failed = false;
-		if ($data['gettext_ready']) {	
+		if ($data['gettext_ready']) {
 			if ($data['textdomain']['is_const']) {
 				foreach($const_list as $e) {
 					$a = explode(',', $e);
@@ -883,7 +883,7 @@ class TranslationToolkit_Helpers {
 
 			//fallback for constants defined by variables! assume the theme name instead
 			if (
-				(strpos($data['textdomain']['identifier'], '$') !== false) 
+				(strpos($data['textdomain']['identifier'], '$') !== false)
 				||
 				(strpos($data['textdomain']['identifier'], '"') !== false)
 				||
@@ -893,9 +893,9 @@ class TranslationToolkit_Helpers {
 				$data['textdomain']['identifier'] = $values['Template'];
 				if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
 				$data['dev-hints'] = __("<strong>Textdomain Naming Issue: </strong>Author uses a variable to define the textdomain constant. It will be assumed to be equal to theme name now.", 'translation-toolkit' );
-			}			
+			}
 
-		}		
+		}
 		//check now known issues for themes
 		if (isset($data['textdomain']['identifier']) && $data['textdomain']['identifier'] == 'woothemes') {
 			if (isset($data['dev-hints'])) $data['dev-hints'] .= "<br/><br/>";
@@ -908,68 +908,68 @@ class TranslationToolkit_Helpers {
 		}
 
 		return $data;
-		
+
 	} // END get_theme_capabilities()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function has_subdirs( $base= '' ) {
-		 
+
 		if ( !is_dir($base) || !is_readable($base) ) {
 			return $false;
 		}
 		$array = array_diff( scandir( $base ), array( '.', '..' ) );
-		foreach( $array as $value ) { 
+		foreach( $array as $value ) {
 			if ( is_dir( $base . $value ) ) {
 				return true;
 			}
 		};
-		
+
 		return false;
-		
+
 	} // END has_subdirs()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function lscandir( $base = '', $reg = '', &$data ) {
-		
+
 		if ( !is_dir( $base ) || !is_readable( $base ) ) {
 			return $data;
 		}
 		$array = array_diff(scandir($base), array('.', '..'));
-		
-		foreach( $array as $value ) { 
+
+		foreach( $array as $value ) {
 			if ( is_file( $base.$value ) && preg_match( $reg, $value ) ) {
-				$data[] = str_replace( "\\","/",$base.$value); 
+				$data[] = str_replace( "\\","/",$base.$value);
 			}
 		}
-		
+
 		return $data;
-		
+
 	} // END lscandir()
 
 	static function rscandir( $base = '', $reg = '', &$data ) {
-		
+
 		if (!is_dir($base) || !is_readable($base)) return $data;
-		$array = array_diff(scandir($base), array('.', '..')); 
-		foreach($array as $value) { 
-			if (is_dir($base.$value)) { 
-				$data = self::rscandir($base.$value.'/', $reg, $data); 
-			} elseif (is_file($base.$value) && preg_match($reg, $value) ) { 
-				$data[] = str_replace( "\\","/",$base.$value); 
+		$array = array_diff(scandir($base), array('.', '..'));
+		foreach($array as $value) {
+			if (is_dir($base.$value)) {
+				$data = self::rscandir($base.$value.'/', $reg, $data);
+			} elseif (is_file($base.$value) && preg_match($reg, $value) ) {
+				$data[] = str_replace( "\\","/",$base.$value);
 			}
 		}
-		
+
 		return $data;
-		
+
 	} // END rscandir()
-	
+
 	/**
 	 * @todo
 	 *
@@ -979,55 +979,55 @@ class TranslationToolkit_Helpers {
 		if (!is_dir($base) || !is_readable($base)) {
 			return $data;
 		}
-		$array = array_diff(scandir($base), array('.', '..')); 
-		foreach($array as $value) { 
-			if (is_dir($base.$value)) { 
+		$array = array_diff(scandir($base), array('.', '..'));
+		foreach($array as $value) {
+			if (is_dir($base.$value)) {
 				$data[] = str_replace( "\\","/",$base.$value);
-				$data = self::rscanpath($base.$value.'/', $data); 
+				$data = self::rscanpath($base.$value.'/', $data);
 			}
 		}
-		
+
 		return $data;
-		
+
 	} // END rscanpath()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function rscandir_php( $base = '', &$exclude_dirs, &$data ) {
-		
+
 		if ( !is_dir( $base ) || !is_readable( $base ) ) {
 			return $data;
 		}
-		$array = array_diff(scandir($base), array('.', '..')); 
+		$array = array_diff(scandir($base), array('.', '..'));
 		foreach( $array as $value ) {
-			if (is_dir($base.$value)) { 
+			if (is_dir($base.$value)) {
 				if (!in_array($base.$value, $exclude_dirs)) {
 					$data = self::rscandir_php($base.$value.'/', $exclude_dirs, $data);
 				}
-			} elseif (is_file($base.$value) && preg_match('/\.(php|phtml)$/', $value) ) { 
-				$data[] = str_replace( "\\","/",$base.$value); 
+			} elseif (is_file($base.$value) && preg_match('/\.(php|phtml)$/', $value) ) {
+				$data[] = str_replace( "\\","/",$base.$value);
 			}
 		}
-		
+
 		return $data;
-		
+
 	}
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function file_permissions( $filename ) {
-		
+
 		static $R = array("---","--x","-w-","-wx","r--","r-x","rw-","rwx");
 		$perm_o	= substr(decoct(fileperms( $filename )),3);
-		
+
 		return "[".$R[(int)$perm_o[0]] . '|' . $R[(int)$perm_o[1]] . '|' . $R[(int)$perm_o[2]]."]";
-		
+
 	} // END file_permissions()
 
 } // END class TranslationToolkit_Helpers

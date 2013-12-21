@@ -19,14 +19,14 @@ if ( !defined( 'T_ML_COMMENT' ) ) {
 }
 
 class TranslationToolkit_Parser {
-	
+
 	/**
 	 * Constructor. Hooks all interactions to initialize the class.
 	 *
 	 * @since 1.0
 	 */
 	function __construct( $basedir, $textdomain, $do_gettext = true, $do_domains = false ) {
-		
+
 		$domains = array(
 			'load_textdomain',
 			'load_theme_textdomain',
@@ -56,70 +56,70 @@ class TranslationToolkit_Parser {
 			'esc_attr_x',
 			'esc_html_x'
 		); //needed only for checks against developer own functions for gettext like Ozz is using
-		
+
 		$this->component_type = 'unknown';
 		$this->textdomain = $textdomain;
 		$this->basedir = $basedir;
 		$this->filename = '';
 		$this->l10n_functions = array();
 		$this->buildin_functions = array_merge($gettext, $escapements);
-		
+
 		if ( $do_gettext ) {
 			$this->l10n_functions = array_merge($this->l10n_functions, $gettext);
 		}
-		
+
 		if ( $do_domains ) {
 			$this->l10n_functions = array_merge($this->l10n_functions, $domains);
 		}
-		
+
 		$this->l10n_regular = '/('.implode('$|', $this->l10n_functions).'$)/';
 		$this->l10n_domains = '/('.implode('|',$domains).')/';
-		
+
 		$this->regexp_wp_msfiles = "/(ms-.*|.*\/ms-.*|.*\/my-.*|wp-activate\.php|wp-signup\.php|wp-admin\/network\.php|wp-admin\/includes\/ms\.php|wp-admin\/network\/.*\.php|wp-admin\/includes\/class-wp-ms.*)/";
-		
+
 		$this->is_new_kernel_translation = @file_exists(dirname(dirname(dirname(dirname(dirname(__FILE__))))).'/wp-admin/user/about.php');
-		
+
 	}
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function parseFile( $filename, $component_type ) {
-		
+
 		if ( file_exists( $filename ) ){
 			$this->filename = str_replace($this->basedir, '', $filename);
 			$content = file_get_contents($filename);
 			return $this->parseString($content, $component_type);
 		}
-		
+
 		return false;
-		
+
 	} // END parseFile()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function parseString( $content, $component_type ) {
-		
+
 		$results = array(
 			'gettext' 	  => array(),
 			'not_gettext' => array(),
 			'textdomains' => array()
 		);
 		$this->component_type = $component_type;
-		
+
 		$in_func = false;
 		$in_domain = false;
 		$in_not_gettext = false;
 		$args_started = false;
 		$parens_balance = 0;
-		
+
 		$tokens = token_get_all($content);
-	
+
 		$cur_not_gettext = false;
 		$cur_func = false;
 		$cur_full_func = false;
@@ -129,10 +129,10 @@ class TranslationToolkit_Parser {
 		$cur_argc = 0;
 		$cur_args = array();
 		$bad_argc = array();
-		
+
 		foreach($tokens as $token) {
 			if (is_array($token)) {
-				list($id, $text) = $token;				
+				list($id, $text) = $token;
 				if (T_STRING == $id && preg_match($this->l10n_regular, $text, $m)) {
 					$in_func = true;
 					$in_domain = preg_match($this->l10n_domains, $text);
@@ -144,9 +144,9 @@ class TranslationToolkit_Parser {
 				} elseif (T_STRING == $id && $in_func) {
 					if($in_domain) {
 						if(isset($cur_args[$cur_argc])){
-							$cur_args[$cur_argc] .= '['.$text.']';	
+							$cur_args[$cur_argc] .= '['.$text.']';
 						}else{
-							$cur_args[$cur_argc] = '['.$text.']';	
+							$cur_args[$cur_argc] = '['.$text.']';
 						}
 						$token = $text;
 					}else{
@@ -173,11 +173,11 @@ class TranslationToolkit_Parser {
 							$token = $text;
 						}
 						if(isset($cur_args[$cur_argc])){
-							$cur_args[$cur_argc] .= $text;	
+							$cur_args[$cur_argc] .= $text;
 						}else{
-							$cur_args[$cur_argc] = $text;	
+							$cur_args[$cur_argc] = $text;
 						}
-						
+
 						if ($cur_argc == 0) $cur_match_line = $line_number;
 					}elseif($in_not_gettext) {
 						if ($text{0} == '"') {
@@ -189,7 +189,7 @@ class TranslationToolkit_Parser {
 							$text = str_replace( "\\'", "'", $text);
 						}
 						$text = str_replace( "\\$", "$", $text);
-						$text = str_replace( "\r\n", "\n", $text);						
+						$text = str_replace( "\r\n", "\n", $text);
 						$results['not_gettext'][] = $this->_build_non_gettext($line_number, $cur_not_gettext, $text);
 						$cur_not_gettext = false;
 						$token = $text;
@@ -215,7 +215,7 @@ class TranslationToolkit_Parser {
 				} elseif((T_VARIABLE == $id)||(T_OBJECT_OPERATOR == $id)||(T_STRING == $id)) {
 					if ($in_func && $in_domain && $args_started) {
 						if(isset($cur_args[$cur_argc])){
-							$cur_args[$cur_argc] .= $text;						
+							$cur_args[$cur_argc] .= $text;
 						}else{
 							$cur_args[$cur_argc] = $text;
 						}
@@ -234,7 +234,7 @@ class TranslationToolkit_Parser {
 				}
 			} elseif (')' == $token) {
 				--$parens_balance;
-				if ($in_func && 0 == $parens_balance) {				
+				if ($in_func && 0 == $parens_balance) {
 					if (count( $cur_args) && isset($cur_args[0])) {
 						//skip those, where all args are variables
 						$is_dev_func = !in_array($cur_full_func, $this->buildin_functions);
@@ -263,9 +263,9 @@ class TranslationToolkit_Parser {
 			}else {
 				if($in_domain) {
 					if(isset($cur_args[$cur_argc])){
-//						$cur_args[$cur_argc] .= $token;	
+//						$cur_args[$cur_argc] .= $token;
 					}else{
-//						$cur_args[$cur_argc] = $token;	
+//						$cur_args[$cur_argc] = $token;
 					}
 					/*
 					var_dump($token);
@@ -275,23 +275,23 @@ class TranslationToolkit_Parser {
 					var_dump("===========");
 					*/
 				}
-			}			
+			}
 			$line_number += substr_count( $token, "\n");
 		}
-		
+
 		return $results;
-		
+
 	} // END parseString()
-	
+
 	/**
 	 * @todo make private
 	 * @todo rename to detect_plugin_header()
 	 *
 	 * @since 1.0.0
 	 */
-	function _detect_plugin_header( $comment ) { 
+	function _detect_plugin_header( $comment ) {
 		$result = array();
-				
+
 		if ( ( $this->component_type != 'plugins' ) && ( $this->component_type != 'plugins_mu' ) ) {
 			return $result;
 		}
@@ -306,7 +306,7 @@ class TranslationToolkit_Parser {
 			'TextDomain' 	=> 'Text Domain',
 			'DomainPath' 	=> 'Domain Path',
 		);
-		
+
 		foreach ( $default_headers as $field => $regex ) {
 			preg_match( '/' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $comment, ${$field});
 			if ( !empty( ${$field} ) ) {
@@ -334,9 +334,9 @@ class TranslationToolkit_Parser {
 			}
 		}
 		return $result;
-			
+
 	} // END _detect_plugin_header()
-	
+
 	/**
 	 * @todo make private
 	 * @todo rename to ltd_validate()
@@ -345,14 +345,14 @@ class TranslationToolkit_Parser {
 	 */
 	function _ltd_validate( $text )	{
 		$r = strip_tags( $text );
-		
+
 		if ( $r != $text ) {
 			return "{bug-detected}";
 		}
-		
+
 		return $text;
 	} // END _ltd_validate()
-	
+
 	/**
 	 * @todo make private
 	 * @todo rename to build_gettext(()
@@ -366,10 +366,10 @@ class TranslationToolkit_Parser {
 			'CC' 	=> array(),
 			'LTD'	=> ( $is_dev_func ? $this->textdomain : 'default' )
 		);
-		
+
 		//check if we doing wordpress
 		if ($this->component_type == 'wordpress') {
-		
+
 			//special handling of WordPress new separations starting version 3.4
 			if (($res['LTD'] == 'default') && $this->is_new_kernel_translation) {
 				//test for admin
@@ -380,16 +380,16 @@ class TranslationToolkit_Parser {
 					$res['LTD'] = 'admin-network';
 				}
 			}
-			else{				
+			else{
 				//check if this is multi-site specific file for lower WordPress versions
 				if ($res['LTD'] == 'default') {
 					if (preg_match($this->regexp_wp_msfiles, $this->filename)) {
 						$res['LTD'] = 'ms';
 					}
-				}			
+				}
 			}
 		}
-		
+
 		switch($func) {
 			case '__':
 				// see also esc_html__
@@ -417,10 +417,10 @@ class TranslationToolkit_Parser {
 				if (isset($args[1])) $res['LTD'] = $this->_ltd_validate(trim($args[1]));
 				elseif ($argc == 1) $res['LTD'] = $this->textdomain;
 				break;
-			case '_x': 		
+			case '_x':
 				//see "_c" but explicite context
 				//see also esc_html_x
-				//see also esc_attr_x 
+				//see also esc_attr_x
 				//[0] =>  phrase
 				//[1] =>  context
 				//[2] => textdomain (optional)
@@ -430,7 +430,7 @@ class TranslationToolkit_Parser {
 				if (isset($args[2])) $res['LTD'] = $this->_ltd_validate(trim($args[2]));
 				elseif ($argc == 2) $res['LTD'] = $this->textdomain;
 				break;
-			case '_ex': 		
+			case '_ex':
 				//see "_c" but explicite context
 				//[0] =>  phrase
 				//[1] =>  context
@@ -457,7 +457,7 @@ class TranslationToolkit_Parser {
 				//[0] => phrase singular
 				//[1] => phrase plural
 				//[2] => number
-				//[3] => textdomain (optional)				
+				//[3] => textdomain (optional)
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0]."\00".$args[1];
@@ -469,7 +469,7 @@ class TranslationToolkit_Parser {
 				//[0] => phrase singular
 				//[1] => phrase plural
 				//[2] => number
-				//[3] => textdomain (optional)				
+				//[3] => textdomain (optional)
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0]."\00".$args[1];
@@ -504,7 +504,7 @@ class TranslationToolkit_Parser {
 			case '_n_noop':
 				//see deprecated __ngettext_noop
 				//[0] =>  phrase singular
-				//[1] => phrase plural				
+				//[1] => phrase plural
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
 				$res['msgid'] = $args[0]."\00".$args[1];
@@ -514,7 +514,7 @@ class TranslationToolkit_Parser {
 			case '_nx_noop':
 				//see "_n_noop" but  but additional context,
 				//[0] => phrase singular
-				//[1] => phrase plural				
+				//[1] => phrase plural
 				//[2] => context
 				if (in_array(0, $bad_argc)) return null; //error, this can't be a function
 				if (in_array(1, $bad_argc)) return null; //error, this can't be a function
@@ -522,7 +522,7 @@ class TranslationToolkit_Parser {
 				$res['msgid'] = $args[2]."\04".$args[0]."\00".$args[1];
 				$res['P'] = true;
 				$res['LTD'] = $this->textdomain; //noop's translated later mostly with correct texdomain
-				break;				
+				break;
 			case 'load_textdomain':
 				$res = array('func' => $func, 'textdomain' => '', 'rel_path' => false, 'path' => false);
 				if (isset($args[0])) $res['textdomain'] = $args[0];
@@ -548,7 +548,7 @@ class TranslationToolkit_Parser {
 				$res = array('func' => $func, 'textdomain' => '', 'rel_path' => false, 'path' => false);
 				if (isset($args[0])) $res['textdomain'] = $args[0];
 				if (isset($args[1])) $res['path'] = $args[1];
-				break;				
+				break;
 			case 'define':
 				$res = array('func' => $func);
 				if (isset($args[0])) $res['const'] = $args[0];
@@ -572,16 +572,16 @@ class TranslationToolkit_Parser {
 				*/
 				;
 		}
-		//permit splitting the "Center" qualified within one file, because WP doesn't provide it. 
+		//permit splitting the "Center" qualified within one file, because WP doesn't provide it.
 		if ($this->component_type == 'wordpress' && preg_match('/continents-cities\.php/', $this->filename) && $res['msgid'] == 'Center') {
 			$res['msgid'] = "continents-cities\04Center";
 			$res['CC'] = array('translators: this is an artificial split between the admin and continent text, because of different contextual usage.');
 		}
-		
+
 		return $res;
-		
+
 	} // END _build_gettext()
-	
+
 	/**
 	 * @todo make private
 	 * @todo rename to build_non_gettext()
@@ -589,16 +589,16 @@ class TranslationToolkit_Parser {
 	 * @since 1.0.0
 	 */
 	function _build_non_gettext( $line, $stage, $text ) {
-		
-		$array = array( 
+
+		$array = array(
 			'msgid' => $text,
-			'R' 	=> $this->filename . ':' . $line, 
-			'CC' 	=> array( $stage ), 
+			'R' 	=> $this->filename . ':' . $line,
+			'CC' 	=> array( $stage ),
 			'LTD'	=> '{php-code}'
 		);
-		
+
 		return $array;
-		
+
 	} // END _build_non_gettext()
 
 } // END class TranslationToolkit_parser

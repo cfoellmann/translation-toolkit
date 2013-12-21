@@ -13,7 +13,7 @@ if ( !function_exists( 'add_filter' ) ) {
 }
 
 class TranslationToolkit_Ajax {
-	
+
 	/**
 	 * Holds a copy of the object for easy reference.
 	 *
@@ -42,7 +42,7 @@ class TranslationToolkit_Ajax {
 	public function __construct() {
 
 		self::$instance = $this;
-		
+
 		add_action( 'wp_ajax_dlg_new', array( $this, 'dlg_new' ) );
 		add_action( 'wp_ajax_dlg_delete', array( $this, 'dlg_delete' ) );
 		add_action( 'wp_ajax_dlg_rescan', array( $this, 'dlg_rescan' ) );
@@ -51,9 +51,9 @@ class TranslationToolkit_Ajax {
 		add_action( 'wp_ajax_merge_from_maintheme', array( $this, 'merge_from_maintheme' ) );
 		add_action( 'wp_ajax_create', array( $this, 'create' ) );
 		add_action( 'wp_ajax_destroy', array( $this, 'destroy' ) );
-		add_action( 'wp_ajax_scan_source_file', array( $this, 'scan_source_file' ) );	
+		add_action( 'wp_ajax_scan_source_file', array( $this, 'scan_source_file' ) );
 		add_action( 'wp_ajax_change_low_memory_mode', array( $this, 'change_low_memory_mode' ) );
-		
+
 		add_action( 'wp_ajax_change_permission', array( $this, 'change_permission' ) );
 		add_action( 'wp_ajax_launch_editor', array( $this, 'launch_editor' ) );
 		add_action( 'wp_ajax_translate_by_google', array( $this, 'translate_by_google' ) );
@@ -62,9 +62,9 @@ class TranslationToolkit_Ajax {
 		add_action( 'wp_ajax_generate_mo_file', array( $this, 'generate_mo_file' ) );
 		add_action( 'wp_ajax_create_language_path', array( $this, 'create_language_path' ) );
 		add_action( 'wp_ajax_create_pot_indicator', array( $this, 'create_pot_indicator' ) );
-		
+
 	} // END __construct()
-	
+
 	/**
 	 * @todo
 	 *
@@ -72,7 +72,7 @@ class TranslationToolkit_Ajax {
 	 */
 	function dlg_new() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		$login_label = TranslationToolkit_Locale::login_label();
 		$sys_locales = TranslationToolkit_Locale::sys_locales();
 		?>
@@ -99,10 +99,10 @@ class TranslationToolkit_Ajax {
 						<input type="hidden" id="csp-dialog-language" value="" />
 						<input type="hidden" id="csp-dialog-path" value="<?php echo strip_tags($_POST['path']); ?>" />
 						<input type="hidden" id="csp-dialog-subpath" value="<?php echo strip_tags($_POST['subpath']); ?>" />
-						<input type="hidden" id="csp-dialog-simplefilename" value="<?php echo strip_tags($_POST['simplefilename']); ?>" />			
-						<input type="hidden" id="csp-dialog-transtemplate" value="<?php echo strip_tags($_POST['transtemplate']); ?>" />					
-						<input type="hidden" id="csp-dialog-textdomain" value="<?php echo strip_tags($_POST['textdomain']); ?>" />					
-						<input type="hidden" id="csp-dialog-denyscan" value="<?php echo ($_POST['denyscan'] ? "true" : "false"); ?>" />					
+						<input type="hidden" id="csp-dialog-simplefilename" value="<?php echo strip_tags($_POST['simplefilename']); ?>" />
+						<input type="hidden" id="csp-dialog-transtemplate" value="<?php echo strip_tags($_POST['transtemplate']); ?>" />
+						<input type="hidden" id="csp-dialog-textdomain" value="<?php echo strip_tags($_POST['textdomain']); ?>" />
+						<input type="hidden" id="csp-dialog-denyscan" value="<?php echo ($_POST['denyscan'] ? "true" : "false"); ?>" />
 						<table style="font-family:monospace;">
 						<?php
 							$total = array_keys( $sys_locales );
@@ -111,7 +111,7 @@ class TranslationToolkit_Ajax {
 									continue;
 								}
 								$values = $sys_locales[ $key ];
-								
+
 								if ( get_locale() == $key ) {
 									$selected = '" selected="selected';
 								} else {
@@ -136,11 +136,11 @@ class TranslationToolkit_Ajax {
 			<input class="button" id="submit_language" type="submit" disabled="disabled" value="<?php _e( 'create po-file', 'translation-toolkit' ); ?>" onclick="return csp_create_new_pofile(this,<?php echo "'".strip_tags($_POST['type'])."'"; ?>);"/>
 		</div>
 		<?php
-		
+
 		exit();
-	
+
 	} // END dlg_new()
-	
+
 	/**
 	 * @todo
 	 *
@@ -159,11 +159,11 @@ class TranslationToolkit_Ajax {
 			<input class="button" id="submit_language" type="submit" value="<?php _e( 'delete files', 'translation-toolkit' ); ?>" onclick="csp_destroy_files(this,'<?php echo str_replace( "'", "\\'", strip_tags(rawurldecode($_POST['name'])))."','".strip_tags($_POST['row'])."','".strip_tags($_POST['path'])."','".strip_tags($_POST['subpath'])."','".strip_tags($_POST['language'])."','".strip_tags($_POST['numlangs']); ?>' );" />
 		</div>
 		<?php
-		
+
 		exit();
-		
+
 	} // END dlg_delete()
-	
+
 	/**
 	 * @todo
 	 *
@@ -171,11 +171,11 @@ class TranslationToolkit_Ajax {
 	 */
 	function dlg_rescan() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		$login_label = TranslationToolkit_Locale::login_label();
-		$sys_locales = TranslationToolkit_Locale::sys_locales();	
-		
-		if ( $_POST['type'] == 'wordpress' ) {	
+		$sys_locales = TranslationToolkit_Locale::sys_locales();
+
+		if ( $_POST['type'] == 'wordpress' ) {
 			$abs_root = rtrim( str_replace( '\\', '/', ABSPATH ), '/' );
 			$excludes = array();
 			$files = array(
@@ -224,8 +224,8 @@ class TranslationToolkit_Ajax {
 		$country_www = isset($sys_locales[$_POST['language']]) ? $sys_locales[$_POST['language']]['country-www'] : 'unknown';
 		$lang_native = isset($sys_locales[$_POST['language']]) ? $sys_locales[$_POST['language']]['lang-native'] : $_POST['language'];
 		$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).".po";
-	?>	
-		<input id="csp-dialog-source-file-json" type="hidden" value="{ <?php 
+	?>
+		<input id="csp-dialog-source-file-json" type="hidden" value="{ <?php
 			echo "name: '".strip_tags($_POST['name'])."',";
 			echo "row: '".strip_tags($_POST['row'])."',";
 			echo "language: '".strip_tags($_POST['language'])."',";
@@ -243,9 +243,9 @@ class TranslationToolkit_Ajax {
 			</tr>
 			<tr>
 				<td nowrap="nowrap"><strong><?php _e( 'Language Target', 'translation-toolkit' ); ?>:</strong></td>
-				<td><img alt="" title="locale: <?php echo strip_tags($_POST['language']); ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/flags/' . $country_www . '.gif'; ?>" /></td>			
+				<td><img alt="" title="locale: <?php echo strip_tags($_POST['language']); ?>" src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/flags/' . $country_www . '.gif'; ?>" /></td>
 				<td><?php echo $lang_native; ?></td>
-			</tr>	
+			</tr>
 			<tr>
 				<td nowrap="nowrap"><strong><?php _e( 'Affected Total Files', 'translation-toolkit' ); ?>:</strong></td>
 				<td nowrap="nowrap" align="right"><?php echo count( $files); ?></td>
@@ -262,11 +262,11 @@ class TranslationToolkit_Ajax {
 		</table>
 		<div style="text-align:center; padding-top: 10px"><input class="button" id="csp-dialog-rescan" type="submit" value="<?php _e( 'scan now', 'translation-toolkit' ); ?>" onclick="csp_scan_source_files(this);"/><span id="csp-dialog-scan-info" style="display:none"><?php _e( 'Please standby, files presently being scanned ...', 'translation-toolkit' ); ?></span></div>
 		<?php
-	
+
 		exit();
-		
+
 	} // END dlg_rescan()
-	
+
 	/**
 	 * @todo
 	 *
@@ -274,7 +274,7 @@ class TranslationToolkit_Ajax {
 	 */
 	function dlg_show_source() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		list($file, $match_line) = explode(':', $_POST['file']);
 		$l = filesize(strip_tags($_POST['path']).$file);
 		$handle = fopen(strip_tags($_POST['path']).$file,'rb' );
@@ -282,15 +282,15 @@ class TranslationToolkit_Ajax {
 		fclose($handle);
 
 		$msgid = $_POST['msgid'];
-		$msgid = TranslationToolkit_Helpers::convert_js_input_for_source( $msgid );	
+		$msgid = TranslationToolkit_Helpers::convert_js_input_for_source( $msgid );
 		if (strlen($msgid) > 0) {
 			if (strpos($msgid, "\00") > 0)
 				$msgid = explode("\00", $msgid);
 			else
 				$msgid = explode("\01", $msgid); //opera fix
-			foreach($msgid as $item) {	
+			foreach($msgid as $item) {
 				if (strpos($content, $item) === false) {
-					//difficult to separate between real \n notation and LF brocken strings also \t 
+					//difficult to separate between real \n notation and LF brocken strings also \t
 					$test = str_replace( "\n", '\n', $item);
 					if (strpos($content, $test) === false) {
 						$test2 = str_replace( '\t', "\t", $item);
@@ -319,7 +319,7 @@ class TranslationToolkit_Ajax {
 		<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>
 		<body style="margin:0; padding:0;font-family:monospace;font-size:13px;">
 			<table id="php_source" cellspacing="0" width="100%" style="padding:0; margin:0;">
-		<?php	
+		<?php
 			$open = 0;
 			$closed = 0;
 			foreach( $content as $line ) {
@@ -437,15 +437,15 @@ class TranslationToolkit_Ajax {
 		}
 		Event.domReady.add(init);
 		/* ]]> */
-		</script>	
+		</script>
 		</body>
 		</html>
 		<?php
-	
+
 		exit();
-		
+
 	} // END dlg_show_source()
-	
+
 	/**
 	 * @todo
 	 *
@@ -453,7 +453,7 @@ class TranslationToolkit_Ajax {
 	 */
 	function merge_from_maintheme() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		$plurals = TranslationToolkit_Locale::plurals();
 		//source|dest|basepath|textdomain|molist
 		$tmp = array();
@@ -473,11 +473,11 @@ class TranslationToolkit_Ajax {
 				$pofile->write_pofile( $target, true, strip_tags( $_POST['textdomain'] ) );
 			}
 		}
-		
+
 		exit();
-		
+
 	} // END merge_from_maintheme()
-	
+
 	/**
 	 * @todo
 	 *
@@ -490,18 +490,18 @@ class TranslationToolkit_Ajax {
 		$plurals = TranslationToolkit_Locale::plurals();
 		$pofile = new TranslationToolkit_FileSystem();
 		$filename = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
-		
+
 		$pofile->new_pofile(
-			$filename, 
+			$filename,
 			strip_tags($_POST['subpath']),
-			strip_tags($_POST['name']), 
-			strip_tags($_POST['timestamp']), 
-			$_POST['translator'], 
-			$_plurals[substr($_POST['language'],0,2)], 
-			$sys_locales[$_POST['language']]['lang'], 
+			strip_tags($_POST['name']),
+			strip_tags($_POST['timestamp']),
+			$_POST['translator'],
+			$_plurals[substr($_POST['language'],0,2)],
+			$sys_locales[$_POST['language']]['lang'],
 			$sys_locales[$_POST['language']]['country']
 		);
-		
+
 		if ( !$pofile->write_pofile( $filename ) ) {
 			header('Status: 404 Not Found' );
 			header('HTTP/1.1 404 Not Found' );
@@ -526,12 +526,12 @@ class TranslationToolkit_Ajax {
 			google: "<?php echo $sys_locales[$_POST['language']]['google-api'] ? 'yes' : 'no'; ?>",
 			microsoft: "<?php echo $sys_locales[$_POST['language']]['microsoft-api'] ? 'yes' : 'no'; ?>"
 		}
-		<?php		
+		<?php
 		}
 		exit();
-		
+
 	} // END create()
-	
+
 	/**
 	 * @todo
 	 *
@@ -539,7 +539,7 @@ class TranslationToolkit_Ajax {
 	 */
 	function destroy() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		$pofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.po';
 		$mofile = strip_tags($_POST['path'].$_POST['subpath'].$_POST['language']).'.mo';
 		$error = false;
@@ -557,10 +557,10 @@ class TranslationToolkit_Ajax {
 			head: '<?php echo sprintf( _n('<strong>%d</strong> Language', '<strong>%d</strong> Languages',$num, 'translation-toolkit' ), $num); ?>',
 			language: '<?php echo strip_tags($_POST['language']); ?>'
 		}
-		<?php	
+		<?php
 		exit();
 	} // END destroy()
-	
+
 	/**
 	 * @todo
 	 *
@@ -569,11 +569,11 @@ class TranslationToolkit_Ajax {
 	function change_low_memory_mode() {
 		TranslationToolkit_Helpers::check_security();
 		update_option( 'translation-toolkit.low-memory', ( $_POST['mode'] == 'true' ? true : false ) );
-		
+
 		exit();
-		
+
 	} // END change_low_memory_mode()
-	
+
 	/**
 	 * @todo
 	 *
@@ -587,7 +587,7 @@ class TranslationToolkit_Ajax {
 		$textdomain = $_POST['textdomain'];
 		//TODO: give the domain into translation file as default domain
 		$pofile = new TranslationToolkit_FileSystem($_POST['type']);
-		
+
 		//BUGFIX: 1.90 - may be, we have only the mo but no po, so we dump it out as base po file first
 		if ( !file_exists( $_POST['pofile'] ) ) {
 			//try implicite convert first and reopen as po second
@@ -602,10 +602,10 @@ class TranslationToolkit_Ajax {
 				if($pofile->read_mofile($part.'continents-cities-'.$root_mo, $plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
 					$pofile->write_pofile($part.'continents-cities-'.$root_po,false,false,'no' );
 				}
-				if($pofile->read_mofile($part.'ms-'.$root_mo, $plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
+				if($pofile->read_mofile($part.'ms-'.$root_mo, $plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {
 					$pofile->write_pofile($part.'ms-'.$root_po,false,false,'no' );
 				}
-				global $wp_version;			
+				global $wp_version;
 				if (version_compare($wp_version, '3.4-alpha', ">=")) {
 					if($pofile->read_mofile($part.'admin-'.$root_mo, $plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
 						$pofile->write_pofile($part.'admin-'.$root_po,false,false,'no' );
@@ -615,10 +615,10 @@ class TranslationToolkit_Ajax {
 					}
 				}
 			}
-		}		
+		}
 		$pofile = new TranslationToolkit_FileSystem($_POST['type']);
 		if ($pofile->read_pofile($_POST['pofile'])) {
-			if ((int)$_POST['num'] == 0) { 
+			if ((int)$_POST['num'] == 0) {
 
 				if (!$pofile->supports_textdomain_extension() && $_POST['type'] == 'wordpress'){
 					//try to merge up first all splitted translations.
@@ -627,7 +627,7 @@ class TranslationToolkit_Ajax {
 					//load existing files for backward compatibility if existing
 					$pofile->read_pofile($part.'continents-cities-'.$root, $plurals, $part.'continents-cities-'.$root);
 					$pofile->read_pofile($part.'ms-'.$root, $plurals, $part.'ms-'.$root);
-					global $wp_version;			
+					global $wp_version;
 					if (version_compare($wp_version, '3.4-alpha', ">=")) {
 						$pofile->read_pofile($part.'admin-'.$root, $plurals, $part.'admin-'.$root);
 						$pofile->read_pofile($part.'admin-network-'.$root, $plurals, $part.'admin-network-'.$root);
@@ -636,9 +636,9 @@ class TranslationToolkit_Ajax {
 					$pofile->read_pofile($_POST['pofile']);
 					//overwrite with full imploded sparse file contents now
 					$pofile->write_pofile($_POST['pofile'],false,false,'no' );
-				}		
+				}
 
-				$pofile->parsing_init(); 
+				$pofile->parsing_init();
 			}
 
 			$php_files = explode("|", $_POST['php']);
@@ -659,7 +659,7 @@ class TranslationToolkit_Ajax {
 				} else {
 					$pofile->parsing_add_messages( $_POST['path'], $php_files[$i], $textdomain );
 				}
-			}	
+			}
 			if ( $last ) {
 				$pofile->parsing_finalize( $textdomain, strip_tags( rawurldecode( $_POST['name'] ) ) );
 			}
@@ -677,9 +677,9 @@ class TranslationToolkit_Ajax {
 			echo sprintf( __("You do not have the permission to read the file '%s'.", 'translation-toolkit' ), $_POST['pofile']);
 		}
 		exit();
-		
+
 	} // END scan_source_file()
-	
+
 	/**
 	 * @todo
 	 *
@@ -687,7 +687,7 @@ class TranslationToolkit_Ajax {
 	 */
 	function change_permission() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		$filename = strip_tags($_POST['file']);
 		$error = false;
 		$transfile = new TranslationToolkit_FileSystem();
@@ -697,7 +697,7 @@ class TranslationToolkit_Ajax {
 		echo '{ title: "'.date(__( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime($filename))." ". TranslationToolkit_Helpers::file_permissions($filename).'" }';
 		exit();
 	}
-	
+
 	/**
 	 * @todo
 	 *
@@ -708,7 +708,7 @@ class TranslationToolkit_Ajax {
 
 		$plurals = TranslationToolkit_Locale::plurals();
 		$f = new TranslationToolkit_FileSystem( $_POST['type'] );
-		
+
 		if ( !file_exists( $_POST['basepath'] . $_POST['file'] ) ) {
 			//try implicite convert first
 			if ( $f->read_mofile(substr($_POST['basepath'].$_POST['file'],0,-2)."mo", $plurals, $_POST['file'], $_POST['textdomain']) ) {
@@ -722,10 +722,10 @@ class TranslationToolkit_Ajax {
 				if($f->read_mofile($_POST['basepath'].$part.'continents-cities-'.$root_mo, $plurals, $part.'continents-cities-'.$root_mo, $_POST['textdomain'])) {
 					$f->write_pofile($_POST['basepath'].$part.'continents-cities-'.$root_po,false,false,'no' );
 				}
-				if($f->read_mofile($_POST['basepath'].$part.'ms-'.$root_mo, $plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {		
+				if($f->read_mofile($_POST['basepath'].$part.'ms-'.$root_mo, $plurals, $part.'ms-'.$root_mo, $_POST['textdomain'])) {
 					$f->write_pofile($_POST['basepath'].$part.'ms-'.$root_po,false,false,'no' );
 				}
-				global $wp_version;			
+				global $wp_version;
 				if (version_compare($wp_version, '3.4-alpha', ">=")) {
 					if($f->read_mofile($_POST['basepath'].$part.'admin-'.$root_mo, $plurals, $part.'admin-'.$root_mo, $_POST['textdomain'])) {
 						$f->write_pofile($_POST['basepath'].$part.'admin-'.$root_po,false,false,'no' );
@@ -736,10 +736,10 @@ class TranslationToolkit_Ajax {
 				}
 			}
 		}
-		
+
 		$f = new TranslationToolkit_FileSystem($_POST['type']);
 		$f->read_pofile($_POST['basepath'].$_POST['file'], $plurals, $_POST['file']);
-		
+
 		if ( !$f->supports_textdomain_extension() && $_POST['type'] == 'wordpress' ) {
 			//try to merge up first all splitted translations.
 			$root = basename($_POST['file']);
@@ -747,7 +747,7 @@ class TranslationToolkit_Ajax {
 			//load existing files for backward compatibility if existing
 			$f->read_pofile($_POST['basepath'].$part.'continents-cities-'.$root, $plurals, $part.'continents-cities-'.$root);
 			$f->read_pofile($_POST['basepath'].$part.'ms-'.$root, $plurals, $part.'ms-'.$root);
-			global $wp_version;			
+			global $wp_version;
 			if (version_compare($wp_version, '3.4-alpha', ">=")) {
 				$f->read_pofile($_POST['basepath'].$part.'admin-'.$root, $plurals, $part.'admin-'.$root);
 				$f->read_pofile($_POST['basepath'].$part.'admin-network-'.$root, $plurals, $part.'admin-network-'.$root);
@@ -767,13 +767,13 @@ class TranslationToolkit_Ajax {
 			_e("Your translation file doesn't support the <em>multiple textdomains in one translation file</em> extension.<br/>Please re-scan the related source files at the overview page to enable this feature.", 'translation-toolkit' );
 			?>&nbsp;<a align="left" class="question-help" href="javascript:void(0);" title="<?php _e("What does that mean?", 'translation-toolkit' ) ?>" rel="translationformat"><img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . "images/question.gif"; ?>" /></a><?php
 		}
-		 * 
+		 *
 		 */
-		
+
 		exit();
-		
+
 	} // END launch_editor()
-	
+
 	/**
 	 * @todo
 	 *
@@ -783,11 +783,11 @@ class TranslationToolkit_Ajax {
 		TranslationToolkit_Helpers::check_security();
 
 		$f = new TranslationToolkit_FileSystem();
-		
+
 		//opera bugfix: replace embedded \1 with \0 because Opera can't send embeded 0
 		$_POST['msgid'] = str_replace( "\1", "\0", $_POST['msgid']);
 		$_POST['msgstr'] = str_replace( "\1", "\0", $_POST['msgstr']);
-		
+
 		if ($f->read_pofile($_POST['path'].$_POST['file'])) {
 			if (!$f->update_entry($_POST['msgid'], $_POST['msgstr'])) {
 				header('Status: 404 Not Found' );
@@ -797,7 +797,7 @@ class TranslationToolkit_Ajax {
 				$f->write_pofile($_POST['path'].$_POST['file']);
 				header('Status: 200 Ok' );
 				header('HTTP/1.1 200 Ok' );
-				header('Content-Length: 1' );	
+				header('Content-Length: 1' );
 				echo "0";
 			}
 		} else {
@@ -805,11 +805,11 @@ class TranslationToolkit_Ajax {
 			header('HTTP/1.1 404 Not Found' );
 			echo sprintf( __("You do not have the permission to read the file '%s'.", 'translation-toolkit' ), $_POST['file']);
 		}
-		
+
 		exit();
-		
+
 	} // END save_catalog_entry()
-	
+
 	/**
 	 * @todo
 	 *
@@ -817,11 +817,11 @@ class TranslationToolkit_Ajax {
 	 */
 	function generate_mo_file() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		$pofile = (string)$_POST['pofile'];
 		$textdomain = (string)$_POST['textdomain'];
 		$f = new TranslationToolkit_FileSystem();
-		
+
 		if ( !$f->read_pofile( $pofile ) ) {
 			header('Status: 404 Not Found' );
 			header('HTTP/1.1 404 Not Found' );
@@ -875,11 +875,11 @@ class TranslationToolkit_Ajax {
 			filetime: '<?php echo date (__( 'm/d/Y H:i:s', 'translation-toolkit' ), filemtime($mo)); ?>'
 		}
 		<?php
-		
+
 		exit();
-		
+
 	} // END generate_mo_file()
-	
+
 	/**
 	 * @todo
 	 *
@@ -898,14 +898,14 @@ class TranslationToolkit_Ajax {
 		} else {
 			header( 'Status: 200 ok' );
 			header( 'HTTP/1.1 200 ok' );
-			header( 'Content-Length: 1' );	
+			header( 'Content-Length: 1' );
 			print 0;
 		}
-		
+
 		exit();
-		
+
 	} // END create_language_path()
-	
+
 	/**
 	 * @todo
 	 *
@@ -913,36 +913,36 @@ class TranslationToolkit_Ajax {
 	 */
 	function create_pot_indicator() {
 		TranslationToolkit_Helpers::check_security();
-		
+
 		$sys_locales = TranslationToolkit_Locale::sys_locales();
 		$plurals = TranslationToolkit_Locale::plurals();
 		$pofile = new TranslationToolkit_FileSystem();
 		$filename = strip_tags($_POST['potfile']);
 		$locale = 'en_US';
-		
+
 		$pofile->new_pofile(
-			$filename, 
+			$filename,
 			'/',
-			'PlaceHolder', 
-			date("Y-m-d H:iO"), 
-			'none', 
-			$plurals[substr($locale,0,2)], 
-			$sys_locales[$locale]['lang'], 
+			'PlaceHolder',
+			date("Y-m-d H:iO"),
+			'none',
+			$plurals[substr($locale,0,2)],
+			$sys_locales[$locale]['lang'],
 			$sys_locales[$locale]['country']
 		);
-		
+
 		if( !$pofile->write_pofile( $filename ) ) {
 			header( 'Status: 404 Not Found' );
 			header( 'HTTP/1.1 404 Not Found' );
 			echo sprintf( __( "You do not have the permission to create the file '%s'.", 'translation-toolkit' ), $filename );
 		}
-		else{	
+		else{
 			header( 'Status: 200 ok' );
 			header( 'HTTP/1.1 200 ok' );
-			header( 'Content-Length: 1' );	
+			header( 'Content-Length: 1' );
 			print 0;
 		}
-	/*	
+	/*
 		$handle = @fopen(strip_tags($_POST['potfile']), "w");
 
 		if ($handle === false) {
@@ -951,7 +951,7 @@ class TranslationToolkit_Ajax {
 			_e("You do not have the permission to choose the translation file directory<br/>Please upload at least one language file (*.mo|*.po) or an empty template file (*.pot) at the appropriated folder using FTP.", 'translation-toolkit' );
 		}
 		else{
-			@fwrite($handle, 
+			@fwrite($handle,
 				"msgid \"\"\n".
 				"msgstr \"\"\n".
 				"\"MIME-Version: 1.0\"\n".
@@ -961,11 +961,11 @@ class TranslationToolkit_Ajax {
 			@fclose($handle);
 			header('Status: 200 ok' );
 			header('HTTP/1.1 200 ok' );
-			header('Content-Length: 1' );	
+			header('Content-Length: 1' );
 			print 0;
 		}
 		exit();
-	*/	
+	*/
 	} // END create_pot_indicator()
-	
+
 } // END class TranslationToolkit_Ajax

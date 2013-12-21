@@ -13,7 +13,7 @@ if ( !function_exists( 'add_filter' ) ) {
 }
 
 class TranslationToolkit_Help {
-	
+
 	/**
 	 * Holds a copy of the object for easy reference.
 	 *
@@ -42,9 +42,9 @@ class TranslationToolkit_Help {
 	public function __construct() {
 
 		self::$instance = $this;
-		
+
 	} // END __construct()
-	
+
 	/**
 	 * @todo
 	 *
@@ -60,21 +60,21 @@ class TranslationToolkit_Help {
 		</p>
 		<p style="margin-top: 50px;padding-top:10px; border-top: solid 1px #ccc;">
 			<small class="alignright" style="position:relative; margin-top: -30px; color: #aaa;">&copy; 2008 - 2012 by Heiko Rabe</small>
-			<a href="http://wordpress.org/extend/plugins/codestyling-localization/" target="_blank">Plugin Directory</a> | 
-			<a href="http://wordpress.org/extend/plugins/codestyling-localization/changelog/" target="_blank">Change Logs</a> | 
+			<a href="http://wordpress.org/extend/plugins/codestyling-localization/" target="_blank">Plugin Directory</a> |
+			<a href="http://wordpress.org/extend/plugins/codestyling-localization/changelog/" target="_blank">Change Logs</a> |
 			<a class="alignright" href="http://wordpress.org/extend/plugins/wp-native-dashboard/" target="_blank"><?php _e( 'Dashboard in your Language', 'translation-toolkit' ); ?></a>
 		</p>
-		
+
 	<?php
 	} // END helptab_about()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function helptab_low_memory() {	?>
-		
+
 		<p>
 			<strong><?php _e( 'PHP Memory Limit Problems', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -92,22 +92,22 @@ class TranslationToolkit_Help {
 				<img src="<?php echo plugin_dir_url( TranslationToolkit::get_file() ) . 'images/question.gif'; ?>" />
 			</a>
 		</p>
-		
+
 		<?php
 	} // END helptab_low_memory()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function helptab_compatibility() { ?>
-		
+
 		<p>
 			<strong><?php _e( 'Compatibility - Hints and Errors', 'translation-toolkit' ); ?></strong>
 		</p>
-		<p> 
-			<?php _e("If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins.", 'translation-toolkit' ); ?> 
+		<p>
+			<?php _e("If you get compatibility warnings, than they are often related to a wrong usage of WordPress core functionality by the authors of the affected Themes or Plugins.", 'translation-toolkit' ); ?>
 			<?php _e("There are several reason for such reports, but in each of this cases only the original author can solve it:", 'translation-toolkit' ); ?>
 		</p>
 		<p>
@@ -126,17 +126,17 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.", 'translation-toolkit' ); ?>
 		</p>
-		
+
 	<?php
 	} // END helptab_compatibility()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function helptab_textdomain() { ?>
-		
+
 		<p>
 			<strong><?php _e( 'What is a textdomain?', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -162,17 +162,17 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e("Reported issues are not a problem of <em>Codestyling Localization</em>, it's caused by the author of the affected component within it's code.", 'translation-toolkit' ); ?>
 		</p>
-		
+
 	<?php
 	} // END helptab_textdomain()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function helptab_filepermissions() { ?>
-		
+
 		<p>
 			<strong><?php _e( 'File Permission and Access Rights', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -185,17 +185,17 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e( 'You can define the necessary constants at your <em>wp-config.php</em> file as described at the <a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants" target="_blank">WordPress Codex Page - Upgrade Constants</a> to get it working at your installation without recurrently occuring credential requests. If your constants are properly defined, this plugin will work smoothly and the WordPress Automatic Updates will work without any further question about FTP User Credentials too.', 'translation-toolkit' ); ?>
 		</p>
-		
+
 	<?php
 	} // END helptab_filepermissions()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function helptab_translationformat() { ?>
-		
+
 		<p>
 			<strong><?php _e( 'Extended Translation File Format', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -212,16 +212,16 @@ class TranslationToolkit_Help {
 			<?php _e( 'Just go back the the overview page, search your affected plugin/theme and re-scan the translation content. Afterwards it will be possible to open the translation file for editing.', 'translation-toolkit' ); ?>
 		</p>
 	<?php
-	
+
 	} // END helptab_translationformat()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	static function helptab_workonchildthemes() { ?>
-		
+
 		<p>
 			<strong><?php _e( 'Working with Child Theme Translations', 'translation-toolkit' ); ?></strong>
 		</p>
@@ -244,8 +244,8 @@ class TranslationToolkit_Help {
 		<p>
 			<?php _e( 'Scanning a Child Theme always includes the files from Main Theme too. So you always get the mixed translation from Main and Child Theme. Doing a Synchronization with the Main Theme will preserve the texts from Child Theme and will attach new texts from Main Theme only.', 'translation-toolkit' ); ?>
 		</p>
-		
+
 	<?php
 	} // END helptab_workonchildthemes()
-	
+
 } // END class TranslationToolkit_AdminHelp

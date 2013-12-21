@@ -21,7 +21,7 @@ if ( ! function_exists( 'add_filter' ) ) {
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -39,18 +39,18 @@ references and possible explainations:
 	Bug #37793  child pid xxx exit signal Segmentation fault (11) => http://bugs.php.net/bug.php?id=37793
 	Bugzilla  Bug 841 => http://bugs.exim.org/show_bug.cgi?id=841
 	http://mobile-website.mobi/php-utf8-vs-iso-8859-1-59
-	
+
  */
 
 class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
-	
+
 	/**
 	 * Constructor. Hooks all interactions to initialize the class.
 	 *
 	 * @since 1.0
 	 */
 	function __construct( $type = 'unknown' ) {
-		
+
 		//now lets check whether overloaded functions been used and provide the correct str_* functions as usual
 		if ( ( ini_get( 'mbstring.func_overload' ) & 0x02 ) === 0x02 && extension_loaded( 'mbstring' ) && is_callable( 'mb_substr' ) ) {
 			$this->strings = new CspStringsAreMultibyte();
@@ -81,11 +81,11 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		);
 		$this->header_vars = array_keys( $this->header );
 		$this->mo_header_vars = array(
-			'PO-Revision-Date',	
-			'MIME-Version',	
-			'Content-Type',	
-			'Content-Transfer-Encoding', 
-			'Plural-Forms', 
+			'PO-Revision-Date',
+			'MIME-Version',
+			'Content-Type',
+			'Content-Transfer-Encoding',
+			'Plural-Forms',
 			'X-Generator',
 			'Project-Id-Version'
 		);
@@ -103,7 +103,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			'nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3;' 						=> array('sl'),
 			'nplurals=5; plural=n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : 4;'										=> array('ga'),
 			'nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;' 	=> array('ar')
-		);		
+		);
 		$this->map 					= array();
 		$this->nplurals 			= 2;
 		$this->plural_func 			= 'n != 1;';
@@ -119,9 +119,9 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		$this->reg_msgid_plural		= '/^msgid_plural\s+(".*")/';
 		$this->reg_msgstr_plural	= '/^msgstr\[\d+\]\s+(".*")/';
 		$this->reg_multi_line		= "/^(\".*\")/s";
-		
+
 	} // END __construct()
-	
+
 	/**
 	 * @todo make private?
 	 *
@@ -154,21 +154,21 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		}
 		$msgstr = implode("\n", $msgstr);
 		$this->map[''] = $this->_new_entry('', $msgstr);
-		
+
 		if ( preg_match("/nplurals\s*=\s*(\d+)\s*\;\s*plural\s*=\s*([^\n]+)\;/", $this->header['Plural-Forms'], $matches) ) {
 			$this->nplurals = (int)$matches[1];
 			$this->plural_func = $matches[2];
 		}
-		
+
 	} // END
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _new_entry( $org, $trans, $reference = false, $flags = false, $tcomment = false, $ccomment = false, $ltd = false ) {
-		
+
 		// T ... translation data, contains embed \00 if plurals
 		// X ... true, if org contains \04 context in front of
 		// P ... true, if is a pluralization,
@@ -177,11 +177,11 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		// F ... flags like 'php-format'
 		// R ... reference
 		// LTD ... loaded text domain
-		
+
 		//Bugfix: illegal line separators contained
 		if ( $trans !== false)
 			$trans = preg_replace('/ /', '', $trans); //LINE SEPARATOR decimal: &#8232; UTF-8 (e2, 80, a8)
-		
+
 		return array(
 			'T' 	=> $trans,
 			'X'		=> ( $this->strings->_strpos( $org, "\04" ) !== false),
@@ -192,35 +192,35 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			'R'		=> (is_string( $reference) ? array( $reference) : ( is_array( $reference) ? $reference : array())),
 			'LTD'	=> (is_string( $ltd) ? array( $ltd) : ( is_array( $ltd) ? $ltd : array()))
 		);
-		
+
 	} // END
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function trim_quotes( $s ) {
-		
+
 		if ( $this->strings->_substr( $s, 0, 1 ) == '"' ) {
 			$s = $this->strings->_substr( $s, 1 );
 		}
-		
+
 		if ( $this->strings->_substr( $s, -1, 1 ) == '"' ) {
 			$s = $this->strings->_substr( $s, 0, -1 );
 		}
-		
+
 		return $s;
-		
+
 	} // END trim_quotes()
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _clean_import( $string ) {
-		
+
 		$escapes = array('t' => "\t", 'n' => "\n", '\\' => '\\');
 		$lines = array_map( 'trim', explode( "\n", $string ) );
 		$lines = array_map( array( 'TranslationToolkit_TranslationFile', 'trim_quotes' ), $lines );
@@ -242,18 +242,18 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			}
 		}
 		unset( $lines);
-		
+
 		return $unpoified;
-		
+
 	} // END
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _clean_export( $string ) {
-		
+
 		$quote = '"';
 		$slash = '\\';
 		$newline = "\n";
@@ -274,43 +274,43 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		}
 		// remove empty strings
 		$po = str_replace( "$newline$quote$quote", '', $po);
-		
+
 		return $po;
-		
+
 	} // END
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _build_rel_path( $base_file ) {
-		
+
 		$a = explode('/', $base_file);
 		$rel = '';
 		for ( $i=0; $i<count( $a)-1; $i++) { $rel.="../"; }
 		return $rel;
-		
+
 	} // END
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function supports_textdomain_extension() {
-		
+
 		return ( $this->header['X-Textdomain-Support'] == 'yes' );
-		
+
 	} // END supports_textdomain_extension()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function new_pofile( $pofile, $base_file, $proj_id, $timestamp, $translator, $pluralforms, $language, $country ) {
-		
+
 		$rel = $this->_build_rel_path( $base_file);
 		preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po|pot)$/", $pofile, $hits);
 		$po_lang = $this->strings->_substr( $hits[1],0,2);
@@ -319,40 +319,40 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			"Project-Id-Version: $proj_id\nPO-Revision-Date: $timestamp\nLast-Translator: $translator\nX-Poedit-Language: $language\nX-Poedit-Country: $country\nX-Poedit-Basepath: $rel\nPlural-Forms: \nX-Textdomain-Support: yes\n",
 			$po_lang
 		);
-		
+
 		return true;
-		
+
 	} // END new_pofile()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
-	 */	
+	 */
 	function read_pofile( $pofile, $check_plurals = false, $base_file = false ) {
-		
-		if ( !empty( $pofile ) && file_exists( $pofile ) && is_readable( $pofile ) ) {		
+
+		if ( !empty( $pofile ) && file_exists( $pofile ) && is_readable( $pofile ) ) {
 			$handle = fopen( $pofile,'rb');
 
 			$msgid = false;
-			$cur_entry = $this->_new_entry('', false); //empty 
-			
+			$cur_entry = $this->_new_entry('', false); //empty
+
 			while ( !feof( $handle)) {
-				$line = trim(fgets( $handle));  
+				$line = trim(fgets( $handle));
 				if ( !$this->strings->_seems_utf8( $line)) $line = $this->strings->_utf8_encode( $line);
-			
+
 				if (empty( $line)) {
-					if ( $msgid !== false) {		
+					if ( $msgid !== false) {
 						$temp = ( $cur_entry['X'] !== false ? $cur_entry['X']."\04".$msgid : $msgid);
 						//merge test: existing do not kill by empty!
 						if( !isset( $this->map[ $temp]) || !( !empty( $this->map[ $temp]['T']) && empty( $cur_entry['T']))) {
 							$this->map[ $temp] = $this->_new_entry(
-								$temp, 
-								$cur_entry['T'], 
-								$cur_entry['R'], 
-								$cur_entry['F'], 
-								$cur_entry['CT'], 
-								$cur_entry['CC'], 
+								$temp,
+								$cur_entry['T'],
+								$cur_entry['R'],
+								$cur_entry['F'],
+								$cur_entry['CT'],
+								$cur_entry['CC'],
 								$cur_entry['LTD']
 							);
 						}
@@ -378,18 +378,18 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				if (preg_match( $this->reg_msgid, $line, $hits)) { $msgid = $this->_clean_import( $hits[1]); }
 				if (preg_match( $this->reg_msgstr, $line, $hits)) { $cur_entry['T'] = $this->_clean_import( $hits[1]); }
 				if (preg_match( $this->reg_msgid_plural, $line, $hits)) { $msgid .= "\0"; $msgid .= $this->_clean_import( $hits[1]); }
-				if (preg_match( $this->reg_msgstr_plural, $line, $hits)) { 
+				if (preg_match( $this->reg_msgstr_plural, $line, $hits)) {
 					if ( $cur_entry['T'] === false) $cur_entry['T'] = $this->_clean_import( $hits[1]);
 					else {
 						$cur_entry['T'] .= (preg_match("/[^\\0*]*/", $cur_entry['T']) ? "\0" : '');
-						$cur_entry['T'] .= $this->_clean_import( $hits[1]); 
+						$cur_entry['T'] .= $this->_clean_import( $hits[1]);
 					}
-				}			
-				
-				
+				}
+
+
 			}
-			fclose ( $handle );		
-			
+			fclose ( $handle );
+
 			//BUGFIX: language not possible if it's a template file
 			$po_lang = 'en';
 			if (preg_match("/([a-z][a-z]_[A-Z][A-Z]).(mo|po)$/", $pofile, $hits)) {
@@ -405,11 +405,11 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			}
 			return true;
 		}
-		
+
 		return false;
-		
+
 	} // END read_pofile()
-	
+
 	/**
 	 * @todo
 	 * extension made to stamp pot files to textdomain entirely
@@ -417,7 +417,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 	 * @since 1.0.0
 	 */
 	function write_pofile( $pofile, $last = false, $textdomain = false, $tds = 'yes' ) {
-		
+
 		if ( file_exists( $pofile ) && !is_writable( $pofile ) ) {
 			return false;
 		}
@@ -440,11 +440,11 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			fwrite( $handle, 'msgid ""'."\n");
 			fwrite( $handle, 'msgstr '.$this->_clean_export( $this->map['']['T'])."\n\n");
 		}
-		
+
 		foreach ( $this->map as $key => $entry) {
-			
+
 			if (( is_array( $entry['R']) && (count( $entry['R']) > 0)) || ( $last === false)) {
-						
+
 				if ( is_array( $entry['CT'])) {
 					foreach ( $entry['CT'] as $comt) {
 						fwrite( $handle, '#  '.$comt."\n");
@@ -462,7 +462,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				}
 				if ( is_array( $entry['F']) && count( $entry['F'])) {
 					fwrite( $handle, '#, '.implode(', ', $entry['F'])."\n");
-				}				
+				}
 				if ( is_array( $entry['LTD']) && count( $entry['LTD'])) {
 					foreach ( $entry['LTD'] as $domain) {
 						if( !empty( $domain)) fwrite( $handle, '#@ '.$domain."\n");
@@ -470,7 +470,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				}elseif( $textdomain) {
 					fwrite( $handle, '#@ '.$textdomain."\n");
 				}
-				
+
 				if( $entry['P'] !== false) {
 					list( $msgid, $msgid_plural) = explode("\0", $key);
 					if ( $entry['X'] !== false) {
@@ -494,22 +494,22 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 					fwrite( $handle, 'msgstr '.$this->_clean_export( $entry['T'])."\n");
 				}
 				fwrite( $handle, "\n");
-				
+
 			}
 		}
 		fclose( $handle );
-		
+
 		return true;
-		
+
 	}
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function ftp_get_pofile_content( $pofile, $last = false, $textdomain = false, $tds = 'yes' ) {
-		
+
 		$content = '';
 		//set the plurals and multi textdomain support
 		//update the revision date
@@ -521,11 +521,11 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			$content .= 'msgid ""'."\n";
 			$content .= 'msgstr '.$this->_clean_export( $this->map['']['T'])."\n\n";
 		}
-		
+
 		foreach ( $this->map as $key => $entry ) {
-			
+
 			if ( ( is_array( $entry['R']) && (count( $entry['R']) > 0)) || ( $last === false ) ) {
-						
+
 				if ( is_array( $entry['CT'])) {
 					foreach ( $entry['CT'] as $comt) {
 						$content .= '#  '.$comt."\n";
@@ -543,7 +543,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				}
 				if ( is_array( $entry['F']) && count( $entry['F'])) {
 					$content .= '#, '.implode(', ', $entry['F'])."\n";
-				}				
+				}
 				if ( is_array( $entry['LTD']) && count( $entry['LTD'])) {
 					foreach ( $entry['LTD'] as $domain) {
 						if( !empty( $domain)) $content .= '#@ '.$domain."\n";
@@ -551,7 +551,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				}elseif( $textdomain) {
 					$content .= '#@ '.$textdomain."\n";
 				}
-				
+
 				if( $entry['P'] !== false) {
 					list( $msgid, $msgid_plural) = explode("\0", $key);
 					if ( $entry['X'] !== false) {
@@ -575,14 +575,14 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 					$content .= 'msgstr '.$this->_clean_export( $entry['T'])."\n";
 				}
 				$content .= "\n";
-				
+
 			}
 		}
-		
+
 		return $content;
-		
+
 	} // END ftp_get_pofile_content()
-	
+
 	/**
 	 * @todo
 	 *
@@ -591,12 +591,12 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 	function read_mofile( $mofile, $check_plurals, $base_file = false, $default_textdomain = '' ) {
 
 		//mo file reading without need of further WP introduced classes !
-		if (file_exists( $mofile)) {				
-			if (is_readable( $mofile)) {						
+		if (file_exists( $mofile)) {
+			if (is_readable( $mofile)) {
 				$file = fopen( $mofile, 'rb' );
 				if ( !$file )
 					return false;
-					
+
 				$header = fread( $file, 28 );
 				if ( $this->strings->_strlen( $header ) != 28 )
 					return false;
@@ -609,18 +609,18 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 					$endian = 'V';
 				else
 					return false;
-								
+
 				// parse header
 				$header = unpack( "{$endian}Hrevision/{$endian}Hcount/{$endian}HposOriginals/{$endian}HposTranslations/{$endian}HsizeHash/{$endian}HposHash", $this->strings->_substr( $header, 4 ) );
 				if ( !is_array( $header ) )
 					return false;
 
 				extract( $header );
-				
+
 				// support revision 0 of MO format specs, only
 				if ( $Hrevision != 0 )
-					return false;		
-					
+					return false;
+
 				// read originals' index
 				fseek( $file, $HposOriginals, SEEK_SET );
 
@@ -641,7 +641,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 
 				// find position of first string in file
 				$HposStrings = 0x7FFFFFFF;
-				
+
 				for ( $i = 0; $i < $Hcount; $i++ )
 				{
 
@@ -667,7 +667,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 					$strings .= fread( $file, 4096 );
 
 				fclose( $file );
-				
+
 				//now reading the contents
 				$this->map = array();
 				for ( $i = 0; $i < $Hcount; $i++ )
@@ -681,7 +681,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 					$translation = $this->strings->_substr( $strings, $translations[ $i]['pos'], $translations[ $i]['length'] );
 					//Bugfix: 1.9.19 - trailing nul were occuring somehow, removed now.
 					$translation = trim( $translation, "\0");
-								
+
 					$this->map[ $original] = $this->_new_entry( $original, $translation, false, false, false, false, $default_textdomain);
 				}
 
@@ -696,123 +696,54 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				return true;
 			}
 		}
-		
+
 		return false;
-		
+
 	} // END read_mofile()
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _is_valid_entry( &$entry, &$textdomain ) {
-		
+
 		return ( ( $this->strings->_strlen(str_replace( "\0", "", $entry['T'])) > 0 ) && in_array( $textdomain, $entry['LTD'] ) ) || ( stripos( $entry['T'], 'Plural-Forms' ) !== false );
-		
+
 	} // END
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function is_illegal_empty_mofile( $textdomain ) {
-		
+
 		$entries = 0;
 		foreach ( $this->map as $key => $value) {
 			if( $this->_is_valid_entry( $value, $textdomain)) { $entries++; }
 		}
-		
+
 		return ( $entries == 0 );
-		
+
 	} // END is_illegal_empty_mofile()
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _reduce_header_for_mofile() {
-		
+
 		if ( isset( $this->map[''] ) ) {
 			$header = $this->map[''];
 			$this->map[''] = $header;
 		}
-		
+
 	} // END
-	
+
 	function write_mofile( $mofile, $textdomain ) {
-		
-		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
-		if (isset( $this->map["continents-cities\04Center"])) {
-			$trans = $this->map["continents-cities\04Center"];
-			unset( $this->map["continents-cities\04Center"]);
-			$this->map["Center"] = $trans;
-		}
-		
-		//reduce the mofile header
-		$mohdr = $this->map['']['T'];
-		$mohdr_h = $this->header;
-		$this->header = array();
-		$this->_set_header_from_string( $mohdr, '', true);
-		
-		$handle = @fopen( $mofile, "wb");
-		
-		if ( $handle === false ) {
-			$this->header = $mohdr_h;
-			$this->_set_header_from_string( $mohdr, '', false);
-			return false;
-		}
-		
-		ksort( $this->map, SORT_REGULAR);
-		//let's calculate none empty values	
-		$entries = 0;
-		
-		foreach ( $this->map as $key => $value ) {
-			if( $this->_is_valid_entry( $value, $textdomain ) ) {
-				$entries++;
-			}
-		}
-		
-		$tab_size = $entries * 8;
-		//header: little endian magic|revision|entries|offset originals|offset translations|hashing table size|hashing table ofs
-		$header = pack('NVVVVVV@'.(28+$tab_size*2),0xDE120495,0x00000000,$entries,28,28+$tab_size,0x00000000,28+$tab_size*2);
-		$org_table = '';
-		$trans_table = '';
-		fwrite( $handle, $header);
-		
-		foreach ( $this->map as $key => $value ) {
-			if ( $this->_is_valid_entry( $value, $textdomain ) ) {
-				$l=$this->strings->_strlen( $key);
-				$org_table .= pack('VV', $l, ftell( $handle)); 
-				$res = pack('A'.$l.'x',$key);
-				fwrite( $handle, $res);
-			}
-		}
-		
-		foreach ( $this->map as $key => $value ) {
-			if ( $this->_is_valid_entry( $value, $textdomain ) ) {
-				$l=$this->strings->_strlen( $value['T']);
-				$trans_table .= pack('VV', $l, ftell( $handle)); 
-				$res = pack('A'.$l.'x',$value['T']);
-				fwrite( $handle, $res);
-			}
-		}
-		
-		fseek( $handle, 28, SEEK_SET);
-		fwrite( $handle,$org_table);
-		fwrite( $handle,$trans_table);
-		fclose( $handle);	
-		$this->header = $mohdr_h;
-		$this->_set_header_from_string( $mohdr, '', false);
-		
-		return true;
-		
-	} // ENF write_mofile()
-	
-	function ftp_get_mofile_content( $mofile, $textdomain ) {
-		
+
 		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
 		if (isset( $this->map["continents-cities\04Center"])) {
 			$trans = $this->map["continents-cities\04Center"];
@@ -825,11 +756,80 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		$mohdr_h = $this->header;
 		$this->header = array();
 		$this->_set_header_from_string( $mohdr, '', true);
-		
-		$content = '';
-		
+
+		$handle = @fopen( $mofile, "wb");
+
+		if ( $handle === false ) {
+			$this->header = $mohdr_h;
+			$this->_set_header_from_string( $mohdr, '', false);
+			return false;
+		}
+
 		ksort( $this->map, SORT_REGULAR);
-		//let's calculate none empty values	
+		//let's calculate none empty values
+		$entries = 0;
+
+		foreach ( $this->map as $key => $value ) {
+			if( $this->_is_valid_entry( $value, $textdomain ) ) {
+				$entries++;
+			}
+		}
+
+		$tab_size = $entries * 8;
+		//header: little endian magic|revision|entries|offset originals|offset translations|hashing table size|hashing table ofs
+		$header = pack('NVVVVVV@'.(28+$tab_size*2),0xDE120495,0x00000000,$entries,28,28+$tab_size,0x00000000,28+$tab_size*2);
+		$org_table = '';
+		$trans_table = '';
+		fwrite( $handle, $header);
+
+		foreach ( $this->map as $key => $value ) {
+			if ( $this->_is_valid_entry( $value, $textdomain ) ) {
+				$l=$this->strings->_strlen( $key);
+				$org_table .= pack('VV', $l, ftell( $handle));
+				$res = pack('A'.$l.'x',$key);
+				fwrite( $handle, $res);
+			}
+		}
+
+		foreach ( $this->map as $key => $value ) {
+			if ( $this->_is_valid_entry( $value, $textdomain ) ) {
+				$l=$this->strings->_strlen( $value['T']);
+				$trans_table .= pack('VV', $l, ftell( $handle));
+				$res = pack('A'.$l.'x',$value['T']);
+				fwrite( $handle, $res);
+			}
+		}
+
+		fseek( $handle, 28, SEEK_SET);
+		fwrite( $handle,$org_table);
+		fwrite( $handle,$trans_table);
+		fclose( $handle);
+		$this->header = $mohdr_h;
+		$this->_set_header_from_string( $mohdr, '', false);
+
+		return true;
+
+	} // ENF write_mofile()
+
+	function ftp_get_mofile_content( $mofile, $textdomain ) {
+
+		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
+		if (isset( $this->map["continents-cities\04Center"])) {
+			$trans = $this->map["continents-cities\04Center"];
+			unset( $this->map["continents-cities\04Center"]);
+			$this->map["Center"] = $trans;
+		}
+
+		//reduce the mofile header
+		$mohdr = $this->map['']['T'];
+		$mohdr_h = $this->header;
+		$this->header = array();
+		$this->_set_header_from_string( $mohdr, '', true);
+
+		$content = '';
+
+		ksort( $this->map, SORT_REGULAR);
+		//let's calculate none empty values
 		$entries = 0;
 		foreach ( $this->map as $key => $value) {
 			if( $this->_is_valid_entry( $value, $textdomain)) { $entries++; }
@@ -843,7 +843,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		foreach ( $this->map as $key => $value) {
 			if ( $this->_is_valid_entry( $value, $textdomain)) {
 				$l=$this->strings->_strlen( $key);
-				$org_table .= pack('VV', $l, strlen( $content)); 
+				$org_table .= pack('VV', $l, strlen( $content));
 				$res = pack('A'.$l.'x',$key);
 				$content .= $res;
 			}
@@ -851,7 +851,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		foreach ( $this->map as $key => $value) {
 			if ( $this->_is_valid_entry( $value, $textdomain)) {
 				$l=$this->strings->_strlen( $value['T']);
-				$trans_table .= pack('VV', $l, strlen( $content)); 
+				$trans_table .= pack('VV', $l, strlen( $content));
 				$res = pack('A'.$l.'x',$value['T']);
 				$content .= $res;
 			}
@@ -860,63 +860,63 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		$content = substr_replace( $content, $trans_table, 28 + strlen( $org_table), strlen( $trans_table));
 		$this->header = $mohdr_h;
 		$this->_set_header_from_string( $mohdr, '', false);
-		
+
 		return $content;
-		
+
 	} // END ftp_get_mofile_content()
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _reset_data( &$val, $key ) {
-		
+
 		unset( $val['R']); $val['R'] = array();
 		unset( $val['CC']); $val['CC'] = array();
 		unset( $val['LTD']); $val['LTD'] = array();
-		
+
 	} // END
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function parsing_init() {
-		
+
 		//reset the references and textdomains
 		$func = array(&$this, '_reset_data');
 		array_walk( $this->map, $func);
 		$this->_set_header_from_string("X-Textdomain-Support: yes\n");
-		
+
 	} // END parsing_init()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function add_messages( $r = false ) {
-		
+
 		if ( $r === false ) {
 			return; //file doesn't exist
 		}
-		
+
 		$gettext = $r['gettext'];
 		$not_gettext = $r['not_gettext'];
-		
+
 		if ( count( $gettext ) ) {
 			foreach ( $gettext as $match ) {
 				$entry = null;
-								
+
 				if (isset( $this->map[ $match['msgid']])) {
 					$entry = $this->map[ $match['msgid']];
 				}
-				
+
 				if ( !is_array( $entry)) {
 					$entry = $this->_new_entry(
-						$match['msgid'], 
+						$match['msgid'],
 						str_pad('', (isset( $match['P']) ? $this->nplurals -1 : 0), "\0"),
 						$match['R'],
 						false, false,false,
@@ -927,27 +927,27 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 						$entry['R'][] = $match['R'];
 					}
 				}
-				
+
 				if ( !in_array( $match['LTD'], $entry['LTD'] ) ) {
 					$entry['LTD'][] = $match['LTD'];
 				}
-				
+
 				foreach ( $match['CC'] as $cc ) {
 					if ( !in_array( $cc, $entry['CC'] ) ) {
 						$entry['CC'][] = $cc;
 					}
 				}
-				
+
 				if( preg_match( "/(%[A-Za-z0-9])/", $match['msgid'] ) > 0) {
 					if ( !is_array( $entry['F']) || ( !in_array( 'php-format', $entry['F'] ) ) ) {
 						$entry['F'][] = 'php-format';
 					}
 				}
-				
-				$this->map[ $match['msgid']] = $entry;				
+
+				$this->map[ $match['msgid']] = $entry;
 			}
 		}
-		
+
 		if ( count( $not_gettext ) ) {
 			foreach ( $not_gettext as $match) {
 				$entry = null;
@@ -955,7 +955,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 					$entry = $this->map[ $match['msgid']];
 				if ( !is_array( $entry)) {
 					$entry = $this->_new_entry(
-						$match['msgid'], 
+						$match['msgid'],
 						'',
 						$match['R'],
 						false,
@@ -976,52 +976,52 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				if ( !in_array( $match['LTD'], $entry['LTD'])) {
 					$entry['LTD'][] = $match['LTD'];
 				}
-				$this->map[ $match['msgid']] = $entry;				
+				$this->map[ $match['msgid']] = $entry;
 			}
 		}
-		
+
 	} // END add_messages()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function parsing_add_messages( $path, $sourcefile, $textdomain = '' ) {
-		
+
 		$parser = new TranslationToolkit_Parser( $path, $textdomain, true, false );
 		$r = $parser->parseFile( $sourcefile, $this->component_type );
 		$this->add_messages( $r );
-		
+
 	} // END parsing_add_messages()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function repair_illegal_single_multi_utilization() {
-		
+
 		//find a solution for this crude examples (duplications po edit warnings):
 		// ...e('All', 'texdomain');  ...n('All', 'All', 5, 'textdomain'); ...n('All', 'Garbage', 5, 'textdomain');
 		//plural string have to get precedence over single string!
 		//plural string with identical singual strings have to be joined too
 		$single_to_remap = array();
 		$plural_to_join = array();
-		
+
 		foreach ( $this->map as $key => $entry ) {
 			$test = explode("\0", $key, 2);
 			if ( is_array( $test ) && count( $test ) == 2 ) {
 				//check if we have that singular as single and remap it
 				if(isset( $this->map[ $test[0]])) {
 					$single_to_remap[ $test[0]] = $key;
-				}				
+				}
 				//collect potential duplicated plurals
 				if ( !isset( $plural_to_join[ $test[0]])) $plural_to_join[ $test[0]] = array();
 				$plural_to_join[ $test[0]][] = $key;
-			}	
+			}
 		}
-		
+
 		foreach ( $single_to_remap as $single => $plural){
 			$e_single = $this->map[ $single];
 			$e_plural = $this->map[ $plural];
@@ -1045,11 +1045,11 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			}
 			//additional place a warning at code comment
 			$this->map[ $plural]['CC'][] = 'gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!';
-			
+
 			//remove that single now
 			unset( $this->map[ $single]);
 		}
-		
+
 		foreach ( $plural_to_join as $key => $plurals) {
 			if (count( $plurals) < 2) continue;
 			$target = array_shift( $plurals);
@@ -1076,20 +1076,20 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 				}
 				//additional place a warning at code comment
 				$this->map[ $target]['CC'][] = 'gettext fix: duplicate plural forms found, that may be ambiguous! Please check the code!';
-			}	
+			}
 			//remove the duplicated plural form now
 			unset( $this->map[ $plural]);
 		}
-		
+
 	} // END repair_illegal_single_multi_utilization()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function parsing_finalize( $textdomain, $prjidver ) {
-		
+
 		//if there is only one textdomain included and this is '' (empty string) replace all with the given textdomain
 		$ltd = array();
 		foreach ( $this->map as $key => $entry) {
@@ -1102,7 +1102,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 					if ( !in_array( $domain, $ltd)) $ltd[] = $domain;
 				}
 			}
-		}		
+		}
 		if ((count( $ltd) == 1) && ( $ltd[0] == '')) {
 			$keys = array_keys( $this->map);
 			foreach ( $keys as $key) {
@@ -1111,46 +1111,46 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		}
 		$this->repair_illegal_single_multi_utilization();
 		$this->_set_header_from_string("Project-Id-Version: $prjidver");
-		
+
 	} // END parsing_finalize()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function _convert_for_js( $str ) {
-		
+
 		$search = array( '"\"', "\\", "\n", "\r", "\t", "\"" );
 		$replace = array( '"\\\\"', '\\\\', '\\\\n', '\\\\r', '\\\\t', '\\\\\"' );
 		$str = str_replace( $search, $replace, $str );
 
 		return $str;
-		
+
 	} // END _convert_for_js()
-	
+
 	/**
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
 	 */
 	function _convert_js_input( $str ) {
-		
+
 		$search = array( '\\\\\\\"', '\\\\\"','\\\\n', '\\\\t','\\0', "\\'", '\\\\' );
 		$replace = array( '\"', '"', "\n", "\\t", "\0", "'", "\\" );
 		$str = str_replace( $search, $replace, $str );
-		
+
 		return $str;
-		
+
 	} // END _convert_js_input()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function echo_as_json( $path, $file, $sys_locales, $api_type ) {
-		
+
 		$loc = $this->strings->_substr( $file, strlen( $file )-8, -3);
 		header( 'Content-Type: application/json; charset=utf-8' );
 		?>
@@ -1185,69 +1185,69 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 		foreach ( $this->map as $key => $entry) {
 			$c++;
 			if ( !strlen( $key)) { continue; }
-			
+
 			if ( $this->strings->_strpos( $key, "\04") > 0) {
 				list( $ctx, $key) = explode("\04", $key);
 				echo "{ \"ctx\" : \"".$this->_convert_for_js( $ctx)."\",";
 			}else {
 				echo "{ ";
 			}
-			
+
 			if ( is_array( $entry['LTD']) && count( $entry['LTD'])) { echo " \"ltd\" : [\"".implode("\",\"",$entry['LTD'])."\"],"; }
 			else { echo " \"ltd\" : [\"\"],"; }
-			
-			if ( $entry['P'] !== false) { 
+
+			if ( $entry['P'] !== false) {
 				$parts = explode("\0", $key);
 				for( $i=0; $i<count( $parts); $i++) {
 					$parts[ $i] = $this->_convert_for_js( $parts[ $i]);
 				}
-				echo " \"key\" : [\"".implode("\",\"",$parts)."\"],"; 
+				echo " \"key\" : [\"".implode("\",\"",$parts)."\"],";
 			} else{ echo " \"key\" : \"".$this->_convert_for_js( $key)."\","; }
-			
+
 			if ( $this->strings->_strpos( $entry['T'], "\0") !== false) {
 				$parts = explode("\0", $entry['T']);
 				for( $i=0; $i<count( $parts); $i++) {
 					$parts[ $i] = $this->_convert_for_js( $parts[ $i]);
-				}			
+				}
 				//BUGFIX: extend template plurals
 				if(count( $parts) < $this->nplurals) {
 					for( $i=count( $parts); $i<$this->nplurals; $i++) {
 						$parts[] = '';
 					}
 				}
-				echo " \"val\" : [\"".implode("\",\"",$parts)."\"]"; 
+				echo " \"val\" : [\"".implode("\",\"",$parts)."\"]";
 			} else { echo " \"val\" : \"".$this->_convert_for_js( $entry['T'])."\""; }
-			
+
 			if ( is_array( $entry['CT']) && count( $entry['CT'])) { echo ", \"rem\" : \"".implode('\n',$this->_convert_for_js( $entry['CT']))."\""; }
 			else { echo  ", \"rem\" : \"\""; }
 
 			if ( is_array( $entry['CC']) && count( $entry['CC'])) {
-				echo  ", \"code\" : \"".implode('\n',$this->_convert_for_js( $entry['CC']))."\""; 
+				echo  ", \"code\" : \"".implode('\n',$this->_convert_for_js( $entry['CC']))."\"";
 			}
-			
+
 			if ( is_array( $entry['R']) && count( $entry['R'])) { echo ", \"ref\" : [\"".implode("\",\"",$entry['R'])."\"]"; }
 			else { echo ", \"ref\" : []"; }
-			
+
 			echo "}".( $c != $num ? ',' : '')."\n";
-	
-			foreach ( $entry['LTD'] as $d) {	
+
+			foreach ( $entry['LTD'] as $d) {
 				if ( !in_array( $d, $ltd)) $ltd[] = esc_js( $d);
 			}
 		}
-		?>	
+		?>
 		],
 		textdomains : ["<?php sort( $ltd); echo implode('","', array_reverse( $ltd)); ?>"]
 	}
-	<?php		
+	<?php
 	} // END echo_as_json()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function update_entry( $msgid, $msgstr ) {
-		
+
 		$msgid = $this->_convert_js_input( $msgid);
 		if ( array_key_exists( $msgid, $this->map)) {
 			$this->map[ $msgid]['T'] = $this->_convert_js_input( $msgstr);
@@ -1260,9 +1260,9 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 			$this->map[ $msgid]['T'] = $this->_convert_js_input( $msgstr);
 			return true;
 		}
-		
+
 		return false;
-		
+
 	} // END update_entry()
-	
+
 } // END class TranslationToolkit_TranslationFile
