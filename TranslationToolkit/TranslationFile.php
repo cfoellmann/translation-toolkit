@@ -283,6 +283,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 	 * @todo make private?
 	 *
 	 * @since 1.0.0
+	 * @param string|boolean $base_file
 	 */
 	function _build_rel_path( $base_file ) {
 
@@ -747,6 +748,10 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 
 	} // END
 
+	/**
+	 * @param string $mofile
+	 * @param string $textdomain
+	 */
 	function write_mofile( $mofile, $textdomain ) {
 
 		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use
@@ -816,6 +821,10 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 
 	} // ENF write_mofile()
 
+	/**
+	 * @param string $mofile
+	 * @param string $textdomain
+	 */
 	function ftp_get_mofile_content( $mofile, $textdomain ) {
 
 		//handle WordPress continent cities patch to separate "Center" for UI and Continent/City use

@@ -436,6 +436,7 @@ function csp_plugin_denied_by_guard($url)
 
 /**
  * @param string $pattern
+ * @param string $content
  */
 function csp_try_jquery_document_ready_hardening_pattern($content, $pattern) {
 	$pieces = explode($pattern, $content);
