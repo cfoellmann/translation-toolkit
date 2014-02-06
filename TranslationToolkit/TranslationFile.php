@@ -308,6 +308,10 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $pofile
+	 * @param string $base_file
+	 * @param string $proj_id
+	 * @param string $timestamp
 	 */
 	function new_pofile( $pofile, $base_file, $proj_id, $timestamp, $translator, $pluralforms, $language, $country ) {
 
@@ -716,6 +720,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $textdomain
 	 */
 	function is_illegal_empty_mofile( $textdomain ) {
 
@@ -1087,6 +1092,7 @@ class TranslationToolkit_TranslationFile { // OLD: CspTranslationFile
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $prjidver
 	 */
 	function parsing_finalize( $textdomain, $prjidver ) {
 

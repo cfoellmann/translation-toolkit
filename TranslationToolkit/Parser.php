@@ -24,6 +24,7 @@ class TranslationToolkit_Parser {
 	 * Constructor. Hooks all interactions to initialize the class.
 	 *
 	 * @since 1.0
+	 * @param string $textdomain
 	 */
 	function __construct( $basedir, $textdomain, $do_gettext = true, $do_domains = false ) {
 
@@ -102,6 +103,7 @@ class TranslationToolkit_Parser {
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param false|string $content
 	 */
 	function parseString( $content, $component_type ) {
 
@@ -342,6 +344,7 @@ class TranslationToolkit_Parser {
 	 * @todo rename to ltd_validate()
 	 *
 	 * @since 1.0.0
+	 * @param string $text
 	 */
 	function _ltd_validate( $text )	{
 		$r = strip_tags( $text );
@@ -358,6 +361,9 @@ class TranslationToolkit_Parser {
 	 * @todo rename to build_gettext(()
 	 *
 	 * @since 1.0.0
+	 * @param integer $line
+	 * @param integer $argc
+	 * @param boolean $is_dev_func
 	 */
 	function _build_gettext( $line, $func, $args, $argc, $is_dev_func, $bad_argc ) {
 		$res = array(
@@ -587,6 +593,9 @@ class TranslationToolkit_Parser {
 	 * @todo rename to build_non_gettext()
 	 *
 	 * @since 1.0.0
+	 * @param integer $line
+	 * @param string|false $stage
+	 * @param string $text
 	 */
 	function _build_non_gettext( $line, $stage, $text ) {
 
