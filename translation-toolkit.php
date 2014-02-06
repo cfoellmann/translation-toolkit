@@ -28,13 +28,15 @@ Domain Path: /languages
  */
 
 /**
- * @author Translation Toolkit Contributors <https://github.com/wp-repository/translation-toolkit/graphs/contributors>
- * @license GPLv2 <http://www.gnu.org/licenses/gpl-2.0.html>
- * @package Translation Toolkit
+ * @author		Translation Toolkit Contributors
+ * @copyright	Copyright (c) 2014, Translation Toolkit Contributors
+ * @license		http://www.gnu.org/licenses/gpl-2.0.html GPLv2
+ * @package		TranslationToolkit
+ * @version		0.1-beta
  */
 
 //avoid direct calls to this file
-if ( ! function_exists( 'add_filter' ) ) {
+if ( !defined( 'ABSPATH' ) ) {
 	header( 'Status: 403 Forbidden' );
 	header( 'HTTP/1.1 403 Forbidden' );
 	exit();
@@ -47,8 +49,8 @@ if ( ! function_exists( 'add_filter' ) ) {
 //	if ( isset($_GET['action']) && isset($_GET['plugin']) && ($_GET['action'] == 'error_scrape') && ($_GET['plugin'] == plugin_basename(__FILE__) ) ) {
 //		if ( !function_exists('token_get_all') ) {
 //			echo "<table>";
-//			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__( 'required', 'translation-toolkit' )."</td><td> | ".__( 'actual', 'translation-toolkit' )."</td></tr>";			
-//			echo "<tr style=\"font-size: 12px;\"><td>PHP Tokenizer Module:</td><td align=\"center\"><strong>active</strong></td><td align=\"center\"><span style=\"color:#f00;\">not installed</span></td></tr>";			
+//			echo "<tr style=\"font-size: 12px;\"><td><strong style=\"border-bottom: 1px solid #000;\">Codestyling Localization</strong></td><td> | ".__( 'required', 'translation-toolkit' )."</td><td> | ".__( 'actual', 'translation-toolkit' )."</td></tr>";
+//			echo "<tr style=\"font-size: 12px;\"><td>PHP Tokenizer Module:</td><td align=\"center\"><strong>active</strong></td><td align=\"center\"><span style=\"color:#f00;\">not installed</span></td></tr>";
 //			echo "</table>";
 //		}
 //	}
@@ -58,7 +60,7 @@ if ( ! function_exists( 'add_filter' ) ) {
 spl_autoload_register( 'TranslationToolkit::autoload' );
 
 class TranslationToolkit {
-	
+
 	/**
 	 * Holds a copy of the object for easy reference.
 	 *
@@ -86,7 +88,7 @@ class TranslationToolkit {
 	 * @var string
 	 */
 	private static $file = __FILE__;
-	
+
 	/**
 	 * Constructor. Hooks all interactions to initialize the class.
 	 *
@@ -95,7 +97,7 @@ class TranslationToolkit {
 	public function __construct() {
 
 		self::$instance = $this;
-		
+
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
 
@@ -111,20 +113,20 @@ class TranslationToolkit {
 	 * @since 1.0.0
 	 */
 	public function init() {
-		
+
 		if ( true == apply_filters( 'tt_dev', WP_DEBUG ) ) {
 			define( 'TT_DEV', true );
 		}
 
 		if ( is_admin() ) {
-			
+
 			$translationtoolkit_admin = new TranslationToolkit_Admin;
 			$translationtoolkit_ajax = new TranslationToolkit_Ajax;
 
 		}
 
 	} // END init()
-	
+
 	/**
 	 * PSR-0 compliant autoloader to load classes as needed.
 	 *
@@ -143,7 +145,7 @@ class TranslationToolkit {
 			require $filename;
 
 	} // END autoload()
-	
+
 	/**
 	 * Getter method for retrieving the object instance.
 	 *
@@ -165,43 +167,43 @@ class TranslationToolkit {
 		return self::$file;
 
 	} // END get_file()
-	
+
 	/**
 	 * Load the plugin's textdomain hooked to 'plugins_loaded'.
 	 *
 	 * @since 1.0.0
 	 */
 	function load_plugin_textdomain() {
-		
+
 		load_plugin_textdomain( 'translation-toolkit', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-		
+
 	}
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function activate_plugin() {
-		
+
 		get_option( 'translation-toolkit.low-memory', 1 );
-		
+
 		if ( !function_exists( 'token_get_all' ) ) {
 			$current = get_option( 'active_plugins' );
 			array_splice( $current, array_search( plugin_basename(__FILE__), $current ), 1 );
 			update_option( 'active_plugins', $current );
 			exit;
 		}
-		
+
 	} // END activate_plugin()
-	
+
 	/**
 	 * @todo
 	 *
 	 * @since 1.0.0
 	 */
 	function deactivate_plugin() {
-		
+
 	} // END deactivate_plugin()
 
 } // END class TranslationToolkit
@@ -228,14 +230,14 @@ class CspStringsAreMultibyte {
 	 * @param integer $offset
 	 */
 	function _substr($string, $offset, $length = null) { return (is_null($length) ? mb_substr($string, $offset, 1073741824, 'ascii') : mb_substr($string, $offset, $length, 'ascii')); }
-	function _str_split($string, $chunkSize) { 
+	function _str_split($string, $chunkSize) {
 		//do not! break unicode / uft8 character in the middle of encoding, just at char border
-		$length = $this->_strlen($string); 
-		$out = array(); 
-		for ($i=0;$i<$length;$i+=$chunkSize) { 
-			$out[] = $this->_substr($string, $i, $chunkSize); 
+		$length = $this->_strlen($string);
+		$out = array();
+		for ($i=0;$i<$length;$i+=$chunkSize) {
+			$out[] = $this->_substr($string, $i, $chunkSize);
 		}
-		return $out; 
+		return $out;
 	}
 	function _substr_count( $haystack, $needle) { return mb_substr_count( $haystack, $needle, 'ascii'); }
 	function _seems_utf8($string) { return mb_check_encoding($string, 'UTF-8'); }
