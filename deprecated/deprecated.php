@@ -56,6 +56,12 @@ if (!function_exists('esc_js')) {
 }
 
 if (!function_exists('__checked_selected_helper')) {
+
+	/**
+	 * @param boolean $current
+	 * @param boolean $echo
+	 * @param string $type
+	 */
 	function __checked_selected_helper( $helper, $current, $echo, $type ) {
 		if ( (string) $helper === (string) $current )
 			$result = " $type='$type'";

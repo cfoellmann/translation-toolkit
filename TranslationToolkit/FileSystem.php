@@ -32,6 +32,7 @@ class TranslationToolkit_FileSystem extends TranslationToolkit_TranslationFile {
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $pofile
 	 */
 	function destroy_pofile( $pofile ) {
 
@@ -94,6 +95,7 @@ class TranslationToolkit_FileSystem extends TranslationToolkit_TranslationFile {
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $mofile
 	 */
 	function destroy_mofile( $mofile ) {
 		global $wp_filesystem, $parent_file;
@@ -159,6 +161,7 @@ class TranslationToolkit_FileSystem extends TranslationToolkit_TranslationFile {
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $path
 	 */
 	function create_directory( $path ) {
 
@@ -218,6 +221,7 @@ class TranslationToolkit_FileSystem extends TranslationToolkit_TranslationFile {
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $filename
 	 */
 	function change_permission( $filename ) {
 
@@ -357,6 +361,8 @@ class TranslationToolkit_FileSystem extends TranslationToolkit_TranslationFile {
 	 * @todo
 	 *
 	 * @since 1.0.0
+	 * @param string $mofile
+	 * @param string $textdomain
 	 */
 	function write_mofile( $mofile, $textdomain ) {
 

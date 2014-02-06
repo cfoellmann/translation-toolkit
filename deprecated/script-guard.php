@@ -411,6 +411,9 @@ function csp_handle_csp_self_protection_result() {
 	exit();
 }
 
+/**
+ * @param string $url
+ */
 function csp_plugin_denied_by_guard($url)
 {
 	$valid = array(
@@ -431,6 +434,9 @@ function csp_plugin_denied_by_guard($url)
 	return true;
 }
 
+/**
+ * @param string $pattern
+ */
 function csp_try_jquery_document_ready_hardening_pattern($content, $pattern) {
 	$pieces = explode($pattern, $content);
 	if (count( $pieces) > 1) {
@@ -468,6 +474,9 @@ function csp_try_jquery_document_ready_hardening_pattern($content, $pattern) {
 	return implode($pattern, $pieces);
 }
 
+/**
+ * @param string $content
+ */
 function csp_try_jquery_document_ready_hardening($content) {
 	$script = csp_try_jquery_document_ready_hardening_pattern($content, '(document).ready(' );
 	return csp_try_jquery_document_ready_hardening_pattern($script, 'jQuery(function()' );	

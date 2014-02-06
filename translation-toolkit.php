@@ -223,6 +223,10 @@ class CspStringsAreAscii {
 class CspStringsAreMultibyte {
 	function _strlen($string) { return mb_strlen($string, 'ascii'); }
 	function _strpos($haystack, $needle, $offset = null) { return mb_strpos($haystack, $needle, $offset, 'ascii'); }
+
+	/**
+	 * @param integer $offset
+	 */
 	function _substr($string, $offset, $length = null) { return (is_null($length) ? mb_substr($string, $offset, 1073741824, 'ascii') : mb_substr($string, $offset, $length, 'ascii')); }
 	function _str_split($string, $chunkSize) { 
 		//do not! break unicode / uft8 character in the middle of encoding, just at char border

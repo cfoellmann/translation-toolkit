@@ -16,6 +16,11 @@ class AccessTokenAuthentication {
      *
      * @return string.
      */
+    /**
+     * @param string $grantType
+     * @param string $scopeUrl
+     * @param string $authUrl
+     */
     function getTokens($grantType, $scopeUrl, $clientID, $clientSecret, $authUrl){
         try {
             //Initialize the Curl Session.
@@ -77,6 +82,9 @@ Class HTTPTranslator {
      *
      * @return string.
      *
+     */
+    /**
+     * @param string $authHeader
      */
     function curlRequest($url, $authHeader) {
         //Initialize the Curl Session.

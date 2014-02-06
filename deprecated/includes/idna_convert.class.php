@@ -89,7 +89,7 @@ class idna_convert
      * the constructor
      *
      * @param array $options
-     * @return boolean
+     * @return boolean|null
      * @since 0.5.2
      */
     public function __construct($options = false)
@@ -398,7 +398,7 @@ class idna_convert
     /**
      * The actual decoding algorithm
      * @param string
-     * @return mixed
+     * @return false|string
      */
     protected function _decode($encoded)
     {
@@ -455,7 +455,7 @@ class idna_convert
     /**
      * The actual encoding algorithm
      * @param  string
-     * @return mixed
+     * @return false|string
      */
     protected function _encode($decoded)
     {
